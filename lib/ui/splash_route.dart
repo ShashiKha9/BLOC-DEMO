@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:rescu_organization_portal/data/blocs/spash_bloc.dart';
+import 'package:rescu_organization_portal/ui/adaptive_navigation.dart';
 import 'package:rescu_organization_portal/ui/content/login/login_route.dart';
 import 'package:rescu_organization_portal/ui/widgets/custom_colors.dart';
 import 'package:rescu_organization_portal/ui/widgets/size_config.dart';
@@ -28,8 +29,8 @@ class _SplashRouteState extends State<SplashRoute> {
       bloc: context.read<SplashBloc>(),
       listener: (context, state) {
         if (state is SplashShouldMoveToDashboard) {
-          // Navigator.of(context).popUntilDoneAndPush(MaterialPageRoute(
-          //     builder: (context) => AdaptiveNavigationLayout()));
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) => const AdaptiveNavigationLayout()));
         }
         if (state is SplashShouldMoveToLogin) {
           Navigator.of(context).pushReplacement(

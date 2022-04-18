@@ -5,7 +5,6 @@ import 'package:rescu_organization_portal/ui/widgets/text_input_decoration.dart'
 import '../adaptive_items.dart';
 import '../adaptive_utils.dart';
 import '../adaptive_widgets.dart';
-import 'custom_colors.dart';
 import 'loading_container.dart';
 
 class SearchableList extends StatelessWidget {
@@ -41,26 +40,14 @@ class SearchableList extends StatelessWidget {
             onChanged: onSearchChanged,
           ),
           const SizedBox(height: 10),
-          list!.isNotEmpty
-              ? Expanded(
-                  child: ListView.builder(
-                      itemCount: list?.length ?? 0,
-                      controller: controller,
-                      itemBuilder: (ctx, index) {
-                        return AdaptiveListTile(item: list![index]);
-                      }))
-              : Expanded(
-                  child: Container(
-                    height: 50,
-                    color: AppColor.baseBackground,
-                    child: const Center(
-                      child: Text(
-                        "No records found",
-                        style: TextStyle(fontSize: 14),
-                      ),
-                    ),
-                  ),
-                ),
+          Expanded(
+              child: ListView.builder(
+                  itemCount: list?.length ?? 0,
+                  itemBuilder: (ctx, index) {
+                    return list == null
+                        ? const SizedBox()
+                        : AdaptiveListTile(item: list![index]);
+                  })),
           actions != null
               ? ButtonBar(
                   children: actions!
@@ -213,6 +200,9 @@ class NavigationItemContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
+          const SizedBox(
+            height: 10,
+          ),
           Row(
             children: [
               Expanded(

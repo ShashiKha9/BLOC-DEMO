@@ -17,13 +17,7 @@ abstract class IAuthenticationApi {
       String? deviceType,
       {bool isPortalRequest = false});
 
-  Future<ApiDataResponse<String>> forgotPassword(
-      String email, String last4OfPhoneNumber);
-
-  // Future<ApiDataResponse<PasswordResetTokenDto>> verifyPasswordResetCode(
-  //     String code, String accessToken);
-
-  // Future<ApiResponse> resetPassword(String id, String token, String password);
+  Future<ApiResponse> changePassword(String oldPassword, String newPassword);
 }
 
 class AuthenticationApi extends BaseApi implements IAuthenticationApi {
@@ -64,32 +58,12 @@ class AuthenticationApi extends BaseApi implements IAuthenticationApi {
   }
 
   @override
-  Future<ApiDataResponse<String>> forgotPassword(
-      String email, String last4OfPhoneNumber) async {
-    return await wrapDataCall(() async {
-      var result = await dio.post("/Passwords/ForgotPassword",
-          data: {'email': email, 'phoneNumberDigits': last4OfPhoneNumber});
-      return OkData(result.data["access_token"].toString());
+  Future<ApiResponse> changePassword(
+      String oldPassword, String newPassword) async {
+    return await wrapCall(() async {
+      await dio.post("groups/changeadminpassword",
+          data: {'OldPassword': oldPassword, 'NewPassword': newPassword});
+      return Ok();
     });
   }
-
-  // Future<ApiDataResponse<PasswordResetTokenDto>> verifyPasswordResetCode(
-  //     String code, String accessToken) async {
-  //   return await wrapDataCall(() async {
-  //     var result = await dio.post("/Passwords/VerifyResetCode",
-  //         data: {'code': code},
-  //         options: Options(headers: {'Authorization': 'Bearer $accessToken'}));
-  //     return OkData(PasswordResetTokenDto.fromJson(result.data));
-  //   });
-  // }
-
-  // @override
-  // Future<ApiResponse> resetPassword(
-  //     String id, String token, String password) async {
-  //   return await wrapCall(() async {
-  //     await dio.post("/Passwords/ResetPassword",
-  //         data: {'EmailGuid': id, 'Password': password, 'Token': token});
-  //     return Ok();
-  //   });
-  // }
 }

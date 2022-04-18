@@ -37,4 +37,10 @@ class ValidationMessagesConst {
 
   //Custom Messages
   static const String customMessageEmailsRequired = "Please select email(s)";
+
+  static const String oldPasswordRequired = "Please enter current password";
+  static const String newPasswordRequired = "Please enter new password";
+  static const String confirmPasswordRequired =
+      "Please enter confirm new password";
+  static const int passwordMinLength = 6;
 }

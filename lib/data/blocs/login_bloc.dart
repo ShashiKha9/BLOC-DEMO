@@ -42,6 +42,8 @@ class LoginInvalidCredentialsState extends LoginState {}
 
 class LoginUnknownErrorState extends LoginState {}
 
+class MoveToChangePasswordScreen extends LoginState {}
+
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final ITokenStore _tokenStore;
   final IAuthenticationApi _authenticationApi;
@@ -61,15 +63,19 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       if (result is OkData<LoginDto>) {
         await _dataManager.clearAll();
         await _tokenStore.save(result.dto.accessToken);
+        if (result.dto.isFirstLogin.toLowerCase() == "true") {
+          yield MoveToChangePasswordScreen();
+          return;
+        }
         yield LoginSuccessState();
         return;
       }
       if (result is BadData<LoginDto> &&
           result.statusCode == HttpStatus.badRequest) {
-        yield LoginSuccessState();
-        return;
-        // yield LoginInvalidCredentialsState();
+        // yield LoginSuccessState();
         // return;
+        yield LoginInvalidCredentialsState();
+        return;
       }
       yield LoginUnknownErrorState();
     }

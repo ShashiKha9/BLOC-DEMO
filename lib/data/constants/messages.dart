@@ -52,4 +52,16 @@ class MessagesConst {
   static const String resetPasswordSuccess =
       "Password has been reset and shared with the user";
   static const String resetPasswordFailed = "Error resetting password";
+
+  // Group Messages
+  static const String groupUsersNotFound = "No records found";
+  static const String groupUserCreateSuccess =
+      "Group Users added successfully.";
+  static const String groupUserUpdateSuccess = "Record updated successfully.";
+  static const String groupDomainsNotFound = "No records found";
+  static const String groupDomainUpdateSuccess = "Record updated successfully";
+  static const String groupDomainCreateSuccess =
+      "Group Domain added successfully.";
+  static const String passwordChangedSuccess =
+      "Password changed successfully, Please login again.";
 }

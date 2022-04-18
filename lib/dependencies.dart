@@ -4,6 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:rescu_organization_portal/app.dart';
 import 'package:rescu_organization_portal/data/api/authentication_api.dart';
+import 'package:rescu_organization_portal/data/api/group_domain_api.dart';
+import 'package:rescu_organization_portal/data/api/group_user_api.dart';
+import 'package:rescu_organization_portal/data/blocs/change_passwod_bloc.dart';
+import 'package:rescu_organization_portal/data/blocs/group_domain_bloc.dart';
+import 'package:rescu_organization_portal/data/blocs/group_users_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/login_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/logout_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/spash_bloc.dart';
@@ -88,7 +93,9 @@ class DependencyConfiguration {
         return dio;
       }),
       Provider<IAuthenticationApi>(
-          create: (ctx) => AuthenticationApi(ctx.read()))
+          create: (ctx) => AuthenticationApi(ctx.read())),
+      Provider<IGroupUserApi>(create: (ctx) => GroupUserApi(ctx.read())),
+      Provider<IGroupDomainApi>(create: (ctx) => GroupDomainApi(ctx.read()))
     ];
   }
 
@@ -98,7 +105,21 @@ class DependencyConfiguration {
           create: (ctx) => SplashBloc(ctx.read(), ctx.read())),
       BlocProvider<LoginBloc>(
           create: (ctx) => LoginBloc(ctx.read(), ctx.read(), ctx.read())),
-      BlocProvider<LogoutBloc>(create: (ctx) => LogoutBloc(ctx.read()))
+      BlocProvider<LogoutBloc>(create: (ctx) => LogoutBloc(ctx.read())),
+      BlocProvider<GroupUserBloc>(create: (ctx) => GroupUserBloc(ctx.read())),
+      BlocProvider<ViewGroupUserBloc>(
+          create: (ctx) => ViewGroupUserBloc(ctx.read())),
+      BlocProvider<AddGroupUserBloc>(
+          create: (ctx) => AddGroupUserBloc(ctx.read())),
+      BlocProvider<GroupDomainBloc>(
+          create: (ctx) => GroupDomainBloc(ctx.read())),
+      BlocProvider<ViewGroupDomainBloc>(
+          create: (ctx) => ViewGroupDomainBloc(ctx.read())),
+      BlocProvider<AddGroupDomainBloc>(
+          create: (ctx) => AddGroupDomainBloc(ctx.read())),
+      BlocProvider<ChangePasswordBloc>(
+          create: (ctx) =>
+              ChangePasswordBloc(ctx.read(), ctx.read(), ctx.read()))
     ];
   }
 }

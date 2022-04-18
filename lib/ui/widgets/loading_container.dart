@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:loading_overlay/loading_overlay.dart';
-import 'package:rescu_organization_portal/ui/widgets/custom_colors.dart';
+import 'package:rescu_organization_portal/ui/widgets/size_config.dart';
 
 class LoadingContainer extends StatefulWidget {
   final LoadingController controller;
@@ -77,10 +77,25 @@ class LoaderConfiguration {
   static Color loaderBackGround = Colors.transparent;
 
   static Widget loaderIndicator() {
-    return Center(
-      child: SpinKitFadingCircle(
-        color: AppColor.baseBackground,
-      ),
+    return SizedBox(
+      width: 200,
+      height: 200,
+      child: SimpleDialog(
+          backgroundColor: Colors.black54.withOpacity(0.7),
+          children: <Widget>[
+            Center(
+              child: Column(children: [
+                SpinKitFadingCircle(
+                  color: Colors.white,
+                  size: SizeConfig.size(5),
+                ),
+                Text(
+                  "Please Wait....",
+                  style: TextStyle(fontSize: SizeConfig.size(1.2)),
+                )
+              ]),
+            )
+          ]),
     );
   }
 }

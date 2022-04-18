@@ -5,6 +5,7 @@ import 'package:rescu_organization_portal/data/blocs/login_bloc.dart';
 import 'package:rescu_organization_portal/data/constants/messages.dart';
 import 'package:rescu_organization_portal/data/constants/validation_messages.dart';
 import 'package:rescu_organization_portal/ui/adaptive_navigation.dart';
+import 'package:rescu_organization_portal/ui/content/account/change_password.dart';
 import 'package:rescu_organization_portal/ui/widgets/buttons.dart';
 import 'package:rescu_organization_portal/ui/widgets/custom_colors.dart';
 import 'package:rescu_organization_portal/ui/widgets/dialogs.dart';
@@ -52,6 +53,13 @@ class _LoginRouteState extends State<LoginRoute> {
               }
               if (state is LoginUnknownErrorState) {
                 ToastDialog.error(MessagesConst.internalServerError);
+              }
+              if (state is MoveToChangePasswordScreen) {
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    builder: (context) => ChangePasswordContent(
+                        args: ChangePasswordRouteArgs(
+                            isRedirectedFromLogin: true,
+                            oldPassword: _passwordController.text))));
               }
             }
           },

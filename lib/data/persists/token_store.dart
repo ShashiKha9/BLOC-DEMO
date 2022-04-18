@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 abstract class ITokenStore {
   Future<String?> load();
 
-  Future save(String accessToken);
+  Future save(String token);
 
   Future delete();
 
@@ -34,7 +34,7 @@ class TokenStore extends ITokenStore {
   }
 
   @override
-  Future save(String accessToken) async {
-    await _sharedPreferences.setString(accessToken, accessToken);
+  Future save(String token) async {
+    await _sharedPreferences.setString(accessToken, token);
   }
 }

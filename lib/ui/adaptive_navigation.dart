@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rescu_organization_portal/data/blocs/logout_bloc.dart';
+import 'package:rescu_organization_portal/ui/content/account/change_password.dart';
+import 'package:rescu_organization_portal/ui/content/domains/domains.dart';
 import 'package:rescu_organization_portal/ui/content/login/login_route.dart';
 import 'package:rescu_organization_portal/ui/content/users/users.dart';
 import 'adaptive_utils.dart';
@@ -59,6 +61,10 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
   final navigation = [
     ContentNavigationItem(
         "Users", const Icon(Icons.people), const UsersContent()),
+    ContentNavigationItem(
+        "Domains", const Icon(Icons.domain), const DomainsContent()),
+    ContentNavigationItem("Change Password", const Icon(Icons.lock_clock),
+        const ChangePasswordContent()),
     ActionNavigationItem("Logout", const Icon(Icons.logout), (context) {
       context.read<LogoutBloc>().add(Logout());
     }),

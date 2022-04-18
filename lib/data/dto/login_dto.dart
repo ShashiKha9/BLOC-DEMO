@@ -25,17 +25,17 @@ class LoginDto {
       required this.provider});
 
   LoginDto.fromJson(Map<String, dynamic> json) {
-    accessToken = json['access_token'];
-    tokenType = json['token_type'];
+    accessToken = json['access_token'] ?? "";
+    tokenType = json['token_type'] ?? "";
     expiresIn = json['expires_in']?.toString() ?? "";
-    customer = json['Customer'];
-    role = json['Role'];
-    isFirstLogin = json['IsFirstLogin'];
-    isOnlyPortalUser = json['IsOnlyPortalUser'];
-    issued = json['.issued'];
-    expires = json['.expires'];
-    emailAddress = json['emailAddress'];
-    provider = json['provider'];
+    customer = json['Customer'] ?? "";
+    role = json['Role'] ?? "";
+    isFirstLogin = json['IsFirstLogin'] ?? "";
+    isOnlyPortalUser = json['IsOnlyPortalUser'] ?? "";
+    issued = json['.issued'] ?? "";
+    expires = json['.expires'] ?? "";
+    emailAddress = json['emailAddress'] ?? "";
+    provider = json['provider'] ?? "";
   }
 
   Map<String, dynamic> toJson() {
