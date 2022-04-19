@@ -180,10 +180,10 @@ class AddGroupUserBloc extends Bloc<GroupUserEvent, GroupUserState> {
     if (event is AddGroupUser) {
       yield GroupUserLoadingState();
       var result = await _groupUserApi.addGroupUser(event.emails);
-      if (result is OkData<List<GroupUserDto>>) {
+      if (result is Ok) {
         yield AddGroupUserSuccessState();
         return;
-      } else if (result is BadData<List<GroupUserDto>>) {
+      } else if (result is Bad) {
         yield AddGroupUserErrorState(result.message);
         return;
       }

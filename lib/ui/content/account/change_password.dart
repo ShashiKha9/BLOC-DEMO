@@ -10,7 +10,6 @@ import 'package:rescu_organization_portal/ui/widgets/common_widgets.dart';
 import 'package:rescu_organization_portal/ui/widgets/custom_colors.dart';
 import 'package:rescu_organization_portal/ui/widgets/dialogs.dart';
 import 'package:rescu_organization_portal/ui/widgets/loading_container.dart';
-import 'package:rescu_organization_portal/ui/widgets/spacer_size.dart';
 import 'package:rescu_organization_portal/ui/widgets/text_input_decoration.dart';
 
 import '../../adaptive_items.dart';
