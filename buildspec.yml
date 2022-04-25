@@ -1,0 +1,13 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      #- flutter test
+  build:
+    commands:
+      - flutter build web -t $MAIN_FILE
+artifacts:
+  files:
+    - '**/*'
+  base-directory: './build/web/'
