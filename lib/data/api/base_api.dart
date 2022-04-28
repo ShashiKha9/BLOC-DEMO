@@ -15,6 +15,12 @@ abstract class BaseApi {
     try {
       return await call.call();
     } on DioError catch (e) {
+      if (e.response?.data != null &&
+          e.response?.data is Map<String, dynamic>) {
+        var errorDto = ErrorDto.fromJson(e.response?.data);
+        e.response!.statusMessage =
+            errorDto.message ?? e.response!.statusMessage;
+      }
       onError?.call();
       if (e.type == DioErrorType.connectTimeout ||
           e.type == DioErrorType.receiveTimeout ||
@@ -37,6 +43,12 @@ abstract class BaseApi {
     try {
       return await call.call();
     } on DioError catch (e) {
+      if (e.response?.data != null &&
+          e.response?.data is Map<String, dynamic>) {
+        var errorDto = ErrorDto.fromJson(e.response?.data);
+        e.response!.statusMessage =
+            errorDto.message ?? e.response!.statusMessage;
+      }
       onError?.call(e);
       if (e.type == DioErrorType.connectTimeout ||
           e.type == DioErrorType.receiveTimeout ||
@@ -83,5 +95,15 @@ class BadData<TDto> extends ApiDataResponse<TDto> {
 
   BadData(int statusCode, this.message) {
     this.statusCode = statusCode;
+  }
+}
+
+class ErrorDto {
+  String? message;
+
+  ErrorDto({this.message});
+
+  ErrorDto.fromJson(Map<String, dynamic> json) {
+    message = json['Message'];
   }
 }

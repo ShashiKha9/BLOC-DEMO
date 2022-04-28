@@ -133,7 +133,7 @@ class _ChangePasswordContentState extends State<ChangePasswordContent> {
                               _obscureTextOldPassword
                                   ? Icons.visibility_off
                                   : Icons.visibility,
-                              color: AppColor.baseBackground,
+                              color: AppColor.loginContainerBackground,
                             ),
                             onPressed: () {
                               setState(() => _obscureTextOldPassword =
@@ -167,7 +167,7 @@ class _ChangePasswordContentState extends State<ChangePasswordContent> {
                         _obscureTextNewPassword
                             ? Icons.visibility_off
                             : Icons.visibility,
-                        color: AppColor.baseBackground,
+                        color: AppColor.loginContainerBackground,
                       ),
                       onPressed: () {
                         setState(() =>
@@ -206,7 +206,7 @@ class _ChangePasswordContentState extends State<ChangePasswordContent> {
                         _obscureTextConfirmPassword
                             ? Icons.visibility_off
                             : Icons.visibility,
-                        color: AppColor.baseBackground,
+                        color: AppColor.loginContainerBackground,
                       ),
                       onPressed: () {
                         setState(() => _obscureTextConfirmPassword =
