@@ -5,7 +5,7 @@ import 'package:rescu_organization_portal/env.dart';
 void main() async {
   DependencyConfiguration configuration = DependencyConfiguration();
   runApp(await configuration.setup(ProjectConfiguration(
-      baseUrl: "https://connect2dev.wisper.com/",
+      baseUrl: "https://connect2uat.wisper.com/",
       environment: Environment.uat,
       stripePublishableKey: "pk_test_8YBc9wx4Nalwqn65XXbWfARY")));
 }

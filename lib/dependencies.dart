@@ -88,7 +88,7 @@ class DependencyConfiguration {
             );
             return handler.reject(err);
           }
-          return handler.next(err);
+          return handler.reject(err);
         }));
         return dio;
       }),
