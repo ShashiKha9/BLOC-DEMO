@@ -1,13 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:rescu_organization_portal/data/api/group_info_api.dart';
 import 'package:rescu_organization_portal/data/blocs/logout_bloc.dart';
 import 'package:rescu_organization_portal/ui/content/account/change_password.dart';
 import 'package:rescu_organization_portal/ui/content/domains/domains.dart';
 import 'package:rescu_organization_portal/ui/content/login/login_route.dart';
 import 'package:rescu_organization_portal/ui/content/users/users.dart';
+import '../data/api/base_api.dart';
+import '../data/dto/group_info_dto.dart';
 import 'adaptive_utils.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'content/groupcontacts/group_contacts.dart';
 
 /*
 This is a collection of responsive widgets which adapt to the user's
@@ -58,23 +63,61 @@ class AdaptiveNavigationLayout extends StatefulWidget {
 }
 
 class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
-  final navigation = [
-    ContentNavigationItem(
-        "Users", const Icon(Icons.people), const UsersContent()),
-    ContentNavigationItem(
-        "Domains", const Icon(Icons.domain), const DomainsContent()),
-    ContentNavigationItem("Change Password", const Icon(Icons.lock_clock),
-        const ChangePasswordContent()),
-    ActionNavigationItem("Logout", const Icon(Icons.logout), (context) {
-      context.read<LogoutBloc>().add(Logout());
-    }),
-  ];
+  List<NavigationItem> navigation = [];
 
   ValueNotifier<Widget>? viewNotifier;
   ValueNotifier<NavigationItem>? navigationNotifier;
 
+  bool _screenLoaded = false;
+
   @override
   void initState() {
+    _determineMenuItems();
+    super.initState();
+  }
+
+  void _determineMenuItems() async {
+    var result = await context.read<IGroupInfoApi>().getLoggedInUserGroup();
+    if (result is OkData<GroupInfoDto> && result.dto.isFleetUser()) {
+      navigation = [
+        ContentNavigationItem(
+            "Users", const Icon(Icons.people), const UsersContent()),
+        ContentNavigationItem(
+            "Domains", const Icon(Icons.domain), const DomainsContent()),
+        ContentNavigationItem(
+            "Incident Contacts",
+            const Icon(Icons.contacts),
+            GroupContactsContent(
+              groupId: result.dto.id,
+            )),
+        ContentNavigationItem(
+            "Incident Addresses",
+            const Icon(Icons.location_history_sharp),
+            GroupContactsContent(
+              groupId: result.dto.id,
+            )),
+        ContentNavigationItem("Change Password", const Icon(Icons.lock_clock),
+            const ChangePasswordContent()),
+        ActionNavigationItem("Logout", const Icon(Icons.logout), (context) {
+          context.read<LogoutBloc>().add(Logout());
+        }),
+      ];
+    } else {
+      navigation = [
+        ContentNavigationItem(
+            "Users", const Icon(Icons.people), const UsersContent()),
+        ContentNavigationItem(
+            "Domains", const Icon(Icons.domain), const DomainsContent()),
+        ContentNavigationItem("Change Password", const Icon(Icons.lock_clock),
+            const ChangePasswordContent()),
+        ActionNavigationItem("Logout", const Icon(Icons.logout), (context) {
+          context.read<LogoutBloc>().add(Logout());
+        }),
+      ];
+    }
+
+    _screenLoaded = true;
+
     viewNotifier = ValueNotifier(
         navigation.whereType<ContentNavigationItem>().first.content);
     navigationNotifier = ValueNotifier(navigation.first);
@@ -85,7 +128,8 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
         if (item is ContentNavigationItem) viewNotifier!.value = item.content;
       });
     });
-    super.initState();
+
+    setState(() {});
   }
 
   @override
@@ -105,21 +149,26 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
                 MaterialPageRoute(builder: (context) => const LoginRoute()));
           }
         },
-        child: LayoutBuilder(
-          builder: (context, box) {
-            if (!kIsWeb) {
-              return Mobile(navigation, viewNotifier!, navigationNotifier!);
-            }
-            // For now, assuming 600
-            if (isMobile(box)) {
-              return Mobile(navigation, viewNotifier!, navigationNotifier!);
-            }
-            if (isCompact(box)) {
-              return Compact(navigation, viewNotifier!, navigationNotifier!);
-            }
-            return Full(navigation, viewNotifier!, navigationNotifier!);
-          },
-        ));
+        child: _screenLoaded
+            ? LayoutBuilder(
+                builder: (context, box) {
+                  if (!kIsWeb) {
+                    return Mobile(
+                        navigation, viewNotifier!, navigationNotifier!);
+                  }
+                  // For now, assuming 600
+                  if (isMobile(box)) {
+                    return Mobile(
+                        navigation, viewNotifier!, navigationNotifier!);
+                  }
+                  if (isCompact(box)) {
+                    return Compact(
+                        navigation, viewNotifier!, navigationNotifier!);
+                  }
+                  return Full(navigation, viewNotifier!, navigationNotifier!);
+                },
+              )
+            : const SizedBox());
   }
 }
 

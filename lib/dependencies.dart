@@ -19,6 +19,10 @@ import 'package:rescu_organization_portal/ui/content/login/login_route.dart';
 import 'package:rescu_organization_portal/ui/widgets/dialogs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'data/api/group_contact_api.dart';
+import 'data/api/group_info_api.dart';
+import 'data/blocs/group_incident_contact_bloc.dart';
+
 class DependencyConfiguration {
   DependencyConfiguration() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -95,7 +99,9 @@ class DependencyConfiguration {
       Provider<IAuthenticationApi>(
           create: (ctx) => AuthenticationApi(ctx.read())),
       Provider<IGroupUserApi>(create: (ctx) => GroupUserApi(ctx.read())),
-      Provider<IGroupDomainApi>(create: (ctx) => GroupDomainApi(ctx.read()))
+      Provider<IGroupDomainApi>(create: (ctx) => GroupDomainApi(ctx.read())),
+      Provider<IGroupInfoApi>(create: (ctx) => GroupInfoApi(ctx.read())),
+      Provider<IGroupIncidentContactsApi>(create: (ctx) => GroupIncidentContactsApi(ctx.read())),
     ];
   }
 
@@ -119,7 +125,13 @@ class DependencyConfiguration {
           create: (ctx) => AddGroupDomainBloc(ctx.read())),
       BlocProvider<ChangePasswordBloc>(
           create: (ctx) =>
-              ChangePasswordBloc(ctx.read(), ctx.read(), ctx.read()))
+              ChangePasswordBloc(ctx.read(), ctx.read(), ctx.read())),
+      BlocProvider<GroupIncidentContactBloc>(
+          create: (ctx) =>
+              GroupIncidentContactBloc(ctx.read(), ctx.read())),
+      BlocProvider<AddUpdateGroupIncidentContactBloc>(
+          create: (ctx) =>
+              AddUpdateGroupIncidentContactBloc(ctx.read())),
     ];
   }
 }
