@@ -19,9 +19,12 @@ import 'package:rescu_organization_portal/ui/content/login/login_route.dart';
 import 'package:rescu_organization_portal/ui/widgets/dialogs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'data/api/group_address_api.dart';
 import 'data/api/group_contact_api.dart';
 import 'data/api/group_info_api.dart';
+import 'data/blocs/group_address_bloc.dart';
 import 'data/blocs/group_incident_contact_bloc.dart';
+import 'data/services/address/address_service.dart';
 
 class DependencyConfiguration {
   DependencyConfiguration() {
@@ -64,7 +67,7 @@ class DependencyConfiguration {
     return [
       Provider<Dio>(create: (ctx) {
         var dio = Dio(BaseOptions(
-            connectTimeout: 30000,
+            //connectTimeout: 30000,
             receiveTimeout: 5000,
             sendTimeout: 5000,
             baseUrl: env.baseUrl));
@@ -102,6 +105,8 @@ class DependencyConfiguration {
       Provider<IGroupDomainApi>(create: (ctx) => GroupDomainApi(ctx.read())),
       Provider<IGroupInfoApi>(create: (ctx) => GroupInfoApi(ctx.read())),
       Provider<IGroupIncidentContactsApi>(create: (ctx) => GroupIncidentContactsApi(ctx.read())),
+      Provider<IGroupAddressApi>(create: (ctx) => GroupAddressApi(ctx.read())),
+      Provider<IAddressService>(create: (ctx) => AddressService(ctx.read())),
     ];
   }
 
@@ -132,6 +137,12 @@ class DependencyConfiguration {
       BlocProvider<AddUpdateGroupIncidentContactBloc>(
           create: (ctx) =>
               AddUpdateGroupIncidentContactBloc(ctx.read())),
+      BlocProvider<GroupAddressBloc>(
+          create: (ctx) =>
+              GroupAddressBloc(ctx.read(), ctx.read())),
+      BlocProvider<AddUpdateGroupAddressBloc>(
+          create: (ctx) =>
+              AddUpdateGroupAddressBloc(ctx.read())),
     ];
   }
 }

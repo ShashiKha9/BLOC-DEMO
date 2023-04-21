@@ -97,9 +97,13 @@ class MobileListTileState extends State<AdaptiveListTileWidget> {
       ],
     );
     if (toggles.isEmpty && buttons.isEmpty) {
-      return Card(child: InkWell(onTap: widget.item.onPressed, child: tile));
+      return Card(
+        child: InkWell(onTap: widget.item.onPressed, child: tile),
+        shape: widget.item.borderDecoration,
+      );
     }
     return Card(
+        shape: widget.item.borderDecoration,
         child: InkWell(
             onTap: widget.item.onPressed,
             child: Column(children: [
@@ -137,6 +141,7 @@ class FullListTileState extends State<AdaptiveListTileWidget> {
     var actionsAndTogglesAndButtons = widget.item.contextualItems.toList();
     actionsAndTogglesAndButtons.sort((a, b) => a.compareTo(b));
     return Card(
+      shape: widget.item.borderDecoration,
       child: InkWell(
         onTap: widget.item.onPressed,
         child: Column(

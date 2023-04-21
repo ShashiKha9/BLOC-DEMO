@@ -12,6 +12,7 @@ import 'adaptive_utils.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'content/groupaddresses/group_addresses.dart';
 import 'content/groupcontacts/group_contacts.dart';
 
 /*
@@ -85,15 +86,15 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
         ContentNavigationItem(
             "Domains", const Icon(Icons.domain), const DomainsContent()),
         ContentNavigationItem(
-            "Incident Contacts",
+            "Contacts",
             const Icon(Icons.contacts),
             GroupContactsContent(
               groupId: result.dto.id,
             )),
         ContentNavigationItem(
-            "Incident Addresses",
-            const Icon(Icons.location_history_sharp),
-            GroupContactsContent(
+            "Addresses",
+            const Icon(Icons.location_pin),
+            GroupAddressesContent(
               groupId: result.dto.id,
             )),
         ContentNavigationItem("Change Password", const Icon(Icons.lock_clock),

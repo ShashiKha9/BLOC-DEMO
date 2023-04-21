@@ -110,11 +110,11 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
             }
             if (state is GetGroupIncidentContactsNotFoundState) {
               _contacts.clear();
-              ToastDialog.error("No records found");
+              ToastDialog.success("No records found");
               setState(() {});
             }
             if (state is DeleteGroupIncidentContactSuccessState) {
-              ToastDialog.error("Record deleted successfully");
+              ToastDialog.success("Record deleted successfully");
               context
                   .read<GroupIncidentContactBloc>()
                   .add(GetGroupIncidentContacts(widget.groupId, _searchValue));
