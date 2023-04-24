@@ -339,8 +339,8 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
             crossStreet: _crossStreetController.text,
             id: address?.id);
         if (address != null && address!.id != null) {
-          // context.read<AddUpdateGroupAddressBloc>().add(
-          //     UpdateGroupIncidentAddress(groupId, address!.id!, addAddress));
+          context.read<AddUpdateGroupAddressBloc>().add(
+              UpdateGroupIncidentAddress(groupId, address!.id!, addAddress));
         } else {
           context
               .read<AddUpdateGroupAddressBloc>()

@@ -73,20 +73,20 @@ class _GroupAddressesContentState extends State<GroupAddressesContent> {
               _addresses.clear();
               _addresses.addAll(state.addresses.map((e) {
                 List<AdaptiveContextualItem> contextualItems = [];
-                // if (!e.isDefault) {
-                //   contextualItems.add(AdaptiveItemButton(
-                //       "Set Default", const Icon(Icons.location_pin), () async {
-                //     showConfirmationDialog(
-                //         context: context,
-                //         body:
-                //             "Make ${e.name} address your default dispatch address?",
-                //         onPressedOk: () {
-                //           context.read<GroupAddressBloc>().add(
-                //               ChangeDefaultGroupIncidentAddress(
-                //                   widget.groupId, e.id!, e));
-                //         });
-                //   }));
-                // }
+                if (!e.isDefault) {
+                  contextualItems.add(AdaptiveItemButton(
+                      "Set Default", const Icon(Icons.location_pin), () async {
+                    showConfirmationDialog(
+                        context: context,
+                        body:
+                            "Make ${e.name} address your default dispatch address?",
+                        onPressedOk: () {
+                          context.read<GroupAddressBloc>().add(
+                              ChangeDefaultGroupIncidentAddress(
+                                  widget.groupId, e.id!, e));
+                        });
+                  }));
+                }
                 contextualItems.add(AdaptiveItemButton(
                     "Edit", const Icon(Icons.edit), () async {
                   Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
