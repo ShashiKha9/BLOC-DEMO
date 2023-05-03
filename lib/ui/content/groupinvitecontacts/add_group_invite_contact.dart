@@ -60,7 +60,7 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
         } else {
           hideLoader();
           if (state is GroupInviteContactErrorState) {
-            ToastDialog.error(MessagesConst.internalServerError);
+            ToastDialog.error(state.error ?? MessagesConst.internalServerError);
           }
           if (state is ContactAddedSuccessState) {
             ToastDialog.success("Contact added successfully");
@@ -141,7 +141,8 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
             firstName: _firstNameController.text,
             lastName: _lastNameController.text,
             phoneNumber: formattedMobileNumber,
-            id: contact?.id);
+            id: contact?.id,
+            isActive: contact?.isActive ?? true);
         if (contact != null && contact!.id != null) {
           context
               .read<AddUpdateGroupInviteContactBloc>()

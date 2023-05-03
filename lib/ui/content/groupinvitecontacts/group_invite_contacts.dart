@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rescu_organization_portal/data/dto/group_invite_contact_dto.dart';
 
 import '../../../data/blocs/group_invite_contact_bloc.dart';
 import '../../../data/constants/messages.dart';
@@ -91,6 +92,24 @@ class _GroupInviteContactsContentState
                   });
                 }));
                 contextualItems.add(AdaptiveItemButton(
+                    "${e.isActive ? "De-" : ""}Activate",
+                    const Icon(Icons.manage_accounts), () async {
+                  showConfirmationDialog(
+                      context: context,
+                      body:
+                          "Are you sure you want to ${e.isActive ? "De-" : ""}Activate this record?",
+                      onPressedOk: () {
+                        var updateContact = GroupInviteContactDto(
+                            firstName: e.firstName,
+                            lastName: e.lastName,
+                            phoneNumber: e.phoneNumber,
+                            isActive: !e.isActive);
+                        context.read<GroupInviteContactBloc>().add(
+                            ActivateDeactivateGroupInviteContact(
+                                widget.groupId, e.id!, updateContact));
+                      });
+                }));
+                contextualItems.add(AdaptiveItemButton(
                     "Delete", const Icon(Icons.delete), () async {
                   showConfirmationDialog(
                       context: context,
@@ -110,7 +129,8 @@ class _GroupInviteContactsContentState
               setState(() {});
             }
             if (state is GroupInviteContactErrorState) {
-              ToastDialog.error(MessagesConst.internalServerError);
+              ToastDialog.error(
+                  state.error ?? MessagesConst.internalServerError);
             }
             if (state is GetGroupInviteContactsNotFoundState) {
               _contacts.clear();
@@ -119,6 +139,12 @@ class _GroupInviteContactsContentState
             }
             if (state is DeleteGroupInviteContactSuccessState) {
               ToastDialog.success("Record deleted successfully");
+              context
+                  .read<GroupInviteContactBloc>()
+                  .add(GetGroupInviteContacts(widget.groupId, _searchValue));
+            }
+            if (state is ActivateDeActivateContactSuccessState) {
+              ToastDialog.success("Record updated successfully");
               context
                   .read<GroupInviteContactBloc>()
                   .add(GetGroupInviteContacts(widget.groupId, _searchValue));

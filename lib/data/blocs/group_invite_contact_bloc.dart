@@ -53,16 +53,35 @@ class UpdateGroupInviteContact extends GroupInviteContactEvent {
   List<Object> get props => [groupId, inviteId, contact];
 }
 
+class ActivateDeactivateGroupInviteContact extends GroupInviteContactEvent {
+  final String groupId;
+  final String inviteId;
+  final GroupInviteContactDto contact;
+
+  ActivateDeactivateGroupInviteContact(
+      this.groupId, this.inviteId, this.contact);
+
+  @override
+  List<Object> get props => [groupId, inviteId, contact];
+}
+
 abstract class GroupInviteContactState extends Equatable {
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class GroupInviteContactInitialState extends GroupInviteContactState {}
 
 class GroupInviteContactLoadingState extends GroupInviteContactState {}
 
-class GroupInviteContactErrorState extends GroupInviteContactState {}
+class GroupInviteContactErrorState extends GroupInviteContactState {
+  final String? error;
+
+  GroupInviteContactErrorState({this.error});
+
+  @override
+  List<Object?> get props => [error];
+}
 
 class LoadGroupDetailsState extends GroupInviteContactState {
   final GroupInfoDto groupInfo;
@@ -85,6 +104,8 @@ class GetGroupInviteContactsSuccessState extends GroupInviteContactState {
 class GetGroupInviteContactsNotFoundState extends GroupInviteContactState {}
 
 class DeleteGroupInviteContactSuccessState extends GroupInviteContactState {}
+
+class ActivateDeActivateContactSuccessState extends GroupInviteContactState {}
 
 class ContactAddedSuccessState extends GroupInviteContactState {}
 
@@ -144,6 +165,23 @@ class GroupInviteContactBloc
         return;
       }
     }
+    if (event is ActivateDeactivateGroupInviteContact) {
+      yield GroupInviteContactLoadingState();
+
+      var result = await _contactsApi.updateGroupInviteContact(
+          event.groupId, event.inviteId, event.contact);
+
+      if (result is Ok) {
+        yield ActivateDeActivateContactSuccessState();
+        return;
+      } else if (result is Bad) {
+        yield GroupInviteContactErrorState(error: result.message);
+        return;
+      } else {
+        yield GroupInviteContactErrorState();
+        return;
+      }
+    }
   }
 }
 
@@ -154,7 +192,8 @@ class AddUpdateGroupInviteContactBloc
       : super(GroupInviteContactInitialState());
 
   @override
-  Stream<GroupInviteContactState> mapEventToState(GroupInviteContactEvent event) async* {
+  Stream<GroupInviteContactState> mapEventToState(
+      GroupInviteContactEvent event) async* {
     if (event is AddGroupInviteContact) {
       yield GroupInviteContactLoadingState();
 
@@ -163,6 +202,9 @@ class AddUpdateGroupInviteContactBloc
 
       if (result is Ok) {
         yield ContactAddedSuccessState();
+        return;
+      } else if (result is Bad) {
+        yield GroupInviteContactErrorState(error: result.message);
         return;
       } else {
         yield GroupInviteContactErrorState();
@@ -177,6 +219,9 @@ class AddUpdateGroupInviteContactBloc
 
       if (result is Ok) {
         yield ContactUpdatedSuccessState();
+        return;
+      } else if (result is Bad) {
+        yield GroupInviteContactErrorState(error: result.message);
         return;
       } else {
         yield GroupInviteContactErrorState();
