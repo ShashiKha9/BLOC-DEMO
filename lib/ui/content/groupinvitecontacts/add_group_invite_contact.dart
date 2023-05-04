@@ -1,31 +1,28 @@
-import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rescu_organization_portal/data/blocs/group_incident_contact_bloc.dart';
 import 'package:rescu_organization_portal/data/constants/messages.dart';
-import 'package:rescu_organization_portal/data/dto/group_incident_contact_dto.dart';
 import 'package:rescu_organization_portal/ui/adaptive_items.dart';
 
+import '../../../data/blocs/group_invite_contact_bloc.dart';
+import '../../../data/dto/group_invite_contact_dto.dart';
 import '../../../data/helpers/phone_number_validator.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/dialogs.dart';
 import '../../widgets/spacer_size.dart';
 import '../../widgets/text_input_decoration.dart';
 
-class AddUpdateGroupContactModelState extends BaseModalRouteState {
+class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
   final String groupId;
-  final GroupIncidentContactDto? contact;
+  final GroupInviteContactDto? contact;
 
-  AddUpdateGroupContactModelState(this.groupId, {this.contact});
+  AddUpdateGroupInviteContactModelState(this.groupId, {this.contact});
 
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _designationController = TextEditingController();
   bool _validMobileNumber = false;
 
   @override
@@ -34,9 +31,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
     if (contact != null && contact!.id != null) {
       _firstNameController.text = contact!.firstName;
       _lastNameController.text = contact!.lastName;
-      _phoneNumberController.text = contact!.phoneNumber.replaceAll("+1", "");
-      _emailController.text = contact!.email ?? "";
-      _designationController.text = contact!.designation ?? "";
+      _phoneNumberController.text = contact!.phoneNumber.replaceAll('+1', "");
       _validateContactNumber(contact!.phoneNumber);
     }
   }
@@ -52,22 +47,20 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneNumberController.dispose();
-    _emailController.dispose();
-    _designationController.dispose();
     super.dispose();
   }
 
   @override
   Widget content(BuildContext context) {
     return BlocListener(
-      bloc: context.read<AddUpdateGroupIncidentContactBloc>(),
-      listener: (context, state) {
-        if (state is GroupIncidentLoadingState) {
+      bloc: context.read<AddUpdateGroupInviteContactBloc>(),
+      listener: (context, GroupInviteContactState state) {
+        if (state is GroupInviteContactLoadingState) {
           showLoader();
         } else {
           hideLoader();
-          if (state is GroupIncidentErrorState) {
-            ToastDialog.error(MessagesConst.internalServerError);
+          if (state is GroupInviteContactErrorState) {
+            ToastDialog.error(state.error ?? MessagesConst.internalServerError);
           }
           if (state is ContactAddedSuccessState) {
             ToastDialog.success("Contact added successfully");
@@ -118,7 +111,6 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                   if (value == null || value.isEmpty) {
                     return "Please enter contact number";
                   }
-
                   if (!_validMobileNumber) {
                     return "Please enter valid contact number";
                   }
@@ -129,24 +121,6 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                     _validateContactNumber(value);
                   }
                 },
-              ),
-              SpacerSize.at(1.5),
-              TextFormField(
-                  decoration: TextInputDecoration(labelText: "Email"),
-                  controller: _emailController,
-                  validator: (value) {
-                    if (value?.isEmpty ?? true) {
-                      return null;
-                    }
-                    if (!EmailValidator.validate(value!)) {
-                      return "Please enter valid email";
-                    }
-                    return null;
-                  }),
-              SpacerSize.at(1.5),
-              TextFormField(
-                decoration: TextInputDecoration(labelText: "Designation"),
-                controller: _designationController,
               ),
             ],
           ),
@@ -163,20 +137,20 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
         FocusScope.of(context).unfocus();
         var formattedMobileNumber = await PhoneNumberUtility.parseToE164Format(
             phoneNumber: _phoneNumberController.text);
-        var addContact = GroupIncidentContactDto(
+        var addContact = GroupInviteContactDto(
             firstName: _firstNameController.text,
             lastName: _lastNameController.text,
             phoneNumber: formattedMobileNumber,
-            email: _emailController.text,
-            designation: _designationController.text,
-            id: contact?.id);
+            id: contact?.id,
+            isActive: contact?.isActive ?? true);
         if (contact != null && contact!.id != null) {
-          context.read<AddUpdateGroupIncidentContactBloc>().add(
-              UpdateGroupIncidentContact(groupId, contact!.id!, addContact));
+          context
+              .read<AddUpdateGroupInviteContactBloc>()
+              .add(UpdateGroupInviteContact(groupId, contact!.id!, addContact));
         } else {
           context
-              .read<AddUpdateGroupIncidentContactBloc>()
-              .add(AddGroupIncidentContact(groupId, addContact));
+              .read<AddUpdateGroupInviteContactBloc>()
+              .add(AddGroupInviteContact(groupId, addContact));
         }
       }),
       AdaptiveItemAction("CANCEL", const Icon(Icons.cancel), () async {
@@ -187,6 +161,6 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
 
   @override
   String getTitle() {
-    return contact == null ? "Add Contact" : "Update Contact";
+    return contact == null ? "Add Invite" : "Update Invite";
   }
 }

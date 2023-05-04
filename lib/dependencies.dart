@@ -22,8 +22,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'data/api/group_address_api.dart';
 import 'data/api/group_contact_api.dart';
 import 'data/api/group_info_api.dart';
+import 'data/api/group_invite_contact_api.dart';
 import 'data/blocs/group_address_bloc.dart';
 import 'data/blocs/group_incident_contact_bloc.dart';
+import 'data/blocs/group_invite_contact_bloc.dart';
 import 'data/services/address/address_service.dart';
 
 class DependencyConfiguration {
@@ -107,6 +109,7 @@ class DependencyConfiguration {
       Provider<IGroupIncidentContactsApi>(create: (ctx) => GroupIncidentContactsApi(ctx.read())),
       Provider<IGroupAddressApi>(create: (ctx) => GroupAddressApi(ctx.read())),
       Provider<IAddressService>(create: (ctx) => AddressService(ctx.read())),
+      Provider<IGroupInviteContactsApi>(create: (ctx) => GroupInviteContactsApi(ctx.read())),
     ];
   }
 
@@ -143,6 +146,12 @@ class DependencyConfiguration {
       BlocProvider<AddUpdateGroupAddressBloc>(
           create: (ctx) =>
               AddUpdateGroupAddressBloc(ctx.read())),
+      BlocProvider<GroupInviteContactBloc>(
+          create: (ctx) =>
+              GroupInviteContactBloc(ctx.read(), ctx.read())),
+      BlocProvider<AddUpdateGroupInviteContactBloc>(
+          create: (ctx) =>
+              AddUpdateGroupInviteContactBloc(ctx.read())),
     ];
   }
 }

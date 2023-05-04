@@ -14,6 +14,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'content/groupaddresses/group_addresses.dart';
 import 'content/groupcontacts/group_contacts.dart';
+import 'content/groupinvitecontacts/group_invite_contacts.dart';
 
 /*
 This is a collection of responsive widgets which adapt to the user's
@@ -95,6 +96,12 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
             "Addresses",
             const Icon(Icons.location_pin),
             GroupAddressesContent(
+              groupId: result.dto.id,
+            )),
+        ContentNavigationItem(
+            "Invites",
+            const Icon(Icons.contacts),
+            GroupInviteContactsContent(
               groupId: result.dto.id,
             )),
         ContentNavigationItem("Change Password", const Icon(Icons.lock_clock),
