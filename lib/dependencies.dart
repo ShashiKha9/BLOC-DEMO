@@ -20,11 +20,9 @@ import 'package:rescu_organization_portal/ui/widgets/dialogs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'data/api/group_address_api.dart';
-import 'data/api/group_contact_api.dart';
 import 'data/api/group_info_api.dart';
 import 'data/api/group_invite_contact_api.dart';
 import 'data/blocs/group_address_bloc.dart';
-import 'data/blocs/group_incident_contact_bloc.dart';
 import 'data/blocs/group_invite_contact_bloc.dart';
 import 'data/services/address/address_service.dart';
 
@@ -106,10 +104,12 @@ class DependencyConfiguration {
       Provider<IGroupUserApi>(create: (ctx) => GroupUserApi(ctx.read())),
       Provider<IGroupDomainApi>(create: (ctx) => GroupDomainApi(ctx.read())),
       Provider<IGroupInfoApi>(create: (ctx) => GroupInfoApi(ctx.read())),
-      Provider<IGroupIncidentContactsApi>(create: (ctx) => GroupIncidentContactsApi(ctx.read())),
+      // Provider<IGroupIncidentContactsApi>(
+      //     create: (ctx) => GroupIncidentContactsApi(ctx.read())),
       Provider<IGroupAddressApi>(create: (ctx) => GroupAddressApi(ctx.read())),
       Provider<IAddressService>(create: (ctx) => AddressService(ctx.read())),
-      Provider<IGroupInviteContactsApi>(create: (ctx) => GroupInviteContactsApi(ctx.read())),
+      Provider<IGroupInviteContactsApi>(
+          create: (ctx) => GroupInviteContactsApi(ctx.read())),
     ];
   }
 
@@ -134,24 +134,19 @@ class DependencyConfiguration {
       BlocProvider<ChangePasswordBloc>(
           create: (ctx) =>
               ChangePasswordBloc(ctx.read(), ctx.read(), ctx.read())),
-      BlocProvider<GroupIncidentContactBloc>(
-          create: (ctx) =>
-              GroupIncidentContactBloc(ctx.read(), ctx.read())),
-      BlocProvider<AddUpdateGroupIncidentContactBloc>(
-          create: (ctx) =>
-              AddUpdateGroupIncidentContactBloc(ctx.read())),
+      // BlocProvider<GroupIncidentContactBloc>(
+      //     create: (ctx) =>
+      //         GroupIncidentContactBloc(ctx.read(), ctx.read())),
+      // BlocProvider<AddUpdateGroupIncidentContactBloc>(
+      //     create: (ctx) => AddUpdateGroupIncidentContactBloc(ctx.read())),
       BlocProvider<GroupAddressBloc>(
-          create: (ctx) =>
-              GroupAddressBloc(ctx.read(), ctx.read())),
+          create: (ctx) => GroupAddressBloc(ctx.read(), ctx.read())),
       BlocProvider<AddUpdateGroupAddressBloc>(
-          create: (ctx) =>
-              AddUpdateGroupAddressBloc(ctx.read())),
+          create: (ctx) => AddUpdateGroupAddressBloc(ctx.read())),
       BlocProvider<GroupInviteContactBloc>(
-          create: (ctx) =>
-              GroupInviteContactBloc(ctx.read(), ctx.read())),
+          create: (ctx) => GroupInviteContactBloc(ctx.read(), ctx.read())),
       BlocProvider<AddUpdateGroupInviteContactBloc>(
-          create: (ctx) =>
-              AddUpdateGroupInviteContactBloc(ctx.read())),
+          create: (ctx) => AddUpdateGroupInviteContactBloc(ctx.read())),
     ];
   }
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rescu_organization_portal/data/blocs/group_invite_contact_bloc.dart';
 
-import '../../../data/blocs/group_incident_contact_bloc.dart';
+import '../../../data/constants/fleet_user_roles.dart';
 import '../../../data/constants/messages.dart';
 import '../../adaptive_items.dart';
 import '../../adaptive_navigation.dart';
@@ -32,8 +33,8 @@ class GroupContactsContent extends StatefulWidget with FloatingActionMixin {
           stateGenerator: () => AddUpdateGroupContactModelState(groupId));
     })).then((_) {
       context
-          .read<GroupIncidentContactBloc>()
-          .add(GetGroupIncidentContacts(groupId, ""));
+          .read<GroupInviteContactBloc>()
+          .add(GetGroupInviteContacts(groupId, "", FleetUserRoles.contact));
     });
   }
 }
@@ -45,9 +46,8 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
 
   @override
   void initState() {
-    context
-        .read<GroupIncidentContactBloc>()
-        .add(GetGroupIncidentContacts(widget.groupId, _searchValue));
+    context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
+        widget.groupId, _searchValue, FleetUserRoles.contact));
     super.initState();
   }
 
@@ -63,13 +63,13 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
       controller: _loadingController,
       blockPopOnLoad: true,
       child: BlocListener(
-        bloc: context.read<GroupIncidentContactBloc>(),
+        bloc: context.read<GroupInviteContactBloc>(),
         listener: (context, state) {
-          if (state is GroupIncidentLoadingState) {
+          if (state is GroupInviteContactLoadingState) {
             _loadingController.show();
           } else {
             _loadingController.hide();
-            if (state is GetGroupIncidentContactsSuccessState) {
+            if (state is GetGroupInviteContactsSuccessState) {
               _contacts.clear();
               _contacts.addAll(state.contacts.map((e) {
                 List<AdaptiveContextualItem> contextualItems = [];
@@ -81,9 +81,9 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
                             widget.groupId,
                             contact: e));
                   })).then((_) {
-                    context
-                        .read<GroupIncidentContactBloc>()
-                        .add(GetGroupIncidentContacts(widget.groupId, ""));
+                    context.read<GroupInviteContactBloc>().add(
+                        GetGroupInviteContacts(
+                            widget.groupId, "", FleetUserRoles.contact));
                   });
                 }));
                 contextualItems.add(AdaptiveItemButton(
@@ -92,8 +92,8 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
                       context: context,
                       body: "Are you sure you want to this record?",
                       onPressedOk: () {
-                        context.read<GroupIncidentContactBloc>().add(
-                            DeleteGroupIncidentContact(widget.groupId, e.id!));
+                        context.read<GroupInviteContactBloc>().add(
+                            DeleteGroupInviteContact(widget.groupId, e.id!));
                       });
                 }));
                 return AdaptiveListItem(
@@ -105,19 +105,18 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
               }));
               setState(() {});
             }
-            if (state is GroupIncidentErrorState) {
+            if (state is GroupInviteContactErrorState) {
               ToastDialog.error(MessagesConst.internalServerError);
             }
-            if (state is GetGroupIncidentContactsNotFoundState) {
+            if (state is GetGroupInviteContactsNotFoundState) {
               _contacts.clear();
               ToastDialog.warning("No records found");
               setState(() {});
             }
-            if (state is DeleteGroupIncidentContactSuccessState) {
+            if (state is DeleteGroupInviteContactSuccessState) {
               ToastDialog.success("Record deleted successfully");
-              context
-                  .read<GroupIncidentContactBloc>()
-                  .add(GetGroupIncidentContacts(widget.groupId, _searchValue));
+              context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
+                  widget.groupId, _searchValue, FleetUserRoles.contact));
             }
           }
         },
@@ -126,9 +125,8 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
             searchIcon: const Icon(Icons.search),
             onSearchSubmitted: (value) {
               _searchValue = value;
-              context
-                  .read<GroupIncidentContactBloc>()
-                  .add(GetGroupIncidentContacts(widget.groupId, _searchValue));
+              context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
+                  widget.groupId, _searchValue, FleetUserRoles.contact));
             },
             list: _contacts),
       ),

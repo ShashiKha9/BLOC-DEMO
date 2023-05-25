@@ -2,9 +2,10 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rescu_organization_portal/data/blocs/group_incident_contact_bloc.dart';
+import 'package:rescu_organization_portal/data/blocs/group_invite_contact_bloc.dart';
+import 'package:rescu_organization_portal/data/constants/fleet_user_roles.dart';
 import 'package:rescu_organization_portal/data/constants/messages.dart';
-import 'package:rescu_organization_portal/data/dto/group_incident_contact_dto.dart';
+import 'package:rescu_organization_portal/data/dto/group_invite_contact_dto.dart';
 import 'package:rescu_organization_portal/ui/adaptive_items.dart';
 
 import '../../../data/helpers/phone_number_validator.dart';
@@ -15,7 +16,7 @@ import '../../widgets/text_input_decoration.dart';
 
 class AddUpdateGroupContactModelState extends BaseModalRouteState {
   final String groupId;
-  final GroupIncidentContactDto? contact;
+  final GroupInviteContactDto? contact;
 
   AddUpdateGroupContactModelState(this.groupId, {this.contact});
 
@@ -60,14 +61,14 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
   @override
   Widget content(BuildContext context) {
     return BlocListener(
-      bloc: context.read<AddUpdateGroupIncidentContactBloc>(),
+      bloc: context.read<AddUpdateGroupInviteContactBloc>(),
       listener: (context, state) {
-        if (state is GroupIncidentLoadingState) {
+        if (state is GroupInviteContactLoadingState) {
           showLoader();
         } else {
           hideLoader();
-          if (state is GroupIncidentErrorState) {
-            ToastDialog.error(MessagesConst.internalServerError);
+          if (state is GroupInviteContactErrorState) {
+            ToastDialog.error(state.error ?? MessagesConst.internalServerError);
           }
           if (state is ContactAddedSuccessState) {
             ToastDialog.success("Contact added successfully");
@@ -163,20 +164,23 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
         FocusScope.of(context).unfocus();
         var formattedMobileNumber = await PhoneNumberUtility.parseToE164Format(
             phoneNumber: _phoneNumberController.text);
-        var addContact = GroupIncidentContactDto(
+        var addContact = GroupInviteContactDto(
             firstName: _firstNameController.text,
             lastName: _lastNameController.text,
             phoneNumber: formattedMobileNumber,
+            isActive: true,
+            role: FleetUserRoles.contact,
             email: _emailController.text,
             designation: _designationController.text,
             id: contact?.id);
         if (contact != null && contact!.id != null) {
-          context.read<AddUpdateGroupIncidentContactBloc>().add(
-              UpdateGroupIncidentContact(groupId, contact!.id!, addContact));
+          context
+              .read<AddUpdateGroupInviteContactBloc>()
+              .add(UpdateGroupInviteContact(groupId, contact!.id!, addContact));
         } else {
           context
-              .read<AddUpdateGroupIncidentContactBloc>()
-              .add(AddGroupIncidentContact(groupId, addContact));
+              .read<AddUpdateGroupInviteContactBloc>()
+              .add(AddGroupInviteContact(groupId, addContact));
         }
       }),
       AdaptiveItemAction("CANCEL", const Icon(Icons.cancel), () async {

@@ -15,11 +15,11 @@ abstract class GroupInviteContactEvent extends Equatable {
 class GetGroupInviteContacts extends GroupInviteContactEvent {
   final String? groupId;
   final String? filter;
-
-  GetGroupInviteContacts(this.groupId, this.filter);
+  final String role;
+  GetGroupInviteContacts(this.groupId, this.filter, this.role);
 
   @override
-  List<Object?> get props => [groupId];
+  List<Object?> get props => [groupId, filter, role];
 }
 
 class DeleteGroupInviteContact extends GroupInviteContactEvent {
@@ -137,8 +137,8 @@ class GroupInviteContactBloc
         groupId = event.groupId!;
       }
 
-      var result =
-          await _contactsApi.getGroupInviteContacts(groupId, event.filter);
+      var result = await _contactsApi.getGroupInviteContacts(
+          groupId, event.filter, event.role);
 
       if (result is OkData<List<GroupInviteContactDto>>) {
         if (result.dto.isNotEmpty) {

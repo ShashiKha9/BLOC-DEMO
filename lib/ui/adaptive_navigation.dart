@@ -83,10 +83,6 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
     if (result is OkData<GroupInfoDto> && result.dto.isFleetUser()) {
       navigation = [
         ContentNavigationItem(
-            "Users", const Icon(Icons.people), const UsersContent()),
-        ContentNavigationItem(
-            "Domains", const Icon(Icons.domain), const DomainsContent()),
-        ContentNavigationItem(
             "Contacts",
             const Icon(Icons.contacts),
             GroupContactsContent(

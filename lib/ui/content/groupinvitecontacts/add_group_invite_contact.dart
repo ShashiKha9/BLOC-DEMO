@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rescu_organization_portal/data/constants/fleet_user_roles.dart';
 import 'package:rescu_organization_portal/data/constants/messages.dart';
 import 'package:rescu_organization_portal/ui/adaptive_items.dart';
 
@@ -142,7 +143,8 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
             lastName: _lastNameController.text,
             phoneNumber: formattedMobileNumber,
             id: contact?.id,
-            isActive: contact?.isActive ?? true);
+            isActive: contact?.isActive ?? true,
+            role: FleetUserRoles.fleet);
         if (contact != null && contact!.id != null) {
           context
               .read<AddUpdateGroupInviteContactBloc>()
