@@ -110,19 +110,19 @@ class _GroupInviteContactsContentState
                                 widget.groupId, e.id!, updateContact));
                       });
                 }));
-                contextualItems.add(AdaptiveItemButton(
-                    "Delete", const Icon(Icons.delete), () async {
-                  showConfirmationDialog(
-                      context: context,
-                      body: "Are you sure you want to this record?",
-                      onPressedOk: () {
-                        context.read<GroupInviteContactBloc>().add(
-                            DeleteGroupInviteContact(widget.groupId, e.id!));
-                      });
-                }));
+                // contextualItems.add(AdaptiveItemButton(
+                //     "Delete", const Icon(Icons.delete), () async {
+                //   showConfirmationDialog(
+                //       context: context,
+                //       body: "Are you sure you want to this record?",
+                //       onPressedOk: () {
+                //         context.read<GroupInviteContactBloc>().add(
+                //             DeleteGroupInviteContact(widget.groupId, e.id!));
+                //       });
+                // }));
                 return AdaptiveListItem(
                     "Name: ${e.firstName} ${e.lastName}",
-                    "Contact Number: ${e.phoneNumber}",
+                    "Contact Number: ${e.phoneNumber}\nEmail: ${e.email}",
                     const Icon(Icons.person),
                     contextualItems,
                     onPressed: () {});

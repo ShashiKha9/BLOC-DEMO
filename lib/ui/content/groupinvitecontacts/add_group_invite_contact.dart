@@ -1,3 +1,4 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,7 +25,9 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   bool _validMobileNumber = false;
+  String _selectedLoginMode = "Phone";
 
   @override
   void initState() {
@@ -33,6 +36,8 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
       _firstNameController.text = contact!.firstName;
       _lastNameController.text = contact!.lastName;
       _phoneNumberController.text = contact!.phoneNumber.replaceAll('+1', "");
+      _emailController.text = contact!.email ?? "";
+      _selectedLoginMode = contact!.loginWith ?? "Phone";
       _validateContactNumber(contact!.phoneNumber);
     }
   }
@@ -48,6 +53,7 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneNumberController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
@@ -123,6 +129,54 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
                   }
                 },
               ),
+              SpacerSize.at(1.5),
+              TextFormField(
+                decoration: TextInputDecoration(labelText: "Email"),
+                controller: _emailController,
+                validator: (value) {
+                  if (value?.isEmpty ?? true) {
+                    return null;
+                  }
+                  if (!EmailValidator.validate(value!)) {
+                    return "Please enter valid email";
+                  }
+                  return null;
+                },
+                onChanged: (value) {
+                  if (EmailValidator.validate(value)) {
+                    setState(() {});
+                  }
+                },
+              ),
+              SpacerSize.at(1.5),
+              _emailController.text.isNotEmpty
+                  ? const Text("Login With")
+                  : Container(),
+              SpacerSize.at(0.5),
+              _emailController.text.isNotEmpty
+                  ? DropdownButtonFormField<String>(
+                      decoration: DropDownInputDecoration(),
+                      hint: const Text("Login With"),
+                      value: _selectedLoginMode,
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedLoginMode = value ?? "Phone";
+                        });
+                      },
+                      validator: (value) {
+                        return null;
+                      },
+                      items: const [
+                          DropdownMenuItem<String>(
+                            value: "Phone",
+                            child: Text("Phone"),
+                          ),
+                          DropdownMenuItem<String>(
+                            value: "Email",
+                            child: Text("Email"),
+                          )
+                        ])
+                  : Container()
             ],
           ),
         ),
@@ -142,6 +196,8 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
             firstName: _firstNameController.text,
             lastName: _lastNameController.text,
             phoneNumber: formattedMobileNumber,
+            email: _emailController.text,
+            loginWith: _selectedLoginMode,
             id: contact?.id,
             isActive: contact?.isActive ?? true,
             role: FleetUserRoles.fleet);

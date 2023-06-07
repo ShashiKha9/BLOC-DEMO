@@ -7,7 +7,8 @@ class GroupInviteContactDto {
   late String? email;
   late String? designation;
   late String role;
-
+  late String? loginWith;
+  late List<String>? incidentTypeList;
   GroupInviteContactDto(
       {required this.firstName,
       this.id,
@@ -16,7 +17,9 @@ class GroupInviteContactDto {
       required this.isActive,
       required this.role,
       this.email,
-      this.designation});
+      this.designation,
+      this.incidentTypeList,
+      this.loginWith});
 
   GroupInviteContactDto.fromJson(Map<String, dynamic> json) {
     id = json['Id'];
@@ -27,6 +30,8 @@ class GroupInviteContactDto {
     email = json['Email'];
     designation = json['Designation'];
     role = json['Role'] ?? "";
+    loginWith = json["LoginWith"] ?? "";
+    incidentTypeList = List<String>.from(json["IncidentTypeList"]);
   }
 
   Map<String, dynamic> toJson() {
@@ -39,6 +44,8 @@ class GroupInviteContactDto {
     data['Email'] = email;
     data['Designation'] = designation;
     data['Role'] = role;
+    data["IncidentTypeList"] = incidentTypeList ?? [];
+    data["LoginWith"] = loginWith;
     return data;
   }
 }
