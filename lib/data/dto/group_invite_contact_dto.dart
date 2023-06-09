@@ -25,7 +25,7 @@ class GroupInviteContactDto {
     id = json['Id'];
     firstName = json['FirstName'];
     lastName = json['LastName'];
-    phoneNumber = json['PhoneNumber'];
+    phoneNumber = json['PhoneNumber'] ?? "";
     isActive = json['IsActive'];
     email = json['Email'];
     designation = json['Designation'];

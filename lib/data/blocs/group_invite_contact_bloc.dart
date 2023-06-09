@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rescu_organization_portal/data/api/base_api.dart';
 import 'package:rescu_organization_portal/data/api/group_incident_type_api.dart';
 import 'package:rescu_organization_portal/data/api/group_info_api.dart';
+import 'package:rescu_organization_portal/data/constants/fleet_user_roles.dart';
 import 'package:rescu_organization_portal/data/dto/group_incident_type_dto.dart';
 import 'package:rescu_organization_portal/data/dto/group_info_dto.dart';
 import 'package:rescu_organization_portal/data/models/group_incident_type_model.dart';
@@ -162,6 +163,13 @@ class GroupInviteContactBloc
           groupId, event.filter, event.role);
 
       if (result is OkData<List<GroupInviteContactDto>>) {
+        if (event.role == FleetUserRoles.contact) {
+          var adminResult = await _contactsApi.getGroupInviteContacts(
+              event.groupId!, event.filter, FleetUserRoles.admin);
+          if (adminResult is OkData<List<GroupInviteContactDto>>) {
+            result.dto.add(adminResult.dto.first);
+          }
+        }
         if (result.dto.isNotEmpty) {
           yield GetGroupInviteContactsSuccessState(result.dto);
         } else {
