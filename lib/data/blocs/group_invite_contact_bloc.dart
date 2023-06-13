@@ -166,7 +166,8 @@ class GroupInviteContactBloc
         if (event.role == FleetUserRoles.contact) {
           var adminResult = await _contactsApi.getGroupInviteContacts(
               event.groupId!, event.filter, FleetUserRoles.admin);
-          if (adminResult is OkData<List<GroupInviteContactDto>>) {
+          if (adminResult is OkData<List<GroupInviteContactDto>> &&
+              adminResult.dto.isNotEmpty) {
             result.dto.add(adminResult.dto.first);
           }
         }

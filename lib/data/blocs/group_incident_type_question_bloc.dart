@@ -62,6 +62,15 @@ class DeleteQuestion extends GroupIncidentTypeQuestionEvent {
   List<Object?> get props => [id, questionId];
 }
 
+class GetQuestion extends GroupIncidentTypeQuestionEvent {
+  final String id;
+
+  GetQuestion(this.id);
+
+  @override
+  List<Object?> get props => [id];
+}
+
 abstract class GroupIncidentTypeQuestionState extends Equatable {
   @override
   List<Object?> get props => [];
@@ -112,6 +121,15 @@ class GetIncidentTypesSuccessState extends GroupIncidentTypeQuestionState {
 
   @override
   List<Object?> get props => [incidentTypes];
+}
+
+class GetQuestionSuccessState extends GroupIncidentTypeQuestionState {
+  final GroupIncidentTypeQuestionDto questionDto;
+
+  GetQuestionSuccessState(this.questionDto);
+
+  @override
+  List<Object?> get props => [questionDto];
 }
 
 class GroupIncidentTypeQuestionBloc extends Bloc<GroupIncidentTypeQuestionEvent,
@@ -191,6 +209,19 @@ class GroupIncidentTypeQuestionBloc extends Bloc<GroupIncidentTypeQuestionEvent,
         yield GetIncidentTypesSuccessState(
             result.dto.map((e) => GroupIncidentTypeModel.fromDto(e)).toList());
       } else if (result is BadData<List<GroupIncidentTypeDto>>) {
+        yield GroupIncidentTypeQuestionFailedState(message: result.message);
+      } else {
+        yield GroupIncidentTypeQuestionFailedState();
+      }
+    }
+
+    if (event is GetQuestion) {
+      yield GroupIncidentTypeQuestionLoadingState();
+
+      var result = await _api.getOne(event.id);
+      if (result is OkData<GroupIncidentTypeQuestionDto>) {
+        yield GetQuestionSuccessState(result.dto);
+      } else if (result is BadData<GroupIncidentTypeQuestionDto>) {
         yield GroupIncidentTypeQuestionFailedState(message: result.message);
       } else {
         yield GroupIncidentTypeQuestionFailedState();

@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:rescu_organization_portal/data/blocs/group_incident_type_bloc.dart';
 import 'package:rescu_organization_portal/ui/content/groupIncidentTypes/add_group_incident_type.dart';
 
@@ -100,7 +103,9 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
                 return AdaptiveListItem(
                     "Name: ${e.name}",
                     "Description: ${e.description}",
-                    const Icon(Icons.report),
+                    e.iconData != null
+                        ? Icon(deserializeIcon(jsonDecode(e.iconData!)))
+                        : const Icon(Icons.report),
                     contextualItems,
                     onPressed: () {});
               }));

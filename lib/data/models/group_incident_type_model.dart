@@ -5,22 +5,29 @@ class GroupIncidentTypeModel {
   late String name;
   late String description;
   late String groupId;
+  late String? iconData;
 
   GroupIncidentTypeModel(
       {this.id,
       required this.name,
       required this.description,
-      required this.groupId});
+      required this.groupId,
+      this.iconData});
 
   GroupIncidentTypeModel.fromDto(GroupIncidentTypeDto dto) {
     id = dto.id;
     name = dto.name;
     groupId = dto.groupId;
     description = dto.description;
+    iconData = dto.iconData;
   }
 
   GroupIncidentTypeDto toDto() {
     return GroupIncidentTypeDto(
-        id: id, name: name, groupId: groupId, description: description);
+        id: id,
+        name: name,
+        groupId: groupId,
+        description: description,
+        iconData: iconData);
   }
 }

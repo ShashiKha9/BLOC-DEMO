@@ -13,10 +13,12 @@ import 'package:rescu_organization_portal/ui/widgets/text_input_decoration.dart'
 
 class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
   final String groupId;
+  final GroupIncidentTypeQuestionDto? parentQuestion;
   final GroupIncidentTypeQuestionDto? questionDto;
+  final bool? isYesQuestion;
 
   AddUpdateGroupIncidentTypeQuestionModelState(this.groupId,
-      {this.questionDto});
+      {this.questionDto, this.parentQuestion, this.isYesQuestion});
 
   late List<GroupIncidentTypeModel> _incidentTypes = [];
   final _formKey = GlobalKey<FormState>();
@@ -30,6 +32,9 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
     if (questionDto != null && questionDto?.id != null) {
       _nameController.text = questionDto!.question;
       _selectedIncidentType = questionDto!.incidentTypeId;
+    }
+    if (parentQuestion != null) {
+      _selectedIncidentType = parentQuestion!.incidentTypeId;
     }
     context.read<GroupIncidentTypeQuestionBloc>().add(GetIncidents(groupId));
   }
@@ -76,31 +81,33 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              DropdownButtonFormField<String>(
-                  decoration: DropDownInputDecoration(),
-                  hint: const Text("Select Incident Type"),
-                  value: _selectedIncidentType,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedIncidentType = value;
-                    });
-                  },
-                  validator: (value) {
-                    if (_selectedIncidentType == null) {
-                      return "Please select Incident Type";
-                    }
-                    return null;
-                  },
-                  items: _incidentTypes.map<DropdownMenuItem<String>>(
-                      (GroupIncidentTypeModel value) {
-                    return DropdownMenuItem<String>(
-                      value: value.id,
-                      child: Text(
-                        value.name,
-                      ),
-                    );
-                  }).toList()),
-              SpacerSize.at(1.5),
+              parentQuestion == null
+                  ? DropdownButtonFormField<String>(
+                      decoration: DropDownInputDecoration(),
+                      hint: const Text("Select Incident Type"),
+                      value: _selectedIncidentType,
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedIncidentType = value;
+                        });
+                      },
+                      validator: (value) {
+                        if (_selectedIncidentType == null) {
+                          return "Please select Incident Type";
+                        }
+                        return null;
+                      },
+                      items: _incidentTypes.map<DropdownMenuItem<String>>(
+                          (GroupIncidentTypeModel value) {
+                        return DropdownMenuItem<String>(
+                          value: value.id,
+                          child: Text(
+                            value.name,
+                          ),
+                        );
+                      }).toList())
+                  : Container(),
+              parentQuestion == null ? SpacerSize.at(1.5) : Container(),
               TextFormField(
                 decoration: TextInputDecoration(labelText: "Question"),
                 controller: _nameController,
@@ -129,8 +136,11 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
         if (!_formKey.currentState!.validate()) return;
         FocusScope.of(context).unfocus();
         var question = GroupIncidentTypeQuestionDto(
+            groupId: groupId,
             question: _nameController.text,
-            incidentTypeId: _selectedIncidentType!);
+            incidentTypeId: _selectedIncidentType!,
+            isYes: isYesQuestion,
+            parentQuestionId: parentQuestion?.id);
 
         if (questionDto != null && questionDto!.id != null) {
           context

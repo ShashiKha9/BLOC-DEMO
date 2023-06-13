@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_incident_type_question_bloc.dart';
 import 'package:rescu_organization_portal/ui/content/groupIncidentTypeQuestions/add_question.dart';
+import 'package:rescu_organization_portal/ui/content/groupIncidentTypeQuestions/view_question.dart';
 
 import '../../../data/constants/messages.dart';
 import '../../adaptive_items.dart';
@@ -75,8 +76,24 @@ class _GroupIncidentTypeQuestionContentState
             _loadingController.hide();
             if (state is GetGroupIncidentTypeQuestionsSuccessState) {
               _contacts.clear();
-              _contacts.addAll(state.model.map((e) {
+              _contacts.addAll(state.model
+                  .where((element) => element.parentQuestionId == null)
+                  .map((e) {
                 List<AdaptiveContextualItem> contextualItems = [];
+                contextualItems.add(AdaptiveItemButton(
+                    "View", const Icon(Icons.view_headline), () async {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+                    return ModalRouteWidget(
+                        stateGenerator: () =>
+                            ViewGroupIncidentTypeQuestionModelState(
+                                widget.groupId, e,
+                                previousTree: e.incidentType));
+                  })).then((_) {
+                    context
+                        .read<GroupIncidentTypeQuestionBloc>()
+                        .add(GetQuestions(widget.groupId, ""));
+                  });
+                }));
                 contextualItems.add(AdaptiveItemButton(
                     "Edit", const Icon(Icons.edit), () async {
                   Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
@@ -95,7 +112,7 @@ class _GroupIncidentTypeQuestionContentState
                     "Delete", const Icon(Icons.delete), () async {
                   showConfirmationDialog(
                       context: context,
-                      body: "Are you sure you want to this record?",
+                      body: "Are you sure you want to delete this record?",
                       onPressedOk: () {
                         context
                             .read<GroupIncidentTypeQuestionBloc>()

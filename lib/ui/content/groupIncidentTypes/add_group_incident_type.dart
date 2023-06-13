@@ -1,11 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:rescu_organization_portal/data/blocs/group_incident_type_bloc.dart';
 import 'package:rescu_organization_portal/data/constants/messages.dart';
 import 'package:rescu_organization_portal/data/models/group_incident_type_model.dart';
 import 'package:rescu_organization_portal/ui/adaptive_items.dart';
+import 'package:rescu_organization_portal/ui/widgets/buttons.dart';
 import 'package:rescu_organization_portal/ui/widgets/common_widgets.dart';
+import 'package:rescu_organization_portal/ui/widgets/custom_colors.dart';
 import 'package:rescu_organization_portal/ui/widgets/dialogs.dart';
 import 'package:rescu_organization_portal/ui/widgets/spacer_size.dart';
 import 'package:rescu_organization_portal/ui/widgets/text_input_decoration.dart';
@@ -15,12 +20,12 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
   final GroupIncidentTypeModel? incidentType;
 
   AddUpdateGroupIncidentTypeModelState(this.groupId, {this.incidentType});
-
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _nameController = TextEditingController();
 
   final TextEditingController _descriptionController = TextEditingController();
+  Icon? _icon;
 
   @override
   void initState() {
@@ -28,6 +33,11 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
     if (incidentType != null && incidentType?.id != null) {
       _nameController.text = incidentType!.name;
       _descriptionController.text = incidentType!.description;
+      _icon = incidentType!.iconData != null
+          ? Icon(
+              deserializeIcon(jsonDecode(incidentType!.iconData!)),
+            )
+          : null;
     }
   }
 
@@ -35,6 +45,17 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
   void dispose() {
     _nameController.dispose();
     super.dispose();
+  }
+
+  _pickIcon() async {
+    IconData? icon = await FlutterIconPicker.showIconPicker(context,
+        iconPackModes: [IconPack.material],
+        backgroundColor: AppColor.baseBackground);
+
+    _icon = Icon(icon);
+    setState(() {});
+
+    debugPrint('Picked Icon:  ${icon != null ? serializeIcon(icon) : ''}');
   }
 
   @override
@@ -91,6 +112,23 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
                     }
                     return null;
                   }),
+              SpacerSize.at(1.5),
+              const Text("Incident Type Icon"),
+              SpacerSize.at(1),
+              Row(
+                children: [
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: _icon ?? Container(),
+                  ),
+                  const SizedBox(width: 10),
+                  AppButton(
+                    buttonText: "Change",
+                    onPressed: () => _pickIcon(),
+                    weight: FontWeight.w400,
+                  )
+                ],
+              ),
             ],
           ),
         ),
@@ -105,9 +143,12 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
         if (!_formKey.currentState!.validate()) return;
         FocusScope.of(context).unfocus();
         var addIncidentType = GroupIncidentTypeModel(
-            groupId: groupId,
-            name: _nameController.text,
-            description: _descriptionController.text);
+          groupId: groupId,
+          name: _nameController.text,
+          description: _descriptionController.text,
+          iconData:
+              _icon != null ? jsonEncode(serializeIcon(_icon!.icon!)) : null,
+        );
         if (incidentType != null && incidentType!.id != null) {
           context.read<GroupIncidentTypeBloc>().add(
               UpdateIncidentType(groupId, incidentType!.id!, addIncidentType));
