@@ -1,12 +1,15 @@
+import 'package:rescu_organization_portal/data/dto/group_incident_type_question_option_dto.dart';
+
 class GroupIncidentTypeQuestionDto {
   late String? id;
   late String question;
   late String incidentTypeId;
   late String? incidentType;
-  late bool? isYes;
+  late QuestionType questionType;
   late String groupId;
-  late String? parentQuestionId;
-  late List<GroupIncidentTypeQuestionDto>? childQuestions;
+  late String? rootQuestionId;
+  late String? parentOptionId;
+  late List<GroupIncidentTypeQuestionOptionDto>? options;
 
   GroupIncidentTypeQuestionDto(
       {required this.question,
@@ -14,9 +17,10 @@ class GroupIncidentTypeQuestionDto {
       required this.groupId,
       this.id,
       this.incidentType,
-      this.isYes,
-      this.parentQuestionId,
-      this.childQuestions});
+      required this.questionType,
+      this.parentOptionId,
+      this.options,
+      this.rootQuestionId});
 
   GroupIncidentTypeQuestionDto.fromJson(Map<String, dynamic> json) {
     id = json["Id"];
@@ -25,13 +29,15 @@ class GroupIncidentTypeQuestionDto {
     incidentTypeId = json["IncidentTypeId"];
     incidentType =
         json["IncidentType"] != null ? json["IncidentType"]["Name"] : "";
-    isYes = json["IsYes"];
-    parentQuestionId = json["ParentQuestionId"];
-    childQuestions = json["ChildQuestions"] != null
-        ? (json["ChildQuestions"] as Iterable)
-            .map((e) => GroupIncidentTypeQuestionDto.fromJson(e))
-            .toList()
-        : null;
+    if (json["Options"] != null) {
+      options = [];
+      json["Options"].forEach((v) {
+        options!.add(GroupIncidentTypeQuestionOptionDto.fromJson(v));
+      });
+    }
+    questionType = getQuestionType(json["QuestionType"]);
+    rootQuestionId = json["RootQuestionId"];
+    parentOptionId = json["ParentOptionId"];
   }
 
   Map<String, dynamic> toJson() {
@@ -39,9 +45,46 @@ class GroupIncidentTypeQuestionDto {
     data["Id"] = id;
     data["Question"] = question;
     data["IncidentTypeId"] = incidentTypeId;
-    data["IsYes"] = isYes;
-    data["ParentQuestionId"] = parentQuestionId;
     data["GroupId"] = groupId;
+    data["Options"] = options?.map((v) => v.toJson()).toList();
+    data["QuestionType"] = getQuestionTypeString();
+    data["RootQuestionId"] = rootQuestionId;
+    data["ParentOptionId"] = parentOptionId;
     return data;
   }
+
+  static getQuestionTypeDisplay(QuestionType questionType) {
+    switch (questionType) {
+      case QuestionType.text:
+        return "Text";
+      case QuestionType.singlePickList:
+        return "Single Picklist";
+      case QuestionType.multiPickList:
+        return "Multi Picklist";
+    }
+  }
+
+  getQuestionTypeString() {
+    switch (questionType) {
+      case QuestionType.text:
+        return "Text";
+      case QuestionType.singlePickList:
+        return "SinglePickList";
+      case QuestionType.multiPickList:
+        return "MultiPickList";
+    }
+  }
+
+  static getQuestionType(String questionTypeString) {
+    switch (questionTypeString) {
+      case "Text":
+        return QuestionType.text;
+      case "SinglePickList":
+        return QuestionType.singlePickList;
+      case "MultiPickList":
+        return QuestionType.multiPickList;
+    }
+  }
 }
+
+enum QuestionType { text, singlePickList, multiPickList }

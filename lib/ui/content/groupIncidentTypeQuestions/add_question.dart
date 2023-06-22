@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_incident_type_question_bloc.dart';
 import 'package:rescu_organization_portal/data/constants/messages.dart';
 import 'package:rescu_organization_portal/data/dto/group_incident_type_question_dto.dart';
+import 'package:rescu_organization_portal/data/dto/group_incident_type_question_option_dto.dart';
 import 'package:rescu_organization_portal/data/models/group_incident_type_model.dart';
 import 'package:rescu_organization_portal/ui/adaptive_items.dart';
 import 'package:rescu_organization_portal/ui/widgets/common_widgets.dart';
@@ -13,12 +14,12 @@ import 'package:rescu_organization_portal/ui/widgets/text_input_decoration.dart'
 
 class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
   final String groupId;
-  final GroupIncidentTypeQuestionDto? parentQuestion;
+  final GroupIncidentTypeQuestionDto? rootQuestion;
+  final GroupIncidentTypeQuestionOptionDto? parentOption;
   final GroupIncidentTypeQuestionDto? questionDto;
-  final bool? isYesQuestion;
 
   AddUpdateGroupIncidentTypeQuestionModelState(this.groupId,
-      {this.questionDto, this.parentQuestion, this.isYesQuestion});
+      {this.questionDto, this.rootQuestion, this.parentOption});
 
   late List<GroupIncidentTypeModel> _incidentTypes = [];
   final _formKey = GlobalKey<FormState>();
@@ -26,15 +27,28 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
   final TextEditingController _nameController = TextEditingController();
   String? _selectedIncidentType;
 
+  final List<QuestionType> _questionTypes = [
+    QuestionType.singlePickList,
+    QuestionType.multiPickList,
+    QuestionType.text
+  ];
+
+  QuestionType? _selectedQuestionType;
+
+  final List<String> _options = [''];
+
   @override
   void initState() {
     super.initState();
     if (questionDto != null && questionDto?.id != null) {
       _nameController.text = questionDto!.question;
       _selectedIncidentType = questionDto!.incidentTypeId;
+      _selectedQuestionType = questionDto!.questionType;
+      _options.clear();
+      _options.addAll(questionDto!.options!.map((e) => e.optionText));
     }
-    if (parentQuestion != null) {
-      _selectedIncidentType = parentQuestion!.incidentTypeId;
+    if (rootQuestion != null) {
+      _selectedIncidentType = rootQuestion!.incidentTypeId;
     }
     context.read<GroupIncidentTypeQuestionBloc>().add(GetIncidents(groupId));
   }
@@ -78,51 +92,104 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
         autovalidateMode: AutovalidateMode.onUserInteraction,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              parentQuestion == null
-                  ? DropdownButtonFormField<String>(
-                      decoration: DropDownInputDecoration(),
-                      hint: const Text("Select Incident Type"),
-                      value: _selectedIncidentType,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedIncidentType = value;
-                        });
-                      },
-                      validator: (value) {
-                        if (_selectedIncidentType == null) {
-                          return "Please select Incident Type";
-                        }
-                        return null;
-                      },
-                      items: _incidentTypes.map<DropdownMenuItem<String>>(
-                          (GroupIncidentTypeModel value) {
-                        return DropdownMenuItem<String>(
-                          value: value.id,
-                          child: Text(
-                            value.name,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                rootQuestion == null
+                    ? DropdownButtonFormField<String>(
+                        decoration: DropDownInputDecoration(),
+                        hint: const Text("Select Incident Type"),
+                        value: _selectedIncidentType,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedIncidentType = value;
+                          });
+                        },
+                        validator: (value) {
+                          if (_selectedIncidentType == null) {
+                            return "Please select Incident Type";
+                          }
+                          return null;
+                        },
+                        items: _incidentTypes.map<DropdownMenuItem<String>>(
+                            (GroupIncidentTypeModel value) {
+                          return DropdownMenuItem<String>(
+                            value: value.id,
+                            child: Text(
+                              value.name,
+                            ),
+                          );
+                        }).toList())
+                    : Container(),
+                rootQuestion == null ? SpacerSize.at(1.5) : Container(),
+                TextFormField(
+                  decoration: TextInputDecoration(labelText: "Question"),
+                  controller: _nameController,
+                  maxLength: 200,
+                  maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Please enter question";
+                    }
+                    return null;
+                  },
+                  minLines: 3,
+                  maxLines: 3,
+                ),
+                SpacerSize.at(1.5),
+                DropdownButtonFormField<QuestionType>(
+                    decoration: DropDownInputDecoration(),
+                    hint: const Text("Select Question Type"),
+                    value: _selectedQuestionType,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedQuestionType = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (_selectedQuestionType == null) {
+                        return "Please select Question Type";
+                      }
+                      return null;
+                    },
+                    items: _questionTypes.map<DropdownMenuItem<QuestionType>>(
+                        (QuestionType value) {
+                      return DropdownMenuItem<QuestionType>(
+                        value: value,
+                        child: Text(
+                          GroupIncidentTypeQuestionDto.getQuestionTypeDisplay(
+                              value),
+                        ),
+                      );
+                    }).toList()),
+                SpacerSize.at(1.5),
+                if (_selectedQuestionType != null &&
+                    _selectedQuestionType != QuestionType.text)
+                  ...(_options.asMap().map((i, e) => MapEntry(
+                      i,
+                      Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: DynamicTextField(
+                                  key: UniqueKey(),
+                                  initialValue: e,
+                                  onChanged: (value) {
+                                    _options[i] = value;
+                                  },
+                                ),
+                              ),
+                              SpacerSize.widthAt(1.5),
+                              _textfieldBtn(i)
+                            ],
                           ),
-                        );
-                      }).toList())
-                  : Container(),
-              parentQuestion == null ? SpacerSize.at(1.5) : Container(),
-              TextFormField(
-                decoration: TextInputDecoration(labelText: "Question"),
-                controller: _nameController,
-                maxLength: 200,
-                maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please enter question";
-                  }
-                  return null;
-                },
-                minLines: 3,
-                maxLines: 3,
-              ),
-            ],
+                          SpacerSize.at(1.5)
+                        ],
+                      )))).values.toList()
+              ],
+            ),
           ),
         ),
       ),
@@ -139,8 +206,13 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
             groupId: groupId,
             question: _nameController.text,
             incidentTypeId: _selectedIncidentType!,
-            isYes: isYesQuestion,
-            parentQuestionId: parentQuestion?.id);
+            questionType: _selectedQuestionType!,
+            rootQuestionId: rootQuestion?.id,
+            parentOptionId: parentOption?.id,
+            options: _options
+                .where((element) => element.isNotEmpty)
+                .map((e) => GroupIncidentTypeQuestionOptionDto(optionText: e))
+                .toList());
 
         if (questionDto != null && questionDto!.id != null) {
           context
@@ -161,5 +233,72 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
   @override
   String getTitle() {
     return questionDto == null ? "Add Question" : "Update Question";
+  }
+
+  Widget _textfieldBtn(int index) {
+    bool isLast = index == _options.length - 1;
+
+    return InkWell(
+      onTap: () => setState(
+        () => isLast ? _options.add('') : _options.removeAt(index),
+      ),
+      borderRadius: BorderRadius.circular(15),
+      child: Container(
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          color: isLast ? Colors.green : Colors.red,
+        ),
+        child: Icon(
+          isLast ? Icons.add : Icons.remove,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+}
+
+class DynamicTextField extends StatefulWidget {
+  final String? initialValue;
+  final void Function(String) onChanged;
+
+  const DynamicTextField({Key? key, this.initialValue, required this.onChanged})
+      : super(key: key);
+
+  @override
+  _DynamicTextFieldState createState() => _DynamicTextFieldState();
+}
+
+class _DynamicTextFieldState extends State<DynamicTextField> {
+  late final TextEditingController _optionController;
+
+  @override
+  void initState() {
+    _optionController = TextEditingController(text: widget.initialValue ?? "");
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _optionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      decoration: TextInputDecoration(labelText: "Option"),
+      controller: _optionController,
+      onChanged: (value) {
+        widget.onChanged(value);
+      },
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return "Please enter option";
+        }
+        return null;
+      },
+    );
   }
 }

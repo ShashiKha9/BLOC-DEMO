@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_incident_type_question_bloc.dart';
+import 'package:rescu_organization_portal/data/dto/group_incident_type_question_dto.dart';
 import 'package:rescu_organization_portal/ui/content/groupIncidentTypeQuestions/add_question.dart';
 import 'package:rescu_organization_portal/ui/content/groupIncidentTypeQuestions/view_question.dart';
 
@@ -77,23 +78,30 @@ class _GroupIncidentTypeQuestionContentState
             if (state is GetGroupIncidentTypeQuestionsSuccessState) {
               _contacts.clear();
               _contacts.addAll(state.model
-                  .where((element) => element.parentQuestionId == null)
+                  .where((element) => element.rootQuestionId == null)
                   .map((e) {
                 List<AdaptiveContextualItem> contextualItems = [];
-                contextualItems.add(AdaptiveItemButton(
-                    "View", const Icon(Icons.view_headline), () async {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-                    return ModalRouteWidget(
-                        stateGenerator: () =>
-                            ViewGroupIncidentTypeQuestionModelState(
-                                widget.groupId, e,
-                                previousTree: e.incidentType));
-                  })).then((_) {
-                    context
-                        .read<GroupIncidentTypeQuestionBloc>()
-                        .add(GetQuestions(widget.groupId, ""));
-                  });
-                }));
+                if (e.questionType == QuestionType.singlePickList) {
+                  contextualItems.add(AdaptiveItemButton(
+                      "View", const Icon(Icons.view_headline), () async {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (ctx) {
+                      return ModalRouteWidget(
+                          stateGenerator: () =>
+                              ViewGroupIncidentTypeQuestionModelState(
+                                widget.groupId,
+                                e,
+                                e,
+                                previousTree: e.incidentType,
+                              ));
+                    })).then((_) {
+                      context
+                          .read<GroupIncidentTypeQuestionBloc>()
+                          .add(GetQuestions(widget.groupId, ""));
+                    });
+                  }));
+                }
+
                 contextualItems.add(AdaptiveItemButton(
                     "Edit", const Icon(Icons.edit), () async {
                   Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
@@ -121,7 +129,8 @@ class _GroupIncidentTypeQuestionContentState
                 }));
                 return AdaptiveListItem(
                     "Question: ${e.question}",
-                    "Incident Type: ${e.incidentType}",
+                    "Incident Type: ${e.incidentType}"
+                        "\nQuestion Type: ${GroupIncidentTypeQuestionDto.getQuestionTypeDisplay(e.questionType)}",
                     const Icon(Icons.question_answer),
                     contextualItems,
                     onPressed: () {});

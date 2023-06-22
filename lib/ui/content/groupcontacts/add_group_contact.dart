@@ -207,7 +207,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                   child: BlocListener(
                       bloc: context.read<AddUpdateGroupInviteContactBloc>(),
                       listener: ((context, state) => {}),
-                      child: Container(
+                      child: SizedBox(
                         width: MediaQuery.of(context).size.width * 0.5,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,

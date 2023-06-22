@@ -13,8 +13,10 @@ import 'package:rescu_organization_portal/ui/widgets/spacer_size.dart';
 class ViewGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
   final String groupId;
   GroupIncidentTypeQuestionDto questionDto;
+  GroupIncidentTypeQuestionDto rootQuestion;
   final String? previousTree;
-  ViewGroupIncidentTypeQuestionModelState(this.groupId, this.questionDto,
+  ViewGroupIncidentTypeQuestionModelState(
+      this.groupId, this.questionDto, this.rootQuestion,
       {this.previousTree});
 
   @override
@@ -49,69 +51,63 @@ class ViewGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
       child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Question on Yes Response",
-                style: TextStyle(fontSize: 18),
-              ),
-              const Divider(
-                thickness: 2,
-              ),
-              _getChildQuestion(true) != null
-                  ? AdaptiveListTile(
-                      item: _getQuestionListItem(_getChildQuestion(true)!))
-                  : AppButtonWithIcon(
-                      icon: const Icon(Icons.add),
-                      onPressed: () async {
-                        Navigator.of(context)
-                            .push(MaterialPageRoute(builder: (ctx) {
-                          return ModalRouteWidget(
-                              stateGenerator: () =>
-                                  AddUpdateGroupIncidentTypeQuestionModelState(
-                                      groupId,
-                                      parentQuestion: questionDto,
-                                      isYesQuestion: true));
-                        })).then((_) {
-                          context
-                              .read<GroupIncidentTypeQuestionBloc>()
-                              .add(GetQuestions(groupId, ""));
-                        });
-                      },
-                      buttonText: "Add Question",
-                    ),
-              SpacerSize.at(1.5),
-              const Text(
-                "Question on No Response",
-                style: TextStyle(fontSize: 18),
-              ),
-              const Divider(
-                thickness: 2,
-              ),
-              _getChildQuestion(false) != null
-                  ? AdaptiveListTile(
-                      item: _getQuestionListItem(_getChildQuestion(false)!))
-                  : AppButtonWithIcon(
-                      icon: const Icon(Icons.add),
-                      onPressed: () async {
-                        Navigator.of(context)
-                            .push(MaterialPageRoute(builder: (ctx) {
-                          return ModalRouteWidget(
-                              stateGenerator: () =>
-                                  AddUpdateGroupIncidentTypeQuestionModelState(
-                                      groupId,
-                                      parentQuestion: questionDto,
-                                      isYesQuestion: false));
-                        })).then((_) {
-                          context
-                              .read<GroupIncidentTypeQuestionBloc>()
-                              .add(GetQuestion(questionDto.id!));
-                        });
-                      },
-                      buttonText: "Add Question",
-                    ),
-            ],
-          )),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: questionDto.options != null &&
+                      questionDto.options!.isNotEmpty
+                  ? [
+                      const Text(
+                        "Single Picklist Options",
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      const Divider(
+                        thickness: 1,
+                      ),
+                      SpacerSize.at(2.5),
+                      ...questionDto.options!
+                          .map((e) => Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    e.optionText,
+                                    style: const TextStyle(fontSize: 18),
+                                  ),
+                                  const Divider(
+                                    thickness: 2,
+                                  ),
+                                  e.childQuestions != null &&
+                                          e.childQuestions!.isNotEmpty
+                                      ? AdaptiveListTile(
+                                          item: _getQuestionListItem(
+                                              e.childQuestions!.first))
+                                      : AppButtonWithIcon(
+                                          icon: const Icon(Icons.add),
+                                          onPressed: () async {
+                                            Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                    builder: (ctx) {
+                                              return ModalRouteWidget(
+                                                  stateGenerator: () =>
+                                                      AddUpdateGroupIncidentTypeQuestionModelState(
+                                                          groupId,
+                                                          parentOption: e,
+                                                          rootQuestion:
+                                                              questionDto));
+                                            })).then((_) {
+                                              context
+                                                  .read<
+                                                      GroupIncidentTypeQuestionBloc>()
+                                                  .add(GetQuestion(
+                                                      questionDto.id!));
+                                            });
+                                          },
+                                          buttonText: "Add Question",
+                                        ),
+                                  SpacerSize.at(1.5)
+                                ],
+                              ))
+                          .toList(),
+                    ]
+                  : [Text(questionDto.getQuestionTypeString())])),
     );
   }
 
@@ -139,23 +135,25 @@ class ViewGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
     return title;
   }
 
-  AdaptiveListItem _getQuestionListItem(e) {
+  AdaptiveListItem _getQuestionListItem(GroupIncidentTypeQuestionDto e) {
     List<AdaptiveContextualItem> contextualItems = [];
-    contextualItems.add(
-        AdaptiveItemButton("View", const Icon(Icons.view_headline), () async {
-      Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-        return ModalRouteWidget(
-            stateGenerator: () => ViewGroupIncidentTypeQuestionModelState(
-                groupId, e,
-                previousTree:
-                    (previousTree == null ? "" : previousTree! + " / ") +
-                        _getTrimmedTitle()));
-      })).then((_) {
-        context
-            .read<GroupIncidentTypeQuestionBloc>()
-            .add(GetQuestion(questionDto.id!));
-      });
-    }));
+    if (e.questionType == QuestionType.singlePickList) {
+      contextualItems.add(
+          AdaptiveItemButton("View", const Icon(Icons.view_headline), () async {
+        Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+          return ModalRouteWidget(
+              stateGenerator: () => ViewGroupIncidentTypeQuestionModelState(
+                  groupId, e, rootQuestion,
+                  previousTree:
+                      (previousTree == null ? "" : previousTree! + " / ") +
+                          _getTrimmedTitle()));
+        })).then((_) {
+          context
+              .read<GroupIncidentTypeQuestionBloc>()
+              .add(GetQuestion(questionDto.id!));
+        });
+      }));
+    }
     contextualItems
         .add(AdaptiveItemButton("Edit", const Icon(Icons.edit), () async {
       Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
@@ -163,14 +161,14 @@ class ViewGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
             stateGenerator: () => AddUpdateGroupIncidentTypeQuestionModelState(
                 groupId,
                 questionDto: e,
-                parentQuestion: questionDto,
-                isYesQuestion: e.isYes));
+                rootQuestion: questionDto));
       })).then((_) {
         context
             .read<GroupIncidentTypeQuestionBloc>()
             .add(GetQuestion(questionDto.id!));
       });
     }));
+
     contextualItems
         .add(AdaptiveItemButton("Delete", const Icon(Icons.delete), () async {
       showConfirmationDialog(
@@ -184,20 +182,10 @@ class ViewGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
     }));
     return AdaptiveListItem(
         "Question: ${e.question}",
-        "Incident Type: ${e.incidentType}",
+        "Incident Type: ${e.incidentType}"
+            "\nQuestion Type: ${GroupIncidentTypeQuestionDto.getQuestionTypeDisplay(e.questionType)}",
         const Icon(Icons.question_answer),
         contextualItems,
         onPressed: () {});
-  }
-
-  GroupIncidentTypeQuestionDto? _getChildQuestion(bool isYes) {
-    return (questionDto.childQuestions
-                ?.where((element) => element.isYes == isYes)
-                .isNotEmpty ??
-            false)
-        ? questionDto.childQuestions
-            ?.where((element) => element.isYes == isYes)
-            .first
-        : null;
   }
 }

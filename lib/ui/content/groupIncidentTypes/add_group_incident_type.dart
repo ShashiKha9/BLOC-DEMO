@@ -49,7 +49,7 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
 
   _pickIcon() async {
     IconData? icon = await FlutterIconPicker.showIconPicker(context,
-        iconPackModes: [IconPack.material],
+        iconPackModes: [IconPack.material, IconPack.fontAwesomeIcons],
         backgroundColor: AppColor.baseBackground);
 
     _icon = Icon(icon);
