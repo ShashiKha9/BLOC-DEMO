@@ -35,7 +35,9 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
 
   QuestionType? _selectedQuestionType;
 
-  final List<String> _options = [''];
+  final List<GroupIncidentTypeQuestionOptionDto> _options = [
+    GroupIncidentTypeQuestionOptionDto(optionText: '')
+  ];
 
   @override
   void initState() {
@@ -45,7 +47,11 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
       _selectedIncidentType = questionDto!.incidentTypeId;
       _selectedQuestionType = questionDto!.questionType;
       _options.clear();
-      _options.addAll(questionDto!.options!.map((e) => e.optionText));
+      _options.addAll(questionDto!.options!);
+
+      if (_options.isEmpty) {
+        _options.add(GroupIncidentTypeQuestionOptionDto(optionText: ''));
+      }
     }
     if (rootQuestion != null) {
       _selectedIncidentType = rootQuestion!.incidentTypeId;
@@ -175,9 +181,9 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
                               Expanded(
                                 child: DynamicTextField(
                                   key: UniqueKey(),
-                                  initialValue: e,
+                                  initialValue: e.optionText,
                                   onChanged: (value) {
-                                    _options[i] = value;
+                                    _options[i].optionText = value;
                                   },
                                 ),
                               ),
@@ -201,6 +207,13 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
     return [
       AdaptiveItemAction("SAVE", const Icon(Icons.save), () async {
         if (!_formKey.currentState!.validate()) return;
+
+        if (_selectedQuestionType != QuestionType.text &&
+            _options.length == 1) {
+          ToastDialog.error("Please add atleast 2 options");
+          return;
+        }
+
         FocusScope.of(context).unfocus();
         var question = GroupIncidentTypeQuestionDto(
             groupId: groupId,
@@ -209,10 +222,7 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
             questionType: _selectedQuestionType!,
             rootQuestionId: rootQuestion?.id,
             parentOptionId: parentOption?.id,
-            options: _options
-                .where((element) => element.isNotEmpty)
-                .map((e) => GroupIncidentTypeQuestionOptionDto(optionText: e))
-                .toList());
+            options: _options);
 
         if (questionDto != null && questionDto!.id != null) {
           context
@@ -240,7 +250,9 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
 
     return InkWell(
       onTap: () => setState(
-        () => isLast ? _options.add('') : _options.removeAt(index),
+        () => isLast
+            ? _options.add(GroupIncidentTypeQuestionOptionDto(optionText: ''))
+            : _options.removeAt(index),
       ),
       borderRadius: BorderRadius.circular(15),
       child: Container(

@@ -173,7 +173,9 @@ class ViewGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
         .add(AdaptiveItemButton("Delete", const Icon(Icons.delete), () async {
       showConfirmationDialog(
           context: context,
-          body: "Are you sure you want to delete this record?",
+          body:
+              "Deleting this record will delete all of its child records as well."
+              "\nAre you sure you want to delete this record?",
           onPressedOk: () {
             context
                 .read<GroupIncidentTypeQuestionBloc>()
