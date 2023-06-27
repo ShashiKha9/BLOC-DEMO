@@ -222,7 +222,9 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
             questionType: _selectedQuestionType!,
             rootQuestionId: rootQuestion?.id,
             parentOptionId: parentOption?.id,
-            options: _options);
+            options: _options
+                .where((element) => element.optionText.isNotEmpty)
+                .toList());
 
         if (questionDto != null && questionDto!.id != null) {
           context
