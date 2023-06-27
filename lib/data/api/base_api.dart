@@ -22,7 +22,7 @@ abstract class BaseApi {
             errorDto.message ?? e.response!.statusMessage;
       }
       onError?.call();
-      if (e.type == DioErrorType.connectionTimeout ||
+      if (e.type == DioErrorType.connectTimeout ||
           e.type == DioErrorType.receiveTimeout ||
           e.type == DioErrorType.sendTimeout) {
         return Bad(HttpStatus.requestTimeout,
@@ -50,7 +50,7 @@ abstract class BaseApi {
             errorDto.message ?? e.response!.statusMessage;
       }
       onError?.call(e);
-      if (e.type == DioErrorType.connectionTimeout ||
+      if (e.type == DioErrorType.connectTimeout ||
           e.type == DioErrorType.receiveTimeout ||
           e.type == DioErrorType.sendTimeout) {
         return BadData(HttpStatus.requestTimeout,

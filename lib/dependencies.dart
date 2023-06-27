@@ -72,8 +72,8 @@ class DependencyConfiguration {
       Provider<Dio>(create: (ctx) {
         var dio = Dio(BaseOptions(
             //connectTimeout: 30000,
-            receiveTimeout: const Duration(milliseconds: 5000),
-            sendTimeout: const Duration(milliseconds: 5000),
+            receiveTimeout: 5000,
+            sendTimeout: 5000,
             baseUrl: env.baseUrl));
         dio.interceptors
             .add(InterceptorsWrapper(onRequest: (options, handler) async {
