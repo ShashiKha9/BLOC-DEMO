@@ -67,7 +67,7 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
           showLoader();
         } else {
           hideLoader();
-          if (state is GroupIncidentTypeFailedState) {
+          if (state is AddUpdateGroupIncidentTypeFailedState) {
             ToastDialog.error(
                 state.message ?? MessagesConst.internalServerError);
           }

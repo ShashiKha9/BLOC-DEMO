@@ -20,6 +20,8 @@ class GetIncidentTypes extends GroupIncidentTypeEvent {
   List<Object?> get props => [groupId, filter];
 }
 
+class ClickedFabIconEvent extends GroupIncidentTypeEvent {}
+
 class AddIncidentType extends GroupIncidentTypeEvent {
   final String groupId;
   final GroupIncidentTypeModel model;
@@ -60,10 +62,21 @@ class GroupIncidentTypeInitialState extends GroupIncidentTypeState {}
 
 class GroupIncidentTypeLoadingState extends GroupIncidentTypeState {}
 
+class ClickedFabIconState extends GroupIncidentTypeState {}
+
 class GroupIncidentTypeFailedState extends GroupIncidentTypeState {
   final String? message;
 
   GroupIncidentTypeFailedState({this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class AddUpdateGroupIncidentTypeFailedState extends GroupIncidentTypeState {
+  final String? message;
+
+  AddUpdateGroupIncidentTypeFailedState({this.message});
 
   @override
   List<Object?> get props => [message];
@@ -94,6 +107,12 @@ class GroupIncidentTypeBloc
   @override
   Stream<GroupIncidentTypeState> mapEventToState(
       GroupIncidentTypeEvent event) async* {
+    if (event is ClickedFabIconEvent) {
+      yield GroupIncidentTypeLoadingState();
+      yield ClickedFabIconState();
+      return;
+    }
+
     if (event is GetIncidentTypes) {
       yield GroupIncidentTypeLoadingState();
 
@@ -121,10 +140,13 @@ class GroupIncidentTypeBloc
       var result = await _api.add(event.groupId, event.model.toDto());
       if (result is Ok) {
         yield AddGroupIncidentTypeSuccessState();
+        return;
       } else if (result is Bad) {
-        yield GroupIncidentTypeFailedState(message: result.message);
+        yield AddUpdateGroupIncidentTypeFailedState(message: result.message);
+        return;
       } else {
-        yield GroupIncidentTypeFailedState();
+        yield AddUpdateGroupIncidentTypeFailedState();
+        return;
       }
     }
 
@@ -135,10 +157,13 @@ class GroupIncidentTypeBloc
           event.groupId, event.incidentTypeId, event.model.toDto());
       if (result is Ok) {
         yield UpdateGroupIncidentTypeSuccessState();
+        return;
       } else if (result is Bad) {
-        yield GroupIncidentTypeFailedState(message: result.message);
+        yield AddUpdateGroupIncidentTypeFailedState(message: result.message);
+        return;
       } else {
-        yield GroupIncidentTypeFailedState();
+        yield AddUpdateGroupIncidentTypeFailedState();
+        return;
       }
     }
 
@@ -148,10 +173,13 @@ class GroupIncidentTypeBloc
       var result = await _api.delete(event.id, event.incidentId);
       if (result is Ok) {
         yield DeleteGroupIncidentTypeSuccessState();
+        return;
       } else if (result is Bad) {
         yield GroupIncidentTypeFailedState(message: result.message);
+        return;
       } else {
         yield GroupIncidentTypeFailedState();
+        return;
       }
     }
   }

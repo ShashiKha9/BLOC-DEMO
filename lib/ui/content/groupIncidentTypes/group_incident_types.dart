@@ -32,12 +32,7 @@ class GroupIncidentTypesContent extends StatefulWidget
 
   @override
   void onFabPressed(BuildContext context) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-      return ModalRouteWidget(
-          stateGenerator: () => AddUpdateGroupIncidentTypeModelState(groupId));
-    })).then((_) {
-      context.read<GroupIncidentTypeBloc>().add(GetIncidentTypes(groupId, ""));
-    });
+    context.read<GroupIncidentTypeBloc>().add(ClickedFabIconEvent());
   }
 }
 
@@ -72,6 +67,21 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
             _loadingController.show();
           } else {
             _loadingController.hide();
+            if (state is ClickedFabIconState) {
+              if (_contacts.isNotEmpty && _contacts.length < 4) {
+                Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+                  return ModalRouteWidget(
+                      stateGenerator: () =>
+                          AddUpdateGroupIncidentTypeModelState(widget.groupId));
+                })).then((_) {
+                  context
+                      .read<GroupIncidentTypeBloc>()
+                      .add(GetIncidentTypes(widget.groupId, ""));
+                });
+              } else {
+                ToastDialog.error("You can add a maximum of 4 incident types.");
+              }
+            }
             if (state is GetGroupIncidentTypesSuccessState) {
               _contacts.clear();
               _contacts.addAll(state.model.map((e) {
