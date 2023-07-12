@@ -36,6 +36,8 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
 
   String? _selectedState;
   final dropdownState = GlobalKey<FormFieldState>();
+  double? _lat;
+  double? _long;
 
   @override
   void initState() {
@@ -147,6 +149,8 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
                           _zipCodeController.text = detail.result.zipCode ?? "";
                           _countyController.text = detail.result.county ?? "";
                           _crossStreetController.text = "";
+                          _lat = detail.result.latitude;
+                          _long = detail.result.longitude;
                         });
                         dropdownState.currentState!
                             .didChange(detail.result.state);
@@ -337,7 +341,9 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
             address2: _address2Controller.text,
             county: _countyController.text,
             crossStreet: _crossStreetController.text,
-            id: address?.id);
+            id: address?.id,
+            lat: _lat,
+            long: _long);
         if (address != null && address!.id != null) {
           context.read<AddUpdateGroupAddressBloc>().add(
               UpdateGroupIncidentAddress(groupId, address!.id!, addAddress));

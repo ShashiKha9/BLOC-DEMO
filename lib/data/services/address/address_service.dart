@@ -48,6 +48,8 @@ class AddressService extends IAddressService {
             .map<AddressComponent>((p) => AddressComponent.fromJson(p))
             .toList() as List<AddressComponent>;
       }
+      double lat = data['result']['geometry']['location']['lat'];
+      double long = data['result']['geometry']['location']['lng'];
       if (addressComponents.isNotEmpty) {
         String streetNumber, route, city, county, state, zip;
         try {
@@ -96,11 +98,14 @@ class AddressService extends IAddressService {
         }
 
         return SuccessDataResponse(AddressServiceDetail(
-            "$streetNumber $route", null, city, state, zip, county));
+            "$streetNumber $route", null, city, state, zip, county,
+            latitude: lat, longitude: long));
       }
-      return FailureDataResponse<AddressServiceDetail>("Unable to obtain results");
+      return FailureDataResponse<AddressServiceDetail>(
+          "Unable to obtain results");
     } catch (e) {
-      return FailureDataResponse<AddressServiceDetail>("Unable to obtain results");
+      return FailureDataResponse<AddressServiceDetail>(
+          "Unable to obtain results");
     }
   }
 }
