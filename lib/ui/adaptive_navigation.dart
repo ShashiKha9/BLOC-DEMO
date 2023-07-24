@@ -97,7 +97,7 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
               groupId: result.dto.id,
             )),
         ContentNavigationItem(
-            "Invites",
+            "Invitees",
             const Icon(Icons.contacts),
             GroupInviteContactsContent(
               groupId: result.dto.id,

@@ -32,6 +32,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
   late List<GroupIncidentTypeModel> _incidentList = [];
   late List<GroupIncidentTypeModel> _selectedIncidents = [];
   String _selectedLoginMode = "Phone";
+  bool _canCloseChat = false;
 
   @override
   void initState() {
@@ -42,6 +43,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
       _phoneNumberController.text = contact!.phoneNumber.replaceAll("+1", "");
       _emailController.text = contact!.email ?? "";
       _designationController.text = contact!.designation ?? "";
+      _canCloseChat = contact!.canCloseChat ?? false;
       _validateContactNumber(contact!.phoneNumber);
     }
     context.read<AddUpdateGroupInviteContactBloc>().add(GetIncidentTypes(""));
@@ -171,11 +173,15 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                 decoration: TextInputDecoration(labelText: "Designation"),
                 controller: _designationController,
               ),
-              SpacerSize.at(1.5),
+              _emailController.text.isNotEmpty
+                  ? SpacerSize.at(1.5)
+                  : Container(),
               _emailController.text.isNotEmpty
                   ? const Text("Login With")
                   : Container(),
-              SpacerSize.at(0.5),
+              _emailController.text.isNotEmpty
+                  ? SpacerSize.at(0.5)
+                  : Container(),
               _emailController.text.isNotEmpty
                   ? DropdownButtonFormField<String>(
                       decoration: DropDownInputDecoration(),
@@ -200,6 +206,25 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                           )
                         ])
                   : Container(),
+              SpacerSize.at(1.5),
+              Row(
+                children: [
+                  Checkbox(
+                      value: _canCloseChat,
+                      onChanged: (value) {
+                        setState(() {
+                          _canCloseChat = value ?? false;
+                        });
+                      }),
+                  InkWell(
+                      onTap: () {
+                        setState(() {
+                          _canCloseChat = !_canCloseChat;
+                        });
+                      },
+                      child: const Text("Can Close Chat"))
+                ],
+              ),
               SpacerSize.at(1.5),
               const Text("Select Incident Types"),
               SpacerSize.at(0.5),
@@ -279,6 +304,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
             designation: _designationController.text,
             loginWith: _selectedLoginMode,
             id: contact?.id,
+            canCloseChat: _canCloseChat,
             incidentTypeList: _selectedIncidents.map((e) => e.id!).toList());
         if (contact != null && contact!.id != null) {
           context
