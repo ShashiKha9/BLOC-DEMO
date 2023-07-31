@@ -54,8 +54,6 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
 
     _icon = Icon(icon);
     setState(() {});
-
-    debugPrint('Picked Icon:  ${icon != null ? serializeIcon(icon) : ''}');
   }
 
   @override

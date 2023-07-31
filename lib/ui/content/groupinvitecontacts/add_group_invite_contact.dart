@@ -28,6 +28,7 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
   final TextEditingController _emailController = TextEditingController();
   bool _validMobileNumber = false;
   String _selectedLoginMode = "Phone";
+  bool _canCloseChat = false;
 
   @override
   void initState() {
@@ -38,6 +39,7 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
       _phoneNumberController.text = contact!.phoneNumber.replaceAll('+1', "");
       _emailController.text = contact!.email ?? "";
       _selectedLoginMode = contact!.loginWith ?? "Phone";
+      _canCloseChat = contact!.canCloseChat ?? false;
       _validateContactNumber(contact!.phoneNumber);
     }
   }
@@ -148,11 +150,15 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
                   }
                 },
               ),
-              SpacerSize.at(1.5),
+              _emailController.text.isNotEmpty
+                  ? SpacerSize.at(1.5)
+                  : Container(),
               _emailController.text.isNotEmpty
                   ? const Text("Login With")
                   : Container(),
-              SpacerSize.at(0.5),
+              _emailController.text.isNotEmpty
+                  ? SpacerSize.at(0.5)
+                  : Container(),
               _emailController.text.isNotEmpty
                   ? DropdownButtonFormField<String>(
                       decoration: DropDownInputDecoration(),
@@ -176,7 +182,26 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
                             child: Text("Email"),
                           )
                         ])
-                  : Container()
+                  : Container(),
+              SpacerSize.at(1.5),
+              Row(
+                children: [
+                  Checkbox(
+                      value: _canCloseChat,
+                      onChanged: (value) {
+                        setState(() {
+                          _canCloseChat = value ?? false;
+                        });
+                      }),
+                  InkWell(
+                      onTap: () {
+                        setState(() {
+                          _canCloseChat = !_canCloseChat;
+                        });
+                      },
+                      child: const Text("Can close incident"))
+                ],
+              ),
             ],
           ),
         ),
@@ -200,7 +225,8 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
             loginWith: _selectedLoginMode,
             id: contact?.id,
             isActive: contact?.isActive ?? true,
-            role: FleetUserRoles.fleet);
+            role: FleetUserRoles.fleet,
+            canCloseChat: _canCloseChat);
         if (contact != null && contact!.id != null) {
           context
               .read<AddUpdateGroupInviteContactBloc>()

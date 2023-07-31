@@ -45,6 +45,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
       _designationController.text = contact!.designation ?? "";
       _canCloseChat = contact!.canCloseChat ?? false;
       _validateContactNumber(contact!.phoneNumber);
+      _selectedLoginMode = contact!.loginWith ?? "Phone";
     }
     context.read<AddUpdateGroupInviteContactBloc>().add(GetIncidentTypes(""));
   }
@@ -222,7 +223,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                           _canCloseChat = !_canCloseChat;
                         });
                       },
-                      child: const Text("Can Close Chat"))
+                      child: const Text("Can close incident"))
                 ],
               ),
               SpacerSize.at(1.5),
