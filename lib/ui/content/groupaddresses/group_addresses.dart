@@ -100,16 +100,19 @@ class _GroupAddressesContentState extends State<GroupAddressesContent> {
                         .add(GetGroupIncidentAddresses(widget.groupId, ""));
                   });
                 }));
-                contextualItems.add(AdaptiveItemButton(
-                    "Delete", const Icon(Icons.delete), () async {
-                  showConfirmationDialog(
-                      context: context,
-                      body: "Are you sure you want to this record?",
-                      onPressedOk: () {
-                        context.read<GroupAddressBloc>().add(
-                            DeleteGroupIncidentAddress(widget.groupId, e.id!));
-                      });
-                }));
+                if (!e.isDefault) {
+                  contextualItems.add(AdaptiveItemButton(
+                      "Delete", const Icon(Icons.delete), () async {
+                    showConfirmationDialog(
+                        context: context,
+                        body: "Are you sure you want to this record?",
+                        onPressedOk: () {
+                          context.read<GroupAddressBloc>().add(
+                              DeleteGroupIncidentAddress(
+                                  widget.groupId, e.id!));
+                        });
+                  }));
+                }
                 return AdaptiveListItem(
                     e.name,
                     "${e.address1}, ${e.address2 ?? ""}\n${e.county ?? ""}, ${e.crossStreet ?? ""}\n${e.city}, ${e.state}, ${e.zipCode}",

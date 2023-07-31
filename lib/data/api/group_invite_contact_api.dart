@@ -5,7 +5,7 @@ import 'base_api.dart';
 
 abstract class IGroupInviteContactsApi {
   Future<ApiDataResponse<List<GroupInviteContactDto>>> getGroupInviteContacts(
-      String groupId, String? filter);
+      String groupId, String? filter, String role);
   Future<ApiResponse> addGroupInviteContact(
       String groupId, GroupInviteContactDto contact);
   Future<ApiResponse> updateGroupInviteContact(
@@ -37,10 +37,10 @@ class GroupInviteContactsApi extends BaseApi
 
   @override
   Future<ApiDataResponse<List<GroupInviteContactDto>>> getGroupInviteContacts(
-      String groupId, String? filter) async {
+      String groupId, String? filter, String role) async {
     return await wrapDataCall(() async {
-      var result =
-          await dio.get("/groups/invites", queryParameters: {'Filter': filter});
+      var result = await dio.get("/groups/invites",
+          queryParameters: {'Filter': filter, 'Role': role});
       return OkData((result.data as Iterable)
           .map((e) => GroupInviteContactDto.fromJson(e))
           .toList());

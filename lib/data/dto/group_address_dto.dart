@@ -9,6 +9,8 @@ class GroupAddressDto {
   late String? county;
   late String? crossStreet;
   late bool isDefault;
+  late double? lat;
+  late double? long;
 
   GroupAddressDto(
       {required this.address1,
@@ -20,7 +22,9 @@ class GroupAddressDto {
       required this.isDefault,
       required this.name,
       required this.state,
-      required this.zipCode});
+      required this.zipCode,
+      this.lat,
+      this.long});
 
   GroupAddressDto.fromJson(Map<String, dynamic> json) {
     id = json['Id'];
@@ -33,6 +37,8 @@ class GroupAddressDto {
     county = json['County'];
     crossStreet = json['CrossStreet'];
     isDefault = json['Default'];
+    lat = json['Latitude'];
+    long = json['Longitude'];
   }
 
   Map<String, dynamic> toJson() {
@@ -47,6 +53,8 @@ class GroupAddressDto {
     data['County'] = county;
     data['CrossStreet'] = crossStreet;
     data['Default'] = isDefault;
+    data['Latitude'] = lat;
+    data['Longitude'] = long;
     return data;
   }
 }

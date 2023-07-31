@@ -12,7 +12,10 @@ class AddressServiceDetail {
   final String? state;
   final String? zipCode;
   final String? county;
+  final double? latitude;
+  final double? longitude;
 
-  AddressServiceDetail(this.street, this.street2, this.city, this.state, this.zipCode,
-      this.county);
+  AddressServiceDetail(this.street, this.street2, this.city, this.state,
+      this.zipCode, this.county,
+      {this.latitude, this.longitude});
 }

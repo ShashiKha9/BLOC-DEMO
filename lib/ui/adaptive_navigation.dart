@@ -4,6 +4,8 @@ import 'package:rescu_organization_portal/data/api/group_info_api.dart';
 import 'package:rescu_organization_portal/data/blocs/logout_bloc.dart';
 import 'package:rescu_organization_portal/ui/content/account/change_password.dart';
 import 'package:rescu_organization_portal/ui/content/domains/domains.dart';
+import 'package:rescu_organization_portal/ui/content/groupIncidentTypeQuestions/group_incident_type_questions.dart';
+import 'package:rescu_organization_portal/ui/content/groupIncidentTypes/group_incident_types.dart';
 import 'package:rescu_organization_portal/ui/content/login/login_route.dart';
 import 'package:rescu_organization_portal/ui/content/users/users.dart';
 import '../data/api/base_api.dart';
@@ -83,10 +85,6 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
     if (result is OkData<GroupInfoDto> && result.dto.isFleetUser()) {
       navigation = [
         ContentNavigationItem(
-            "Users", const Icon(Icons.people), const UsersContent()),
-        ContentNavigationItem(
-            "Domains", const Icon(Icons.domain), const DomainsContent()),
-        ContentNavigationItem(
             "Contacts",
             const Icon(Icons.contacts),
             GroupContactsContent(
@@ -102,6 +100,18 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
             "Invites",
             const Icon(Icons.contacts),
             GroupInviteContactsContent(
+              groupId: result.dto.id,
+            )),
+        ContentNavigationItem(
+            "Incident Types",
+            const Icon(Icons.report),
+            GroupIncidentTypesContent(
+              groupId: result.dto.id,
+            )),
+        ContentNavigationItem(
+            "Questions",
+            const Icon(Icons.question_answer),
+            GroupIncidentTypeQuestionContent(
               groupId: result.dto.id,
             )),
         ContentNavigationItem("Change Password", const Icon(Icons.lock_clock),

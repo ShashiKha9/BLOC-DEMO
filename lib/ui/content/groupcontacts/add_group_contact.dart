@@ -2,9 +2,11 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rescu_organization_portal/data/blocs/group_incident_contact_bloc.dart';
+import 'package:rescu_organization_portal/data/blocs/group_invite_contact_bloc.dart';
+import 'package:rescu_organization_portal/data/constants/fleet_user_roles.dart';
 import 'package:rescu_organization_portal/data/constants/messages.dart';
-import 'package:rescu_organization_portal/data/dto/group_incident_contact_dto.dart';
+import 'package:rescu_organization_portal/data/dto/group_invite_contact_dto.dart';
+import 'package:rescu_organization_portal/data/models/group_incident_type_model.dart';
 import 'package:rescu_organization_portal/ui/adaptive_items.dart';
 
 import '../../../data/helpers/phone_number_validator.dart';
@@ -15,7 +17,7 @@ import '../../widgets/text_input_decoration.dart';
 
 class AddUpdateGroupContactModelState extends BaseModalRouteState {
   final String groupId;
-  final GroupIncidentContactDto? contact;
+  final GroupInviteContactDto? contact;
 
   AddUpdateGroupContactModelState(this.groupId, {this.contact});
 
@@ -27,6 +29,9 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _designationController = TextEditingController();
   bool _validMobileNumber = false;
+  late List<GroupIncidentTypeModel> _incidentList = [];
+  late List<GroupIncidentTypeModel> _selectedIncidents = [];
+  String _selectedLoginMode = "Phone";
 
   @override
   void initState() {
@@ -39,6 +44,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
       _designationController.text = contact!.designation ?? "";
       _validateContactNumber(contact!.phoneNumber);
     }
+    context.read<AddUpdateGroupInviteContactBloc>().add(GetIncidentTypes(""));
   }
 
   _validateContactNumber(String number) async {
@@ -60,14 +66,14 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
   @override
   Widget content(BuildContext context) {
     return BlocListener(
-      bloc: context.read<AddUpdateGroupIncidentContactBloc>(),
+      bloc: context.read<AddUpdateGroupInviteContactBloc>(),
       listener: (context, state) {
-        if (state is GroupIncidentLoadingState) {
+        if (state is GroupInviteContactLoadingState) {
           showLoader();
         } else {
           hideLoader();
-          if (state is GroupIncidentErrorState) {
-            ToastDialog.error(MessagesConst.internalServerError);
+          if (state is GroupInviteContactErrorState) {
+            ToastDialog.error(state.error ?? MessagesConst.internalServerError);
           }
           if (state is ContactAddedSuccessState) {
             ToastDialog.success("Contact added successfully");
@@ -76,6 +82,18 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
           if (state is ContactUpdatedSuccessState) {
             ToastDialog.success("Contact updated successfully");
             Navigator.of(context).pop();
+          }
+          if (state is GetIncidentTypeSuccessState) {
+            setState(() {
+              _incidentList = state.model;
+              if (contact != null &&
+                  contact!.incidentTypeList != null &&
+                  contact!.incidentTypeList!.isNotEmpty) {
+                _selectedIncidents = _incidentList
+                    .where((e) => contact!.incidentTypeList!.contains(e.id))
+                    .toList();
+              }
+            });
           }
         }
       },
@@ -142,12 +160,100 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                       return "Please enter valid email";
                     }
                     return null;
+                  },
+                  onChanged: (value) {
+                    if (EmailValidator.validate(value)) {
+                      setState(() {});
+                    }
                   }),
               SpacerSize.at(1.5),
               TextFormField(
                 decoration: TextInputDecoration(labelText: "Designation"),
                 controller: _designationController,
               ),
+              SpacerSize.at(1.5),
+              _emailController.text.isNotEmpty
+                  ? const Text("Login With")
+                  : Container(),
+              SpacerSize.at(0.5),
+              _emailController.text.isNotEmpty
+                  ? DropdownButtonFormField<String>(
+                      decoration: DropDownInputDecoration(),
+                      hint: const Text("Login With"),
+                      value: _selectedLoginMode,
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedLoginMode = value ?? "Phone";
+                        });
+                      },
+                      validator: (value) {
+                        return null;
+                      },
+                      items: const [
+                          DropdownMenuItem<String>(
+                            value: "Phone",
+                            child: Text("Phone"),
+                          ),
+                          DropdownMenuItem<String>(
+                            value: "Email",
+                            child: Text("Email"),
+                          )
+                        ])
+                  : Container(),
+              SpacerSize.at(1.5),
+              const Text("Select Incident Types"),
+              SpacerSize.at(0.5),
+              Expanded(
+                  child: BlocListener(
+                      bloc: context.read<AddUpdateGroupInviteContactBloc>(),
+                      listener: ((context, state) => {}),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextField(
+                              decoration: TextInputDecoration(
+                                hintText: "Search by name",
+                                suffixIcon: const Icon(Icons.search),
+                              ),
+                              onSubmitted: (value) {
+                                context
+                                    .read<AddUpdateGroupInviteContactBloc>()
+                                    .add(GetIncidentTypes(value));
+                              },
+                              onChanged: (value) {
+                                context
+                                    .read<AddUpdateGroupInviteContactBloc>()
+                                    .add(GetIncidentTypes(value));
+                              },
+                            ),
+                            const SizedBox(height: 10),
+                            Expanded(
+                                child: ListView.builder(
+                                    itemCount: _incidentList.length,
+                                    itemBuilder: (context, index) => ListTile(
+                                          leading: _selectedIncidents.contains(
+                                                  _incidentList[index])
+                                              ? const Icon(Icons.check_box)
+                                              : const Icon(Icons
+                                                  .check_box_outline_blank),
+                                          title:
+                                              Text(_incidentList[index].name),
+                                          onTap: () => {
+                                            setState(() {
+                                              _selectedIncidents.contains(
+                                                      _incidentList[index])
+                                                  ? _selectedIncidents.remove(
+                                                      _incidentList[index])
+                                                  : _selectedIncidents.add(
+                                                      _incidentList[index]);
+                                            })
+                                          },
+                                        )))
+                          ],
+                        ),
+                      )))
             ],
           ),
         ),
@@ -163,20 +269,25 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
         FocusScope.of(context).unfocus();
         var formattedMobileNumber = await PhoneNumberUtility.parseToE164Format(
             phoneNumber: _phoneNumberController.text);
-        var addContact = GroupIncidentContactDto(
+        var addContact = GroupInviteContactDto(
             firstName: _firstNameController.text,
             lastName: _lastNameController.text,
             phoneNumber: formattedMobileNumber,
+            isActive: true,
+            role: FleetUserRoles.contact,
             email: _emailController.text,
             designation: _designationController.text,
-            id: contact?.id);
+            loginWith: _selectedLoginMode,
+            id: contact?.id,
+            incidentTypeList: _selectedIncidents.map((e) => e.id!).toList());
         if (contact != null && contact!.id != null) {
-          context.read<AddUpdateGroupIncidentContactBloc>().add(
-              UpdateGroupIncidentContact(groupId, contact!.id!, addContact));
+          context
+              .read<AddUpdateGroupInviteContactBloc>()
+              .add(UpdateGroupInviteContact(groupId, contact!.id!, addContact));
         } else {
           context
-              .read<AddUpdateGroupIncidentContactBloc>()
-              .add(AddGroupIncidentContact(groupId, addContact));
+              .read<AddUpdateGroupInviteContactBloc>()
+              .add(AddGroupInviteContact(groupId, addContact));
         }
       }),
       AdaptiveItemAction("CANCEL", const Icon(Icons.cancel), () async {

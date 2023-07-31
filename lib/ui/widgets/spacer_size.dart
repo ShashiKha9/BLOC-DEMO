@@ -25,4 +25,10 @@ class SpacerSize {
       height: SizeConfig.size(height),
     );
   }
+
+  static Widget widthAt(double width) {
+    return SizedBox(
+      width: SizeConfig.size(width),
+    );
+  }
 }

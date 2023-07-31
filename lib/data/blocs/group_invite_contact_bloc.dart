@@ -1,8 +1,12 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rescu_organization_portal/data/api/base_api.dart';
+import 'package:rescu_organization_portal/data/api/group_incident_type_api.dart';
 import 'package:rescu_organization_portal/data/api/group_info_api.dart';
+import 'package:rescu_organization_portal/data/constants/fleet_user_roles.dart';
+import 'package:rescu_organization_portal/data/dto/group_incident_type_dto.dart';
 import 'package:rescu_organization_portal/data/dto/group_info_dto.dart';
+import 'package:rescu_organization_portal/data/models/group_incident_type_model.dart';
 
 import '../api/group_invite_contact_api.dart';
 import '../dto/group_invite_contact_dto.dart';
@@ -15,11 +19,20 @@ abstract class GroupInviteContactEvent extends Equatable {
 class GetGroupInviteContacts extends GroupInviteContactEvent {
   final String? groupId;
   final String? filter;
-
-  GetGroupInviteContacts(this.groupId, this.filter);
+  final String role;
+  GetGroupInviteContacts(this.groupId, this.filter, this.role);
 
   @override
-  List<Object?> get props => [groupId];
+  List<Object?> get props => [groupId, filter, role];
+}
+
+class GetIncidentTypes extends GroupInviteContactEvent {
+  final String? filter;
+
+  GetIncidentTypes(this.filter);
+
+  @override
+  List<Object?> get props => [filter];
 }
 
 class DeleteGroupInviteContact extends GroupInviteContactEvent {
@@ -111,6 +124,15 @@ class ContactAddedSuccessState extends GroupInviteContactState {}
 
 class ContactUpdatedSuccessState extends GroupInviteContactState {}
 
+class GetIncidentTypeSuccessState extends GroupInviteContactState {
+  final List<GroupIncidentTypeModel> model;
+
+  GetIncidentTypeSuccessState(this.model);
+
+  @override
+  List<Object?> get props => [model];
+}
+
 class GroupInviteContactBloc
     extends Bloc<GroupInviteContactEvent, GroupInviteContactState> {
   final IGroupInfoApi _groupInfoApi;
@@ -137,10 +159,18 @@ class GroupInviteContactBloc
         groupId = event.groupId!;
       }
 
-      var result =
-          await _contactsApi.getGroupInviteContacts(groupId, event.filter);
+      var result = await _contactsApi.getGroupInviteContacts(
+          groupId, event.filter, event.role);
 
       if (result is OkData<List<GroupInviteContactDto>>) {
+        if (event.role == FleetUserRoles.contact) {
+          var adminResult = await _contactsApi.getGroupInviteContacts(
+              event.groupId!, event.filter, FleetUserRoles.admin);
+          if (adminResult is OkData<List<GroupInviteContactDto>> &&
+              adminResult.dto.isNotEmpty) {
+            result.dto.add(adminResult.dto.first);
+          }
+        }
         if (result.dto.isNotEmpty) {
           yield GetGroupInviteContactsSuccessState(result.dto);
         } else {
@@ -188,7 +218,8 @@ class GroupInviteContactBloc
 class AddUpdateGroupInviteContactBloc
     extends Bloc<GroupInviteContactEvent, GroupInviteContactState> {
   final IGroupInviteContactsApi _contactsApi;
-  AddUpdateGroupInviteContactBloc(this._contactsApi)
+  final IGroupIncidentTypeApi _incidentTypeApi;
+  AddUpdateGroupInviteContactBloc(this._contactsApi, this._incidentTypeApi)
       : super(GroupInviteContactInitialState());
 
   @override
@@ -226,6 +257,19 @@ class AddUpdateGroupInviteContactBloc
       } else {
         yield GroupInviteContactErrorState();
         return;
+      }
+    }
+    if (event is GetIncidentTypes) {
+      yield GroupInviteContactLoadingState();
+
+      var result = await _incidentTypeApi.get(event.filter ?? "");
+      if (result is OkData<List<GroupIncidentTypeDto>>) {
+        yield GetIncidentTypeSuccessState(
+            result.dto.map((e) => GroupIncidentTypeModel.fromDto(e)).toList());
+      } else if (result is BadData<List<GroupIncidentTypeDto>>) {
+        yield GroupInviteContactErrorState(error: result.message);
+      } else {
+        yield GroupInviteContactErrorState();
       }
     }
   }

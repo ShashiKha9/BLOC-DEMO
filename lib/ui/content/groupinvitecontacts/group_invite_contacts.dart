@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rescu_organization_portal/data/constants/fleet_user_roles.dart';
 import 'package:rescu_organization_portal/data/dto/group_invite_contact_dto.dart';
 
 import '../../../data/blocs/group_invite_contact_bloc.dart';
@@ -36,7 +37,7 @@ class GroupInviteContactsContent extends StatefulWidget
     })).then((_) {
       context
           .read<GroupInviteContactBloc>()
-          .add(GetGroupInviteContacts(groupId, ""));
+          .add(GetGroupInviteContacts(groupId, "", FleetUserRoles.fleet));
     });
   }
 }
@@ -49,9 +50,8 @@ class _GroupInviteContactsContentState
 
   @override
   void initState() {
-    context
-        .read<GroupInviteContactBloc>()
-        .add(GetGroupInviteContacts(widget.groupId, _searchValue));
+    context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
+        widget.groupId, _searchValue, FleetUserRoles.fleet));
     super.initState();
   }
 
@@ -86,9 +86,9 @@ class _GroupInviteContactsContentState
                                 widget.groupId,
                                 contact: e));
                   })).then((_) {
-                    context
-                        .read<GroupInviteContactBloc>()
-                        .add(GetGroupInviteContacts(widget.groupId, ""));
+                    context.read<GroupInviteContactBloc>().add(
+                        GetGroupInviteContacts(
+                            widget.groupId, "", FleetUserRoles.fleet));
                   });
                 }));
                 contextualItems.add(AdaptiveItemButton(
@@ -103,25 +103,26 @@ class _GroupInviteContactsContentState
                             firstName: e.firstName,
                             lastName: e.lastName,
                             phoneNumber: e.phoneNumber,
-                            isActive: !e.isActive);
+                            isActive: !e.isActive,
+                            role: FleetUserRoles.fleet);
                         context.read<GroupInviteContactBloc>().add(
                             ActivateDeactivateGroupInviteContact(
                                 widget.groupId, e.id!, updateContact));
                       });
                 }));
-                contextualItems.add(AdaptiveItemButton(
-                    "Delete", const Icon(Icons.delete), () async {
-                  showConfirmationDialog(
-                      context: context,
-                      body: "Are you sure you want to this record?",
-                      onPressedOk: () {
-                        context.read<GroupInviteContactBloc>().add(
-                            DeleteGroupInviteContact(widget.groupId, e.id!));
-                      });
-                }));
+                // contextualItems.add(AdaptiveItemButton(
+                //     "Delete", const Icon(Icons.delete), () async {
+                //   showConfirmationDialog(
+                //       context: context,
+                //       body: "Are you sure you want to this record?",
+                //       onPressedOk: () {
+                //         context.read<GroupInviteContactBloc>().add(
+                //             DeleteGroupInviteContact(widget.groupId, e.id!));
+                //       });
+                // }));
                 return AdaptiveListItem(
                     "Name: ${e.firstName} ${e.lastName}",
-                    "Contact Number: ${e.phoneNumber}",
+                    "Contact Number: ${e.phoneNumber}\nEmail: ${e.email}",
                     const Icon(Icons.person),
                     contextualItems,
                     onPressed: () {});
@@ -139,15 +140,13 @@ class _GroupInviteContactsContentState
             }
             if (state is DeleteGroupInviteContactSuccessState) {
               ToastDialog.success("Record deleted successfully");
-              context
-                  .read<GroupInviteContactBloc>()
-                  .add(GetGroupInviteContacts(widget.groupId, _searchValue));
+              context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
+                  widget.groupId, _searchValue, FleetUserRoles.fleet));
             }
             if (state is ActivateDeActivateContactSuccessState) {
               ToastDialog.success("Record updated successfully");
-              context
-                  .read<GroupInviteContactBloc>()
-                  .add(GetGroupInviteContacts(widget.groupId, _searchValue));
+              context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
+                  widget.groupId, _searchValue, FleetUserRoles.fleet));
             }
           }
         },
@@ -156,9 +155,8 @@ class _GroupInviteContactsContentState
             searchIcon: const Icon(Icons.search),
             onSearchSubmitted: (value) {
               _searchValue = value;
-              context
-                  .read<GroupInviteContactBloc>()
-                  .add(GetGroupInviteContacts(widget.groupId, _searchValue));
+              context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
+                  widget.groupId, _searchValue, FleetUserRoles.fleet));
             },
             list: _contacts),
       ),
