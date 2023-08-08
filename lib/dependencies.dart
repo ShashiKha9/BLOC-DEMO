@@ -4,11 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:rescu_organization_portal/app.dart';
 import 'package:rescu_organization_portal/data/api/authentication_api.dart';
+import 'package:rescu_organization_portal/data/api/group_branch_api.dart';
 import 'package:rescu_organization_portal/data/api/group_domain_api.dart';
 import 'package:rescu_organization_portal/data/api/group_incident_type_api.dart';
 import 'package:rescu_organization_portal/data/api/group_incident_type_question_api.dart';
 import 'package:rescu_organization_portal/data/api/group_user_api.dart';
 import 'package:rescu_organization_portal/data/blocs/change_passwod_bloc.dart';
+import 'package:rescu_organization_portal/data/blocs/goup_branch_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_domain_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_incident_type_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_incident_type_question_bloc.dart';
@@ -118,7 +120,8 @@ class DependencyConfiguration {
         create: (ctx) => GroupIncidentTypeApi(ctx.read()),
       ),
       Provider<IGroupIncidentTypeQuestionApi>(
-          create: (ctx) => GroupIncidentTypeQuestionApi(ctx.read()))
+          create: (ctx) => GroupIncidentTypeQuestionApi(ctx.read())),
+      Provider<IGroupBranchApi>(create: (ctx) => GroupBranchApi(ctx.read()))
     ];
   }
 
@@ -161,7 +164,11 @@ class DependencyConfiguration {
           create: (ctx) => GroupIncidentTypeBloc(ctx.read())),
       BlocProvider<GroupIncidentTypeQuestionBloc>(
           create: (ctx) =>
-              GroupIncidentTypeQuestionBloc(ctx.read(), ctx.read()))
+              GroupIncidentTypeQuestionBloc(ctx.read(), ctx.read())),
+      BlocProvider<GroupBranchBloc>(
+          create: (ctx) => GroupBranchBloc(ctx.read())),
+      BlocProvider<AddUpdateGroupBranchBloc>(
+          create: (ctx) => AddUpdateGroupBranchBloc(ctx.read())),
     ];
   }
 }
