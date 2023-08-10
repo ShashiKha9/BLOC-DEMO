@@ -11,6 +11,7 @@ class GroupAddressDto {
   late bool isDefault;
   late double? lat;
   late double? long;
+  late List<String>? branchIds;
 
   GroupAddressDto(
       {required this.address1,
@@ -24,7 +25,8 @@ class GroupAddressDto {
       required this.state,
       required this.zipCode,
       this.lat,
-      this.long});
+      this.long,
+      this.branchIds});
 
   GroupAddressDto.fromJson(Map<String, dynamic> json) {
     id = json['Id'];
@@ -55,6 +57,7 @@ class GroupAddressDto {
     data['Default'] = isDefault;
     data['Latitude'] = lat;
     data['Longitude'] = long;
+    data['BranchIds'] = branchIds;
     return data;
   }
 }

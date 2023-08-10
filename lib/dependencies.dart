@@ -154,17 +154,17 @@ class DependencyConfiguration {
       BlocProvider<GroupAddressBloc>(
           create: (ctx) => GroupAddressBloc(ctx.read(), ctx.read())),
       BlocProvider<AddUpdateGroupAddressBloc>(
-          create: (ctx) => AddUpdateGroupAddressBloc(ctx.read())),
+          create: (ctx) => AddUpdateGroupAddressBloc(ctx.read(), ctx.read())),
       BlocProvider<GroupInviteContactBloc>(
           create: (ctx) => GroupInviteContactBloc(ctx.read(), ctx.read())),
       BlocProvider<AddUpdateGroupInviteContactBloc>(
-          create: (ctx) =>
-              AddUpdateGroupInviteContactBloc(ctx.read(), ctx.read())),
+          create: (ctx) => AddUpdateGroupInviteContactBloc(
+              ctx.read(), ctx.read(), ctx.read())),
       BlocProvider<GroupIncidentTypeBloc>(
-          create: (ctx) => GroupIncidentTypeBloc(ctx.read())),
+          create: (ctx) => GroupIncidentTypeBloc(ctx.read(), ctx.read())),
       BlocProvider<GroupIncidentTypeQuestionBloc>(
-          create: (ctx) =>
-              GroupIncidentTypeQuestionBloc(ctx.read(), ctx.read())),
+          create: (ctx) => GroupIncidentTypeQuestionBloc(
+              ctx.read(), ctx.read(), ctx.read())),
       BlocProvider<GroupBranchBloc>(
           create: (ctx) => GroupBranchBloc(ctx.read())),
       BlocProvider<AddUpdateGroupBranchBloc>(

@@ -1,8 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rescu_organization_portal/data/api/base_api.dart';
+import 'package:rescu_organization_portal/data/api/group_branch_api.dart';
 import 'package:rescu_organization_portal/data/api/group_incident_type_api.dart';
 import 'package:rescu_organization_portal/data/api/group_incident_type_question_api.dart';
+import 'package:rescu_organization_portal/data/dto/group_branch_dto.dart';
 import 'package:rescu_organization_portal/data/dto/group_incident_type_dto.dart';
 import 'package:rescu_organization_portal/data/dto/group_incident_type_question_dto.dart';
 import 'package:rescu_organization_portal/data/models/group_incident_type_model.dart';
@@ -71,6 +73,15 @@ class GetQuestion extends GroupIncidentTypeQuestionEvent {
   List<Object?> get props => [id];
 }
 
+class GetBranches extends GroupIncidentTypeQuestionEvent {
+  final String groupId;
+
+  GetBranches(this.groupId);
+
+  @override
+  List<Object?> get props => [groupId];
+}
+
 abstract class GroupIncidentTypeQuestionState extends Equatable {
   @override
   List<Object?> get props => [];
@@ -132,11 +143,22 @@ class GetQuestionSuccessState extends GroupIncidentTypeQuestionState {
   List<Object?> get props => [questionDto];
 }
 
+class GetBranchesSuccessState extends GroupIncidentTypeQuestionState {
+  final List<GroupBranchDto> branches;
+
+  GetBranchesSuccessState(this.branches);
+
+  @override
+  List<Object?> get props => [branches];
+}
+
 class GroupIncidentTypeQuestionBloc extends Bloc<GroupIncidentTypeQuestionEvent,
     GroupIncidentTypeQuestionState> {
   final IGroupIncidentTypeQuestionApi _api;
   final IGroupIncidentTypeApi _incidentTypeApi;
-  GroupIncidentTypeQuestionBloc(this._api, this._incidentTypeApi)
+  final IGroupBranchApi _branchApi;
+  GroupIncidentTypeQuestionBloc(
+      this._api, this._incidentTypeApi, this._branchApi)
       : super(GroupIncidentTypeQuestionInitialState());
 
   @override
@@ -222,6 +244,19 @@ class GroupIncidentTypeQuestionBloc extends Bloc<GroupIncidentTypeQuestionEvent,
       if (result is OkData<GroupIncidentTypeQuestionDto>) {
         yield GetQuestionSuccessState(result.dto);
       } else if (result is BadData<GroupIncidentTypeQuestionDto>) {
+        yield GroupIncidentTypeQuestionFailedState(message: result.message);
+      } else {
+        yield GroupIncidentTypeQuestionFailedState();
+      }
+    }
+
+    if (event is GetBranches) {
+      yield GroupIncidentTypeQuestionLoadingState();
+
+      var result = await _branchApi.getGroupBranches(event.groupId, '');
+      if (result is OkData<List<GroupBranchDto>>) {
+        yield GetBranchesSuccessState(result.dto);
+      } else if (result is BadData<List<GroupBranchDto>>) {
         yield GroupIncidentTypeQuestionFailedState(message: result.message);
       } else {
         yield GroupIncidentTypeQuestionFailedState();

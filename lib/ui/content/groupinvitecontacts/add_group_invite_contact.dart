@@ -4,8 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rescu_organization_portal/data/constants/fleet_user_roles.dart';
 import 'package:rescu_organization_portal/data/constants/messages.dart';
+import 'package:rescu_organization_portal/data/dto/group_branch_dto.dart';
 import 'package:rescu_organization_portal/ui/adaptive_items.dart';
-
 import '../../../data/blocs/group_invite_contact_bloc.dart';
 import '../../../data/dto/group_invite_contact_dto.dart';
 import '../../../data/helpers/phone_number_validator.dart';
@@ -29,6 +29,9 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
   bool _validMobileNumber = false;
   String _selectedLoginMode = "Phone";
   bool _canCloseChat = false;
+  List<GroupBranchDto> _branches = [];
+  List<GroupBranchDto> _selectedBranches = [];
+  final multiSelectState = GlobalKey<FormFieldState>();
 
   @override
   void initState() {
@@ -42,6 +45,7 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
       _canCloseChat = contact!.canCloseChat ?? false;
       _validateContactNumber(contact!.phoneNumber);
     }
+    context.read<AddUpdateGroupInviteContactBloc>().add(GetBranches(groupId));
   }
 
   _validateContactNumber(String number) async {
@@ -72,12 +76,30 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
             ToastDialog.error(state.error ?? MessagesConst.internalServerError);
           }
           if (state is ContactAddedSuccessState) {
-            ToastDialog.success("Contact added successfully");
+            ToastDialog.success("Invitee added successfully");
             Navigator.of(context).pop();
           }
           if (state is ContactUpdatedSuccessState) {
-            ToastDialog.success("Contact updated successfully");
+            ToastDialog.success("Invitee updated successfully");
             Navigator.of(context).pop();
+          }
+          if (state is GetBranchesSuccessState) {
+            if (state.branches.isNotEmpty) {
+              setState(() {
+                _branches = state.branches;
+                if (contact != null && contact!.id != null) {
+                  _selectedBranches = _branches
+                      .where(
+                          (element) => contact!.branchIds!.contains(element.id))
+                      .toList();
+                }
+              });
+              // Wait for build to complete
+              Future.delayed(Duration.zero, () {
+                multiSelectState.currentState!
+                    .didChange(_selectedBranches.map((e) => e.id!).toList());
+              });
+            }
           }
         }
       },
@@ -89,6 +111,33 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              buildMultiSelectFormField(
+                context: context,
+                formKey: multiSelectState,
+                showSelectAll: true,
+                items: _branches
+                    .map((e) => {
+                          "display": e.name,
+                          "value": e.id.toString(),
+                        })
+                    .toList(),
+                onSaved: (value) {
+                  if (value == null) return;
+                  _selectedBranches = _branches
+                      .where((element) => value.contains(element.id))
+                      .toList();
+                },
+                title: "Select Branches",
+                initialValue:
+                    _selectedBranches.map((e) => e.id.toString()).toList(),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please select branches";
+                  }
+                  return null;
+                },
+              ),
+              SpacerSize.at(1.5),
               TextFormField(
                   decoration: TextInputDecoration(labelText: "First Name"),
                   controller: _firstNameController,
@@ -226,7 +275,8 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
             id: contact?.id,
             isActive: contact?.isActive ?? true,
             role: FleetUserRoles.fleet,
-            canCloseChat: _canCloseChat);
+            canCloseChat: _canCloseChat,
+            branchIds: _selectedBranches.map((e) => e.id!).toList());
         if (contact != null && contact!.id != null) {
           context
               .read<AddUpdateGroupInviteContactBloc>()
@@ -245,6 +295,6 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
 
   @override
   String getTitle() {
-    return contact == null ? "Add Invite" : "Update Invite";
+    return contact == null ? "Add Invitee" : "Update Invitee";
   }
 }

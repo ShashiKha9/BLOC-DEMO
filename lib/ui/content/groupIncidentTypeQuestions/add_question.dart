@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_incident_type_question_bloc.dart';
 import 'package:rescu_organization_portal/data/constants/messages.dart';
+import 'package:rescu_organization_portal/data/dto/group_branch_dto.dart';
 import 'package:rescu_organization_portal/data/dto/group_incident_type_question_dto.dart';
 import 'package:rescu_organization_portal/data/dto/group_incident_type_question_option_dto.dart';
 import 'package:rescu_organization_portal/data/models/group_incident_type_model.dart';
@@ -22,6 +23,7 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
       {this.questionDto, this.rootQuestion, this.parentOption});
 
   late List<GroupIncidentTypeModel> _incidentTypes = [];
+  List<GroupIncidentTypeModel> _filteredIncidentTypes = [];
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _nameController = TextEditingController();
@@ -38,6 +40,11 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
   final List<GroupIncidentTypeQuestionOptionDto> _options = [
     GroupIncidentTypeQuestionOptionDto(optionText: '')
   ];
+
+  List<GroupBranchDto> _branches = [];
+  GroupBranchDto? _selectedBranch;
+
+  final _multiSelectFieldKey = GlobalKey<FormFieldState>();
 
   @override
   void initState() {
@@ -57,6 +64,7 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
       _selectedIncidentType = rootQuestion!.incidentTypeId;
     }
     context.read<GroupIncidentTypeQuestionBloc>().add(GetIncidents(groupId));
+    context.read<GroupIncidentTypeQuestionBloc>().add(GetBranches(groupId));
   }
 
   @override
@@ -91,6 +99,18 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
               _incidentTypes = state.incidentTypes;
             });
           }
+          if (state is GetBranchesSuccessState) {
+            setState(() {
+              _branches = state.branches;
+              if (questionDto != null && questionDto!.branchId != null) {
+                _selectedBranch = _branches.firstWhere(
+                    (element) => element.id == questionDto!.branchId);
+                _filteredIncidentTypes = _incidentTypes
+                    .where((element) => element.branchId == _selectedBranch!.id)
+                    .toList();
+              }
+            });
+          }
         }
       },
       child: Form(
@@ -102,6 +122,39 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (questionDto == null && rootQuestion == null)
+                  DropdownButtonFormField<String>(
+                      decoration: DropDownInputDecoration(),
+                      hint: const Text("Select Branch"),
+                      value: _selectedBranch?.id,
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedBranch = _branches
+                              .firstWhere((element) => element.id == value);
+                          _selectedIncidentType = null;
+                          _filteredIncidentTypes = _incidentTypes
+                              .where((element) =>
+                                  element.branchId == _selectedBranch!.id)
+                              .toList();
+                        });
+                      },
+                      validator: (value) {
+                        if (_selectedBranch == null) {
+                          return "Please select branch";
+                        }
+                        return null;
+                      },
+                      items: _branches.map<DropdownMenuItem<String>>(
+                          (GroupBranchDto value) {
+                        return DropdownMenuItem<String>(
+                          value: value.id,
+                          child: Text(
+                            value.name,
+                          ),
+                        );
+                      }).toList()),
+                if (questionDto == null && rootQuestion == null)
+                  SpacerSize.at(1.5),
                 rootQuestion == null
                     ? DropdownButtonFormField<String>(
                         decoration: DropDownInputDecoration(),
@@ -118,8 +171,9 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
                           }
                           return null;
                         },
-                        items: _incidentTypes.map<DropdownMenuItem<String>>(
-                            (GroupIncidentTypeModel value) {
+                        items: _filteredIncidentTypes
+                            .map<DropdownMenuItem<String>>(
+                                (GroupIncidentTypeModel value) {
                           return DropdownMenuItem<String>(
                             value: value.id,
                             child: Text(
@@ -224,7 +278,8 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
             parentOptionId: parentOption?.id,
             options: _options
                 .where((element) => element.optionText.isNotEmpty)
-                .toList());
+                .toList(),
+            branchId: _selectedBranch?.id);
 
         if (questionDto != null && questionDto!.id != null) {
           context

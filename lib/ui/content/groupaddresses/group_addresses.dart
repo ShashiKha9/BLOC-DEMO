@@ -71,6 +71,7 @@ class _GroupAddressesContentState extends State<GroupAddressesContent> {
             _loadingController.hide();
             if (state is GetGroupAddressesSuccessState) {
               _addresses.clear();
+              state.addresses.sort((a, b) => b.isDefault ? 1 : -1);
               _addresses.addAll(state.addresses.map((e) {
                 List<AdaptiveContextualItem> contextualItems = [];
                 if (!e.isDefault) {

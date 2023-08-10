@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_invite_contact_bloc.dart';
 import 'package:rescu_organization_portal/data/constants/fleet_user_roles.dart';
 import 'package:rescu_organization_portal/data/constants/messages.dart';
+import 'package:rescu_organization_portal/data/dto/group_branch_dto.dart';
 import 'package:rescu_organization_portal/data/dto/group_invite_contact_dto.dart';
 import 'package:rescu_organization_portal/data/models/group_incident_type_model.dart';
 import 'package:rescu_organization_portal/ui/adaptive_items.dart';
@@ -30,7 +31,10 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
   final TextEditingController _designationController = TextEditingController();
   bool _validMobileNumber = false;
   late List<GroupIncidentTypeModel> _incidentList = [];
-  late List<GroupIncidentTypeModel> _selectedIncidents = [];
+  late List<GroupIncidentTypeModel> _preSelectedIncidents = [];
+  List<GroupIncidentTypeModel> _selectedIncidents = [];
+  List<GroupBranchDto> _branches = [];
+  List<GroupBranchDto> _selectedBranches = [];
   String _selectedLoginMode = "Phone";
   bool _canCloseChat = false;
 
@@ -48,6 +52,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
       _selectedLoginMode = contact!.loginWith ?? "Phone";
     }
     context.read<AddUpdateGroupInviteContactBloc>().add(GetIncidentTypes(""));
+    context.read<AddUpdateGroupInviteContactBloc>().add(GetBranches(groupId));
   }
 
   _validateContactNumber(String number) async {
@@ -89,13 +94,37 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
           if (state is GetIncidentTypeSuccessState) {
             setState(() {
               _incidentList = state.model;
+              _incidentList.insert(
+                  0,
+                  GroupIncidentTypeModel(
+                      id: 'all',
+                      name: 'All',
+                      groupId: _incidentList.first.groupId,
+                      description: "",
+                      branchId: 'all'));
               if (contact != null &&
                   contact!.incidentTypeList != null &&
                   contact!.incidentTypeList!.isNotEmpty) {
-                _selectedIncidents = _incidentList
+                _preSelectedIncidents = _incidentList
                     .where((e) => contact!.incidentTypeList!.contains(e.id))
                     .toList();
               }
+            });
+          }
+          if (state is GetBranchesSuccessState) {
+            setState(() {
+              _branches = state.branches;
+              var activeBranches =
+                  state.branches.where((e) => e.active).toList();
+              if (contact != null && contact!.branchIds != null) {
+                _selectedBranches = _branches
+                    .where((e) => contact!.branchIds!.contains(e.id))
+                    .toList();
+              }
+              activeBranches.addAll(_selectedBranches
+                  .where((element) => !element.active)
+                  .toList());
+              _branches = activeBranches;
             });
           }
         }
@@ -227,59 +256,69 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                 ],
               ),
               SpacerSize.at(1.5),
-              const Text("Select Incident Types"),
-              SpacerSize.at(0.5),
-              Expanded(
-                  child: BlocListener(
-                      bloc: context.read<AddUpdateGroupInviteContactBloc>(),
-                      listener: ((context, state) => {}),
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.5,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextField(
-                              decoration: TextInputDecoration(
-                                hintText: "Search by name",
-                                suffixIcon: const Icon(Icons.search),
+              const Text("Select Branches"),
+              SpacerSize.at(1),
+              Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: _branches
+                      .map((e) => Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              InkWell(
+                                onTap: () => {
+                                  setState(() {
+                                    if (_selectedBranches.contains(e)) {
+                                      _selectedBranches.remove(e);
+                                      _selectedIncidents.removeWhere(
+                                          (element) =>
+                                              element.branchId == e.id);
+                                    } else {
+                                      _selectedBranches.add(e);
+                                    }
+                                  })
+                                },
+                                child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      _selectedBranches.contains(e)
+                                          ? const Icon(Icons.check_box)
+                                          : const Icon(
+                                              Icons.check_box_outline_blank),
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text(e.name)
+                                    ]),
                               ),
-                              onSubmitted: (value) {
-                                context
-                                    .read<AddUpdateGroupInviteContactBloc>()
-                                    .add(GetIncidentTypes(value));
-                              },
-                              onChanged: (value) {
-                                context
-                                    .read<AddUpdateGroupInviteContactBloc>()
-                                    .add(GetIncidentTypes(value));
-                              },
-                            ),
-                            const SizedBox(height: 10),
-                            Expanded(
-                                child: ListView.builder(
-                                    itemCount: _incidentList.length,
-                                    itemBuilder: (context, index) => ListTile(
-                                          leading: _selectedIncidents.contains(
-                                                  _incidentList[index])
-                                              ? const Icon(Icons.check_box)
-                                              : const Icon(Icons
-                                                  .check_box_outline_blank),
-                                          title:
-                                              Text(_incidentList[index].name),
-                                          onTap: () => {
-                                            setState(() {
-                                              _selectedIncidents.contains(
-                                                      _incidentList[index])
-                                                  ? _selectedIncidents.remove(
-                                                      _incidentList[index])
-                                                  : _selectedIncidents.add(
-                                                      _incidentList[index]);
-                                            })
-                                          },
-                                        )))
-                          ],
-                        ),
-                      )))
+                              SpacerSize.at(1.5),
+                              if (_selectedBranches.contains(e))
+                                IncidentTypeSelection(
+                                  selectedIncidents: _preSelectedIncidents
+                                      .where(
+                                          (element) => element.branchId == e.id)
+                                      .toList(),
+                                  incidentTypes: _incidentList
+                                      .where((element) =>
+                                          element.id == 'all' ||
+                                          element.branchId == e.id)
+                                      .toList(),
+                                  onSelectionChange:
+                                      (List<GroupIncidentTypeModel>
+                                          selectedIncidents) {
+                                    _selectedIncidents.removeWhere(
+                                        (element) => element.branchId == e.id);
+                                    _selectedIncidents
+                                        .addAll(selectedIncidents);
+                                  },
+                                ),
+                              SpacerSize.at(1.5),
+                            ],
+                          ))
+                      .toList()),
             ],
           ),
         ),
@@ -295,6 +334,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
         FocusScope.of(context).unfocus();
         var formattedMobileNumber = await PhoneNumberUtility.parseToE164Format(
             phoneNumber: _phoneNumberController.text);
+        _selectedIncidents.removeWhere((element) => element.id == 'all');
         var addContact = GroupInviteContactDto(
             firstName: _firstNameController.text,
             lastName: _lastNameController.text,
@@ -306,7 +346,10 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
             loginWith: _selectedLoginMode,
             id: contact?.id,
             canCloseChat: _canCloseChat,
-            incidentTypeList: _selectedIncidents.map((e) => e.id!).toList());
+            incidentTypeList: [
+              ...{..._selectedIncidents.map((e) => e.id!).toList()}
+            ],
+            branchIds: _selectedBranches.map((e) => e.id!).toList());
         if (contact != null && contact!.id != null) {
           context
               .read<AddUpdateGroupInviteContactBloc>()
@@ -326,5 +369,107 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
   @override
   String getTitle() {
     return contact == null ? "Add Contact" : "Update Contact";
+  }
+}
+
+class IncidentTypeSelection extends StatefulWidget {
+  final List<GroupIncidentTypeModel> incidentTypes;
+  final Function(List<GroupIncidentTypeModel>) onSelectionChange;
+  final List<GroupIncidentTypeModel>? selectedIncidents;
+  final bool? preSelectAll;
+
+  const IncidentTypeSelection(
+      {Key? key,
+      required this.incidentTypes,
+      required this.onSelectionChange,
+      this.selectedIncidents,
+      this.preSelectAll})
+      : super(key: key);
+
+  @override
+  _IncidentTypeSelectionState createState() => _IncidentTypeSelectionState();
+}
+
+class _IncidentTypeSelectionState extends State<IncidentTypeSelection> {
+  List<GroupIncidentTypeModel> _selectedIncidents = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIncidents = widget.selectedIncidents ?? [];
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      setState(() {
+        _handleCheckboxSelection();
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints:
+          BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.6),
+      margin: const EdgeInsets.only(left: 35),
+      child: Row(
+        children: [
+          const Text("Select Incident Types:"),
+          const SizedBox(
+            width: 10,
+          ),
+          Wrap(
+            spacing: 20,
+            alignment: WrapAlignment.start,
+            direction: Axis.horizontal,
+            children: widget.incidentTypes
+                .map((e) => InkWell(
+                      onTap: () {
+                        setState(() {
+                          if (e.id == 'all') {
+                            if (_selectedIncidents.contains(e)) {
+                              _selectedIncidents.clear();
+                            } else {
+                              _selectedIncidents =
+                                  widget.incidentTypes.toList();
+                              _selectedIncidents.add(e);
+                            }
+                          } else {
+                            _selectedIncidents.contains(e)
+                                ? _selectedIncidents.remove(e)
+                                : _selectedIncidents.add(e);
+                          }
+                          _handleCheckboxSelection();
+                          widget.onSelectionChange(_selectedIncidents);
+                        });
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _selectedIncidents.contains(e)
+                              ? const Icon(Icons.check_box)
+                              : const Icon(Icons.check_box_outline_blank),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(e.name)
+                        ],
+                      ),
+                    ))
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  _handleCheckboxSelection() {
+    setState(() {
+      if (_selectedIncidents.where((element) => element.id != 'all').length ==
+          widget.incidentTypes.length - 1) {
+        _selectedIncidents.add(
+            widget.incidentTypes.firstWhere((element) => element.id == 'all'));
+      } else {
+        _selectedIncidents.removeWhere((element) => element.id == 'all');
+      }
+    });
   }
 }

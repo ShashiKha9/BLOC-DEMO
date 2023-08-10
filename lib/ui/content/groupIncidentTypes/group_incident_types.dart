@@ -68,7 +68,7 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
           } else {
             _loadingController.hide();
             if (state is ClickedFabIconState) {
-              if (_contacts.isNotEmpty && _contacts.length >= 4) {
+              if (_contacts.isNotEmpty && _contacts.length <= 4) {
                 ToastDialog.error("You can add a maximum of 4 incident types.");
               } else {
                 Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {

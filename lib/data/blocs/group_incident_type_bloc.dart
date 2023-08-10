@@ -1,7 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rescu_organization_portal/data/api/base_api.dart';
+import 'package:rescu_organization_portal/data/api/group_branch_api.dart';
 import 'package:rescu_organization_portal/data/api/group_incident_type_api.dart';
+import 'package:rescu_organization_portal/data/dto/group_branch_dto.dart';
 import 'package:rescu_organization_portal/data/dto/group_incident_type_dto.dart';
 import 'package:rescu_organization_portal/data/models/group_incident_type_model.dart';
 
@@ -53,6 +55,16 @@ class DeleteIncidentType extends GroupIncidentTypeEvent {
   List<Object?> get props => [id, incidentId];
 }
 
+class GetBranches extends GroupIncidentTypeEvent {
+  final String groupId;
+  final String filter;
+
+  GetBranches(this.groupId, this.filter);
+
+  @override
+  List<Object?> get props => [groupId, filter];
+}
+
 abstract class GroupIncidentTypeState extends Equatable {
   @override
   List<Object?> get props => [];
@@ -99,10 +111,21 @@ class UpdateGroupIncidentTypeSuccessState extends GroupIncidentTypeState {}
 
 class DeleteGroupIncidentTypeSuccessState extends GroupIncidentTypeState {}
 
+class GetBranchesSuccessState extends GroupIncidentTypeState {
+  final List<GroupBranchDto> model;
+
+  GetBranchesSuccessState(this.model);
+
+  @override
+  List<Object?> get props => [model];
+}
+
 class GroupIncidentTypeBloc
     extends Bloc<GroupIncidentTypeEvent, GroupIncidentTypeState> {
   final IGroupIncidentTypeApi _api;
-  GroupIncidentTypeBloc(this._api) : super(GroupIncidentTypeInitialState());
+  final IGroupBranchApi _branchApi;
+  GroupIncidentTypeBloc(this._api, this._branchApi)
+      : super(GroupIncidentTypeInitialState());
 
   @override
   Stream<GroupIncidentTypeState> mapEventToState(
@@ -179,6 +202,28 @@ class GroupIncidentTypeBloc
         return;
       } else {
         yield GroupIncidentTypeFailedState();
+        return;
+      }
+    }
+
+    if (event is GetBranches) {
+      yield GroupIncidentTypeLoadingState();
+
+      var result =
+          await _branchApi.getGroupBranches(event.groupId, event.filter);
+
+      if (result is OkData<List<GroupBranchDto>>) {
+        if (result.dto.isNotEmpty) {
+          yield GetBranchesSuccessState(result.dto);
+          return;
+        } else {
+          yield AddUpdateGroupIncidentTypeFailedState(
+              message: "No branches found");
+          return;
+        }
+      }
+      if (result is BadData<List<GroupBranchDto>>) {
+        yield AddUpdateGroupIncidentTypeFailedState(message: result.message);
         return;
       }
     }

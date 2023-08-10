@@ -7,6 +7,7 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:rescu_organization_portal/data/blocs/group_address_bloc.dart';
 import 'package:rescu_organization_portal/data/constants/messages.dart';
 import 'package:rescu_organization_portal/data/dto/group_address_dto.dart';
+import 'package:rescu_organization_portal/data/dto/group_branch_dto.dart';
 import 'package:rescu_organization_portal/ui/adaptive_items.dart';
 
 import '../../../data/services/address/address_service.dart';
@@ -39,6 +40,11 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
   double? _lat;
   double? _long;
 
+  List<GroupBranchDto> _branches = [];
+  List<GroupBranchDto> _selectedBranches = [];
+
+  final multiSelectFieldState = GlobalKey<FormFieldState>();
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +58,7 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
       _crossStreetController.text = address!.crossStreet ?? "";
       _selectedState = address!.state;
     }
+    context.read<AddUpdateGroupAddressBloc>().add(GetBranches(groupId));
   }
 
   @override
@@ -86,6 +93,11 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
             ToastDialog.success("Address updated successfully");
             Navigator.of(context).pop();
           }
+          if (state is GetBranchesSuccessState) {
+            setState(() {
+              _branches = state.branches;
+            });
+          }
         }
       },
       child: Form(
@@ -97,6 +109,34 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (address == null)
+                  buildMultiSelectFormField(
+                    context: context,
+                    formKey: multiSelectFieldState,
+                    showSelectAll: true,
+                    items: _branches
+                        .map((e) => {
+                              "display": e.name,
+                              "value": e.id.toString(),
+                            })
+                        .toList(),
+                    onSaved: (value) {
+                      if (value == null) return;
+                      _selectedBranches = _branches
+                          .where((element) => value.contains(element.id))
+                          .toList();
+                    },
+                    title: "Select Branches",
+                    initialValue:
+                        _selectedBranches.map((e) => e.id.toString()).toList(),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Please select branches";
+                      }
+                      return null;
+                    },
+                  ),
+                if (address == null) SpacerSize.at(1.5),
                 TextFormField(
                   decoration:
                       TextInputDecoration(labelText: "Address Nickname"),
@@ -343,7 +383,8 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
             crossStreet: _crossStreetController.text,
             id: address?.id,
             lat: _lat,
-            long: _long);
+            long: _long,
+            branchIds: _selectedBranches.map((e) => e.id!).toList());
         if (address != null && address!.id != null) {
           context.read<AddUpdateGroupAddressBloc>().add(
               UpdateGroupIncidentAddress(groupId, address!.id!, addAddress));
