@@ -14,11 +14,13 @@ import '../../widgets/dialogs.dart';
 import '../../widgets/loading_container.dart';
 
 class GroupIncidentTypesContent extends StatefulWidget
-    with FloatingActionMixin {
+    with FloatingActionMixin, AppBarBranchSelectionMixin {
   final String groupId;
+  final String? branchId;
   const GroupIncidentTypesContent({
     Key? key,
     required this.groupId,
+    required this.branchId,
   }) : super(key: key);
 
   @override
@@ -34,18 +36,25 @@ class GroupIncidentTypesContent extends StatefulWidget
   void onFabPressed(BuildContext context) {
     context.read<GroupIncidentTypeBloc>().add(ClickedFabIconEvent());
   }
+
+  @override
+  void branchSelection(BuildContext context, String? branchId) {
+    context.read<GroupIncidentTypeBloc>().add(BranchChangedEvent(branchId));
+  }
 }
 
 class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
+  String? _selectedBranchId;
   final LoadingController _loadingController = LoadingController();
   String _searchValue = "";
   final List<AdaptiveListItem> _contacts = [];
 
   @override
   void initState() {
-    context
-        .read<GroupIncidentTypeBloc>()
-        .add(GetIncidentTypes(widget.groupId, _searchValue));
+    _selectedBranchId = widget.branchId;
+    // context
+    //     .read<GroupIncidentTypeBloc>()
+    //     .add(GetIncidentTypes(_searchValue, _selectedBranchId));
     super.initState();
   }
 
@@ -68,7 +77,7 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
           } else {
             _loadingController.hide();
             if (state is ClickedFabIconState) {
-              if (_contacts.isNotEmpty && _contacts.length <= 4) {
+              if (_contacts.isNotEmpty && _contacts.length >= 4) {
                 ToastDialog.error("You can add a maximum of 4 incident types.");
               } else {
                 Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
@@ -78,7 +87,7 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
                 })).then((_) {
                   context
                       .read<GroupIncidentTypeBloc>()
-                      .add(GetIncidentTypes(widget.groupId, ""));
+                      .add(GetIncidentTypes("", _selectedBranchId));
                 });
               }
             }
@@ -96,7 +105,7 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
                   })).then((_) {
                     context
                         .read<GroupIncidentTypeBloc>()
-                        .add(GetIncidentTypes(widget.groupId, ""));
+                        .add(GetIncidentTypes("", _selectedBranchId));
                   });
                 }));
                 contextualItems.add(AdaptiveItemButton(
@@ -133,7 +142,18 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
               ToastDialog.success("Record deleted successfully");
               context
                   .read<GroupIncidentTypeBloc>()
-                  .add(GetIncidentTypes(widget.groupId, _searchValue));
+                  .add(GetIncidentTypes(_searchValue, _selectedBranchId));
+            }
+            if (state is BranchChangedState) {
+              _selectedBranchId = state.branchId;
+              context
+                  .read<GroupIncidentTypeBloc>()
+                  .add(GetIncidentTypes(_searchValue, _selectedBranchId));
+            }
+            if (state is RefreshIncidentTypes) {
+              context
+                  .read<GroupIncidentTypeBloc>()
+                  .add(GetIncidentTypes(_searchValue, _selectedBranchId));
             }
           }
         },
@@ -144,7 +164,7 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
               _searchValue = value;
               context
                   .read<GroupIncidentTypeBloc>()
-                  .add(GetIncidentTypes(widget.groupId, _searchValue));
+                  .add(GetIncidentTypes(_searchValue, _selectedBranchId));
             },
             list: _contacts),
       ),

@@ -182,12 +182,12 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
         if (!_formKey.currentState!.validate()) return;
         FocusScope.of(context).unfocus();
         var addIncidentType = GroupIncidentTypeModel(
-          groupId: groupId,
-          name: _nameController.text,
-          description: _descriptionController.text,
-          iconData:
-              _icon != null ? jsonEncode(serializeIcon(_icon!.icon!)) : null,
-        );
+            groupId: groupId,
+            name: _nameController.text,
+            description: _descriptionController.text,
+            iconData:
+                _icon != null ? jsonEncode(serializeIcon(_icon!.icon!)) : null,
+            branchId: incidentType?.branchId);
         if (incidentType != null && incidentType!.id != null) {
           context.read<GroupIncidentTypeBloc>().add(
               UpdateIncidentType(groupId, incidentType!.id!, addIncidentType));

@@ -157,7 +157,8 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
                   SpacerSize.at(1.5),
                 rootQuestion == null
                     ? DropdownButtonFormField<String>(
-                        decoration: DropDownInputDecoration(),
+                        decoration:
+                            TextInputDecoration(labelText: "Incident Type"),
                         hint: const Text("Select Incident Type"),
                         value: _selectedIncidentType,
                         onChanged: (value) {
@@ -199,7 +200,7 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
                 ),
                 SpacerSize.at(1.5),
                 DropdownButtonFormField<QuestionType>(
-                    decoration: DropDownInputDecoration(),
+                    decoration: TextInputDecoration(labelText: "Question Type"),
                     hint: const Text("Select Question Type"),
                     value: _selectedQuestionType,
                     onChanged: (value) {
@@ -279,7 +280,7 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
             options: _options
                 .where((element) => element.optionText.isNotEmpty)
                 .toList(),
-            branchId: _selectedBranch?.id);
+            branchId: _selectedBranch?.id ?? questionDto?.branchId);
 
         if (questionDto != null && questionDto!.id != null) {
           context

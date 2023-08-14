@@ -206,15 +206,15 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
               _emailController.text.isNotEmpty
                   ? SpacerSize.at(1.5)
                   : Container(),
-              _emailController.text.isNotEmpty
-                  ? const Text("Login With")
-                  : Container(),
-              _emailController.text.isNotEmpty
-                  ? SpacerSize.at(0.5)
-                  : Container(),
+              // _emailController.text.isNotEmpty
+              //     ? const Text("Login With")
+              //     : Container(),
+              // _emailController.text.isNotEmpty
+              //     ? SpacerSize.at(0.5)
+              //     : Container(),
               _emailController.text.isNotEmpty
                   ? DropdownButtonFormField<String>(
-                      decoration: DropDownInputDecoration(),
+                      decoration: TextInputDecoration(labelText: "Login With"),
                       hint: const Text("Login With"),
                       value: _selectedLoginMode,
                       onChanged: (value) {
@@ -255,70 +255,75 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                       child: const Text("Can close incident"))
                 ],
               ),
-              SpacerSize.at(1.5),
-              const Text("Select Branches"),
-              SpacerSize.at(1),
-              Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _branches
-                      .map((e) => Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              InkWell(
-                                onTap: () => {
-                                  setState(() {
-                                    if (_selectedBranches.contains(e)) {
-                                      _selectedBranches.remove(e);
+              if (contact == null || contact!.role != 'Admin')
+                SpacerSize.at(1.5),
+              if (contact == null || contact!.role != 'Admin')
+                const Text("Select Branches"),
+              if (contact == null || contact!.role != 'Admin') SpacerSize.at(1),
+              if (contact == null || contact!.role != 'Admin')
+                Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _branches
+                        .map((e) => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                InkWell(
+                                  onTap: () => {
+                                    setState(() {
+                                      if (_selectedBranches.contains(e)) {
+                                        _selectedBranches.remove(e);
+                                        _selectedIncidents.removeWhere(
+                                            (element) =>
+                                                element.branchId == e.id);
+                                      } else {
+                                        _selectedBranches.add(e);
+                                      }
+                                    })
+                                  },
+                                  child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        _selectedBranches.contains(e)
+                                            ? const Icon(Icons.check_box)
+                                            : const Icon(
+                                                Icons.check_box_outline_blank),
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                        Text(e.name)
+                                      ]),
+                                ),
+                                SpacerSize.at(1.5),
+                                if (_selectedBranches.contains(e))
+                                  IncidentTypeSelection(
+                                    selectedIncidents: _preSelectedIncidents
+                                        .where((element) =>
+                                            element.branchId == e.id)
+                                        .toList(),
+                                    incidentTypes: _incidentList
+                                        .where((element) =>
+                                            element.id == 'all' ||
+                                            element.branchId == e.id)
+                                        .toList(),
+                                    onSelectionChange:
+                                        (List<GroupIncidentTypeModel>
+                                            selectedIncidents) {
                                       _selectedIncidents.removeWhere(
                                           (element) =>
                                               element.branchId == e.id);
-                                    } else {
-                                      _selectedBranches.add(e);
-                                    }
-                                  })
-                                },
-                                child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      _selectedBranches.contains(e)
-                                          ? const Icon(Icons.check_box)
-                                          : const Icon(
-                                              Icons.check_box_outline_blank),
-                                      const SizedBox(
-                                        width: 10,
-                                      ),
-                                      Text(e.name)
-                                    ]),
-                              ),
-                              SpacerSize.at(1.5),
-                              if (_selectedBranches.contains(e))
-                                IncidentTypeSelection(
-                                  selectedIncidents: _preSelectedIncidents
-                                      .where(
-                                          (element) => element.branchId == e.id)
-                                      .toList(),
-                                  incidentTypes: _incidentList
-                                      .where((element) =>
-                                          element.id == 'all' ||
-                                          element.branchId == e.id)
-                                      .toList(),
-                                  onSelectionChange:
-                                      (List<GroupIncidentTypeModel>
-                                          selectedIncidents) {
-                                    _selectedIncidents.removeWhere(
-                                        (element) => element.branchId == e.id);
-                                    _selectedIncidents
-                                        .addAll(selectedIncidents);
-                                  },
-                                ),
-                              SpacerSize.at(1.5),
-                            ],
-                          ))
-                      .toList()),
+                                      _selectedIncidents
+                                          .addAll(selectedIncidents);
+                                    },
+                                  ),
+                                SpacerSize.at(1.5),
+                              ],
+                            ))
+                        .toList()),
             ],
           ),
         ),

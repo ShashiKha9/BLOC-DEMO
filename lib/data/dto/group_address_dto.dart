@@ -12,6 +12,7 @@ class GroupAddressDto {
   late double? lat;
   late double? long;
   late List<String>? branchIds;
+  late String? branchId;
 
   GroupAddressDto(
       {required this.address1,
@@ -26,7 +27,8 @@ class GroupAddressDto {
       required this.zipCode,
       this.lat,
       this.long,
-      this.branchIds});
+      this.branchIds,
+      this.branchId});
 
   GroupAddressDto.fromJson(Map<String, dynamic> json) {
     id = json['Id'];
@@ -41,6 +43,8 @@ class GroupAddressDto {
     isDefault = json['Default'];
     lat = json['Latitude'];
     long = json['Longitude'];
+    branchId = json['BranchId'];
+    branchIds = [];
   }
 
   Map<String, dynamic> toJson() {
@@ -58,6 +62,8 @@ class GroupAddressDto {
     data['Latitude'] = lat;
     data['Longitude'] = long;
     data['BranchIds'] = branchIds;
+    data['BranchId'] = branchId;
+
     return data;
   }
 }

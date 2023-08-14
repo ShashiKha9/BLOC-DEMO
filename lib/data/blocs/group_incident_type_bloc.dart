@@ -13,13 +13,13 @@ abstract class GroupIncidentTypeEvent extends Equatable {
 }
 
 class GetIncidentTypes extends GroupIncidentTypeEvent {
-  final String groupId;
   final String filter;
+  final String? branchId;
 
-  GetIncidentTypes(this.groupId, this.filter);
+  GetIncidentTypes(this.filter, this.branchId);
 
   @override
-  List<Object?> get props => [groupId, filter];
+  List<Object?> get props => [filter, branchId];
 }
 
 class ClickedFabIconEvent extends GroupIncidentTypeEvent {}
@@ -64,6 +64,17 @@ class GetBranches extends GroupIncidentTypeEvent {
   @override
   List<Object?> get props => [groupId, filter];
 }
+
+class BranchChangedEvent extends GroupIncidentTypeEvent {
+  final String? branchId;
+
+  BranchChangedEvent(this.branchId);
+
+  @override
+  List<Object?> get props => [branchId];
+}
+
+class RefreshIncidentTypes extends GroupIncidentTypeEvent {}
 
 abstract class GroupIncidentTypeState extends Equatable {
   @override
@@ -120,6 +131,17 @@ class GetBranchesSuccessState extends GroupIncidentTypeState {
   List<Object?> get props => [model];
 }
 
+class BranchChangedState extends GroupIncidentTypeState {
+  final String? branchId;
+
+  BranchChangedState(this.branchId);
+
+  @override
+  List<Object?> get props => [branchId];
+}
+
+class RefreshIncidentTypesState extends GroupIncidentTypeState {}
+
 class GroupIncidentTypeBloc
     extends Bloc<GroupIncidentTypeEvent, GroupIncidentTypeState> {
   final IGroupIncidentTypeApi _api;
@@ -139,7 +161,7 @@ class GroupIncidentTypeBloc
     if (event is GetIncidentTypes) {
       yield GroupIncidentTypeLoadingState();
 
-      var result = await _api.get(event.filter);
+      var result = await _api.get(event.filter, event.branchId);
 
       if (result is OkData<List<GroupIncidentTypeDto>>) {
         if (result.dto.isNotEmpty) {
@@ -226,6 +248,16 @@ class GroupIncidentTypeBloc
         yield AddUpdateGroupIncidentTypeFailedState(message: result.message);
         return;
       }
+    }
+
+    if (event is BranchChangedEvent) {
+      yield BranchChangedState(event.branchId);
+      return;
+    }
+
+    if (event is RefreshIncidentTypes) {
+      yield RefreshIncidentTypesState();
+      return;
     }
   }
 }

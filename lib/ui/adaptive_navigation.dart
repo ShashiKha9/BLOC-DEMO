@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:rescu_organization_portal/data/api/group_branch_api.dart';
 import 'package:rescu_organization_portal/data/api/group_info_api.dart';
 import 'package:rescu_organization_portal/data/blocs/logout_bloc.dart';
+import 'package:rescu_organization_portal/data/dto/group_branch_dto.dart';
 import 'package:rescu_organization_portal/ui/content/account/change_password.dart';
 import 'package:rescu_organization_portal/ui/content/domains/domains.dart';
 import 'package:rescu_organization_portal/ui/content/groupBranches/group_branches.dart';
@@ -9,6 +11,7 @@ import 'package:rescu_organization_portal/ui/content/groupIncidentTypeQuestions/
 import 'package:rescu_organization_portal/ui/content/groupIncidentTypes/group_incident_types.dart';
 import 'package:rescu_organization_portal/ui/content/login/login_route.dart';
 import 'package:rescu_organization_portal/ui/content/users/users.dart';
+import 'package:rescu_organization_portal/ui/widgets/text_input_decoration.dart';
 import '../data/api/base_api.dart';
 import '../data/dto/group_info_dto.dart';
 import 'adaptive_utils.dart';
@@ -54,6 +57,10 @@ mixin FloatingActionMixin on Widget {
   void onFabPressed(BuildContext context);
 }
 
+mixin AppBarBranchSelectionMixin on Widget {
+  void branchSelection(BuildContext context, String? branchId);
+}
+
 mixin AppBarActionsMixin on Widget {
   List<Widget> getActions();
 }
@@ -74,6 +81,9 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
   ValueNotifier<NavigationItem>? navigationNotifier;
 
   bool _screenLoaded = false;
+  bool _isFleetUser = false;
+  List<GroupBranchDto>? _branches;
+  ValueNotifier<String?>? _selectedBranch;
 
   @override
   void initState() {
@@ -84,36 +94,50 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
   void _determineMenuItems() async {
     var result = await context.read<IGroupInfoApi>().getLoggedInUserGroup();
     if (result is OkData<GroupInfoDto> && result.dto.isFleetUser()) {
+      _isFleetUser = true;
+      var branchRes = await context
+          .read<IGroupBranchApi>()
+          .getGroupBranches(result.dto.id, "");
+      if (branchRes is OkData<List<GroupBranchDto>>) {
+        _branches = branchRes.dto;
+        _selectedBranch = ValueNotifier(_branches?.first.id);
+      }
+
       navigation = [
         ContentNavigationItem(
             "Contacts",
             const Icon(Icons.contacts),
             GroupContactsContent(
               groupId: result.dto.id,
+              branchId: _selectedBranch!.value,
             )),
         ContentNavigationItem(
             "Addresses",
             const Icon(Icons.location_pin),
             GroupAddressesContent(
               groupId: result.dto.id,
+              selectedBranchId: _selectedBranch!.value,
             )),
         ContentNavigationItem(
             "Invitees",
             const Icon(Icons.contacts),
             GroupInviteContactsContent(
               groupId: result.dto.id,
+              branchId: _selectedBranch!.value,
             )),
         ContentNavigationItem(
             "Incident Types",
             const Icon(Icons.report),
             GroupIncidentTypesContent(
               groupId: result.dto.id,
+              branchId: _selectedBranch!.value,
             )),
         ContentNavigationItem(
             "Questions",
             const Icon(Icons.question_answer),
             GroupIncidentTypeQuestionContent(
               groupId: result.dto.id,
+              branchId: _selectedBranch!.value,
             )),
         ContentNavigationItem("Branches", const Icon(Icons.apartment),
             GroupBranchesContent(groupId: result.dto.id)),
@@ -146,7 +170,15 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
     navigationNotifier!.addListener(() {
       setState(() {
         var item = navigationNotifier!.value;
-        if (item is ContentNavigationItem) viewNotifier!.value = item.content;
+        if (item is ContentNavigationItem) {
+          viewNotifier!.value = item.content;
+          if (item.content is AppBarBranchSelectionMixin) {
+            Future.delayed(const Duration(milliseconds: 10), (() {
+              (item.content as AppBarBranchSelectionMixin)
+                  .branchSelection(context, _selectedBranch!.value);
+            }));
+          }
+        }
       });
     });
 
@@ -157,6 +189,7 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
   void dispose() {
     viewNotifier!.dispose();
     navigationNotifier!.dispose();
+    _selectedBranch!.dispose();
     super.dispose();
   }
 
@@ -174,19 +207,20 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
             ? LayoutBuilder(
                 builder: (context, box) {
                   if (!kIsWeb) {
-                    return Mobile(
-                        navigation, viewNotifier!, navigationNotifier!);
+                    return Mobile(navigation, viewNotifier!,
+                        navigationNotifier!, _branches!, _selectedBranch!);
                   }
                   // For now, assuming 600
                   if (isMobile(box)) {
-                    return Mobile(
-                        navigation, viewNotifier!, navigationNotifier!);
+                    return Mobile(navigation, viewNotifier!,
+                        navigationNotifier!, _branches!, _selectedBranch!);
                   }
                   if (isCompact(box)) {
-                    return Compact(
-                        navigation, viewNotifier!, navigationNotifier!);
+                    return Compact(navigation, viewNotifier!,
+                        navigationNotifier!, _branches!, _selectedBranch!);
                   }
-                  return Full(navigation, viewNotifier!, navigationNotifier!);
+                  return Full(navigation, viewNotifier!, navigationNotifier!,
+                      _branches!, _selectedBranch!);
                 },
               )
             : const SizedBox());
@@ -197,9 +231,11 @@ abstract class AdaptiveLayoutBase extends StatelessWidget {
   final List<NavigationItem> navigation;
   final ValueNotifier<Widget> primaryContentNotifier;
   final ValueNotifier<NavigationItem> selectedNavigationItemNotifier;
+  final List<GroupBranchDto> branches;
+  final ValueNotifier<String?> selectedBranch;
 
   const AdaptiveLayoutBase(this.navigation, this.primaryContentNotifier,
-      this.selectedNavigationItemNotifier,
+      this.selectedNavigationItemNotifier, this.branches, this.selectedBranch,
       {Key? key})
       : super(key: key);
 }
@@ -209,8 +245,12 @@ class Mobile extends AdaptiveLayoutBase {
       List<NavigationItem> navigation,
       ValueNotifier<Widget> viewNotifier,
       ValueNotifier<NavigationItem> navigationNotifier,
+      List<GroupBranchDto> branches,
+      final ValueNotifier<String?> selectedBranch,
       {Key? key})
-      : super(navigation, viewNotifier, navigationNotifier, key: key);
+      : super(navigation, viewNotifier, navigationNotifier, branches,
+            selectedBranch,
+            key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -219,7 +259,29 @@ class Mobile extends AdaptiveLayoutBase {
       label: selectedNavigationItemNotifier.value.title,
       child: Scaffold(
         appBar: AppBar(
-            title: const Text("Rescu Group Portal"),
+            toolbarHeight: content is AppBarBranchSelectionMixin ? 100 : null,
+            title:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text("Rescu Group Portal"),
+              if (content is AppBarBranchSelectionMixin)
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  child: DropdownButtonFormField(
+                      hint: const Text("Switch Branch"),
+                      isDense: true,
+                      value: selectedBranch.value,
+                      items: branches
+                          .map((e) => DropdownMenuItem(
+                                child: Text(e.name),
+                                value: e.id,
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        selectedBranch.value = value as String?;
+                        content.branchSelection(context, value);
+                      }),
+                ),
+            ]),
             actions: content is AppBarActionsMixin ? content.getActions() : []),
         drawer: Drawer(
           child: Column(
@@ -284,17 +346,48 @@ class Compact extends AdaptiveLayoutBase {
       List<NavigationItem> navigation,
       ValueNotifier<Widget> viewNotifier,
       ValueNotifier<NavigationItem> navigationNotifier,
+      List<GroupBranchDto> branches,
+      final ValueNotifier<String?> selectedBranch,
       {Key? key})
-      : super(navigation, viewNotifier, navigationNotifier, key: key);
+      : super(navigation, viewNotifier, navigationNotifier, branches,
+            selectedBranch,
+            key: key);
 
   @override
   Widget build(BuildContext context) {
     var content = primaryContentNotifier.value;
     return Scaffold(
       appBar: AppBar(
-          title: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: const [Text("Rescu Group Portal")]),
+          centerTitle: true,
+          title: Row(children: [
+            const Text("Rescu Group Portal"),
+            if (content is AppBarBranchSelectionMixin)
+              Expanded(
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Tooltip(
+                    message: "Switch Branch",
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      child: DropdownButtonFormField(
+                          hint: const Text("Switch Branch"),
+                          isDense: true,
+                          value: selectedBranch.value,
+                          items: branches
+                              .map((e) => DropdownMenuItem(
+                                    child: Text(e.name),
+                                    value: e.id,
+                                  ))
+                              .toList(),
+                          onChanged: (value) {
+                            selectedBranch.value = value as String?;
+                            content.branchSelection(context, value);
+                          }),
+                    ),
+                  ),
+                ),
+              ),
+          ]),
           actions: content is AppBarActionsMixin ? content.getActions() : []),
       floatingActionButton: Builder(builder: (BuildContext context) {
         if (content is FloatingActionMixin) {
@@ -363,8 +456,12 @@ class Full extends AdaptiveLayoutBase {
       List<NavigationItem> navigation,
       ValueNotifier<Widget> viewNotifier,
       ValueNotifier<NavigationItem> navigationNotifier,
+      List<GroupBranchDto> branches,
+      final ValueNotifier<String?> selectedBranch,
       {Key? key})
-      : super(navigation, viewNotifier, navigationNotifier, key: key);
+      : super(navigation, viewNotifier, navigationNotifier, branches,
+            selectedBranch,
+            key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -374,8 +471,37 @@ class Full extends AdaptiveLayoutBase {
         child: Scaffold(
           appBar: AppBar(
               title: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.start,
-                  children: const [Text("Rescu Group Portal")]),
+                  children: [
+                    const Text("Rescu Group Portal"),
+                    if (content is AppBarBranchSelectionMixin)
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Tooltip(
+                            message: "Switch Branch",
+                            child: SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.4,
+                              child: DropdownButtonFormField(
+                                  hint: const Text("Switch Branch"),
+                                  isDense: true,
+                                  value: selectedBranch.value,
+                                  items: branches
+                                      .map((e) => DropdownMenuItem(
+                                            child: Text(e.name),
+                                            value: e.id,
+                                          ))
+                                      .toList(),
+                                  onChanged: (value) {
+                                    selectedBranch.value = value as String?;
+                                    content.branchSelection(context, value);
+                                  }),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ]),
               actions:
                   content is AppBarActionsMixin ? content.getActions() : []),
           floatingActionButton: Builder(builder: (BuildContext context) {

@@ -11,11 +11,14 @@ import '../../widgets/dialogs.dart';
 import '../../widgets/loading_container.dart';
 import 'add_group_contact.dart';
 
-class GroupContactsContent extends StatefulWidget with FloatingActionMixin {
+class GroupContactsContent extends StatefulWidget
+    with FloatingActionMixin, AppBarBranchSelectionMixin {
   final String groupId;
+  final String? branchId;
   const GroupContactsContent({
     Key? key,
     required this.groupId,
+    required this.branchId,
   }) : super(key: key);
 
   @override
@@ -32,22 +35,30 @@ class GroupContactsContent extends StatefulWidget with FloatingActionMixin {
       return ModalRouteWidget(
           stateGenerator: () => AddUpdateGroupContactModelState(groupId));
     })).then((_) {
-      context
-          .read<GroupInviteContactBloc>()
-          .add(GetGroupInviteContacts(groupId, "", FleetUserRoles.contact));
+      context.read<GroupInviteContactBloc>().add(RefreshContactList());
     });
+  }
+
+  @override
+  void branchSelection(BuildContext context, String? branchId) {
+    context.read<GroupInviteContactBloc>().add(BranchChangedEvent(branchId));
   }
 }
 
 class _GroupContactsContentState extends State<GroupContactsContent> {
+  String? _selectedBranchId;
   final LoadingController _loadingController = LoadingController();
   String _searchValue = "";
   final List<AdaptiveListItem> _contacts = [];
 
   @override
   void initState() {
+    _selectedBranchId = widget.branchId;
     context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
-        widget.groupId, _searchValue, FleetUserRoles.contact));
+        widget.groupId,
+        _searchValue,
+        FleetUserRoles.contact,
+        _selectedBranchId));
     super.initState();
   }
 
@@ -82,8 +93,8 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
                             contact: e));
                   })).then((_) {
                     context.read<GroupInviteContactBloc>().add(
-                        GetGroupInviteContacts(
-                            widget.groupId, "", FleetUserRoles.contact));
+                        GetGroupInviteContacts(widget.groupId, "",
+                            FleetUserRoles.contact, _selectedBranchId));
                   });
                 }));
                 // contextualItems.add(AdaptiveItemButton(
@@ -116,7 +127,25 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
             if (state is DeleteGroupInviteContactSuccessState) {
               ToastDialog.success("Record deleted successfully");
               context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
-                  widget.groupId, _searchValue, FleetUserRoles.contact));
+                  widget.groupId,
+                  _searchValue,
+                  FleetUserRoles.contact,
+                  _selectedBranchId));
+            }
+            if (state is BranchChangedState) {
+              _selectedBranchId = state.branchId;
+              context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
+                  widget.groupId,
+                  _searchValue,
+                  FleetUserRoles.contact,
+                  _selectedBranchId));
+            }
+            if (state is RefreshContactListState) {
+              context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
+                  widget.groupId,
+                  _searchValue,
+                  FleetUserRoles.contact,
+                  _selectedBranchId));
             }
           }
         },
@@ -126,7 +155,10 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
             onSearchSubmitted: (value) {
               _searchValue = value;
               context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
-                  widget.groupId, _searchValue, FleetUserRoles.contact));
+                  widget.groupId,
+                  _searchValue,
+                  FleetUserRoles.contact,
+                  _selectedBranchId));
             },
             list: _contacts),
       ),

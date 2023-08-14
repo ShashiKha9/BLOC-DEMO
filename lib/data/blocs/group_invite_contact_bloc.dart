@@ -22,10 +22,11 @@ class GetGroupInviteContacts extends GroupInviteContactEvent {
   final String? groupId;
   final String? filter;
   final String role;
-  GetGroupInviteContacts(this.groupId, this.filter, this.role);
+  final String? branchId;
+  GetGroupInviteContacts(this.groupId, this.filter, this.role, this.branchId);
 
   @override
-  List<Object?> get props => [groupId, filter, role];
+  List<Object?> get props => [groupId, filter, role, branchId];
 }
 
 class GetIncidentTypes extends GroupInviteContactEvent {
@@ -88,6 +89,18 @@ class GetBranches extends GroupInviteContactEvent {
   @override
   List<Object?> get props => [groupId];
 }
+
+class BranchChangedEvent extends GroupInviteContactEvent {
+  final String? branchId;
+
+  BranchChangedEvent(this.branchId);
+
+  @override
+  List<Object?> get props => [branchId];
+}
+
+// This is just a notifier event to refresh the address list
+class RefreshContactList extends GroupInviteContactEvent {}
 
 abstract class GroupInviteContactState extends Equatable {
   @override
@@ -153,6 +166,18 @@ class GetBranchesSuccessState extends GroupInviteContactState {
   List<Object?> get props => [branches];
 }
 
+class BranchChangedState extends GroupInviteContactState {
+  final String? branchId;
+
+  BranchChangedState(this.branchId);
+
+  @override
+  List<Object?> get props => [branchId];
+}
+
+// This is just a notifier state to refresh the address list
+class RefreshContactListState extends GroupInviteContactState {}
+
 class GroupInviteContactBloc
     extends Bloc<GroupInviteContactEvent, GroupInviteContactState> {
   final IGroupInfoApi _groupInfoApi;
@@ -180,12 +205,15 @@ class GroupInviteContactBloc
       }
 
       var result = await _contactsApi.getGroupInviteContacts(
-          groupId, event.filter, event.role);
+          groupId, event.filter, event.role, event.branchId);
 
       if (result is OkData<List<GroupInviteContactDto>>) {
         if (event.role == FleetUserRoles.contact) {
           var adminResult = await _contactsApi.getGroupInviteContacts(
-              event.groupId!, event.filter, FleetUserRoles.admin);
+              event.groupId!,
+              event.filter,
+              FleetUserRoles.admin,
+              event.branchId);
           if (adminResult is OkData<List<GroupInviteContactDto>> &&
               adminResult.dto.isNotEmpty) {
             result.dto.add(adminResult.dto.first);
@@ -231,6 +259,16 @@ class GroupInviteContactBloc
         yield GroupInviteContactErrorState();
         return;
       }
+    }
+
+    if (event is BranchChangedEvent) {
+      yield BranchChangedState(event.branchId);
+      return;
+    }
+
+    if (event is RefreshContactList) {
+      yield RefreshContactListState();
+      return;
     }
   }
 }
@@ -284,7 +322,7 @@ class AddUpdateGroupInviteContactBloc
     if (event is GetIncidentTypes) {
       yield GroupInviteContactLoadingState();
 
-      var result = await _incidentTypeApi.get(event.filter ?? "");
+      var result = await _incidentTypeApi.get(event.filter ?? "", null);
       if (result is OkData<List<GroupIncidentTypeDto>>) {
         yield GetIncidentTypeSuccessState(
             result.dto.map((e) => GroupIncidentTypeModel.fromDto(e)).toList());

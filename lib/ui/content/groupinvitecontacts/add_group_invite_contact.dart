@@ -202,15 +202,15 @@ class AddUpdateGroupInviteContactModelState extends BaseModalRouteState {
               _emailController.text.isNotEmpty
                   ? SpacerSize.at(1.5)
                   : Container(),
-              _emailController.text.isNotEmpty
-                  ? const Text("Login With")
-                  : Container(),
-              _emailController.text.isNotEmpty
-                  ? SpacerSize.at(0.5)
-                  : Container(),
+              // _emailController.text.isNotEmpty
+              //     ? const Text("Login With")
+              //     : Container(),
+              // _emailController.text.isNotEmpty
+              //     ? SpacerSize.at(0.5)
+              //     : Container(),
               _emailController.text.isNotEmpty
                   ? DropdownButtonFormField<String>(
-                      decoration: DropDownInputDecoration(),
+                      decoration: TextInputDecoration(labelText: "Login With"),
                       hint: const Text("Login With"),
                       value: _selectedLoginMode,
                       onChanged: (value) {

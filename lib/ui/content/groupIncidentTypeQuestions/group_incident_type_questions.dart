@@ -13,11 +13,13 @@ import '../../widgets/dialogs.dart';
 import '../../widgets/loading_container.dart';
 
 class GroupIncidentTypeQuestionContent extends StatefulWidget
-    with FloatingActionMixin {
+    with FloatingActionMixin, AppBarBranchSelectionMixin {
   final String groupId;
+  final String? branchId;
   const GroupIncidentTypeQuestionContent({
     Key? key,
     required this.groupId,
+    required this.branchId,
   }) : super(key: key);
 
   @override
@@ -36,24 +38,31 @@ class GroupIncidentTypeQuestionContent extends StatefulWidget
           stateGenerator: () =>
               AddUpdateGroupIncidentTypeQuestionModelState(groupId));
     })).then((_) {
-      context
-          .read<GroupIncidentTypeQuestionBloc>()
-          .add(GetQuestions(groupId, ""));
+      context.read<GroupIncidentTypeQuestionBloc>().add(RefreshQuestions());
     });
+  }
+
+  @override
+  void branchSelection(BuildContext context, String? branchId) {
+    context
+        .read<GroupIncidentTypeQuestionBloc>()
+        .add(BranchChangedEvent(branchId));
   }
 }
 
 class _GroupIncidentTypeQuestionContentState
     extends State<GroupIncidentTypeQuestionContent> {
+  String? _selectedBranchId;
   final LoadingController _loadingController = LoadingController();
   String _searchValue = "";
   final List<AdaptiveListItem> _contacts = [];
 
   @override
   void initState() {
-    context
-        .read<GroupIncidentTypeQuestionBloc>()
-        .add(GetQuestions(widget.groupId, _searchValue));
+    _selectedBranchId = widget.branchId;
+    // context
+    //     .read<GroupIncidentTypeQuestionBloc>()
+    //     .add(GetQuestions(widget.groupId, _searchValue, _selectedBranchId));
     super.initState();
   }
 
@@ -95,9 +104,8 @@ class _GroupIncidentTypeQuestionContentState
                                 previousTree: e.incidentType,
                               ));
                     })).then((_) {
-                      context
-                          .read<GroupIncidentTypeQuestionBloc>()
-                          .add(GetQuestions(widget.groupId, ""));
+                      context.read<GroupIncidentTypeQuestionBloc>().add(
+                          GetQuestions(widget.groupId, "", _selectedBranchId));
                     });
                   }));
                 }
@@ -111,9 +119,8 @@ class _GroupIncidentTypeQuestionContentState
                                 widget.groupId,
                                 questionDto: e));
                   })).then((_) {
-                    context
-                        .read<GroupIncidentTypeQuestionBloc>()
-                        .add(GetQuestions(widget.groupId, ""));
+                    context.read<GroupIncidentTypeQuestionBloc>().add(
+                        GetQuestions(widget.groupId, "", _selectedBranchId));
                   });
                 }));
                 contextualItems.add(AdaptiveItemButton(
@@ -149,9 +156,17 @@ class _GroupIncidentTypeQuestionContentState
             }
             if (state is DeleteGroupIncidentTypeQuestionSuccessState) {
               ToastDialog.success("Record deleted successfully");
-              context
-                  .read<GroupIncidentTypeQuestionBloc>()
-                  .add(GetQuestions(widget.groupId, _searchValue));
+              context.read<GroupIncidentTypeQuestionBloc>().add(GetQuestions(
+                  widget.groupId, _searchValue, _selectedBranchId));
+            }
+            if (state is BranchChangedState) {
+              _selectedBranchId = state.branchId;
+              context.read<GroupIncidentTypeQuestionBloc>().add(GetQuestions(
+                  widget.groupId, _searchValue, _selectedBranchId));
+            }
+            if (state is RefreshQuestions) {
+              context.read<GroupIncidentTypeQuestionBloc>().add(GetQuestions(
+                  widget.groupId, _searchValue, _selectedBranchId));
             }
           }
         },
@@ -160,9 +175,8 @@ class _GroupIncidentTypeQuestionContentState
             searchIcon: const Icon(Icons.search),
             onSearchSubmitted: (value) {
               _searchValue = value;
-              context
-                  .read<GroupIncidentTypeQuestionBloc>()
-                  .add(GetQuestions(widget.groupId, _searchValue));
+              context.read<GroupIncidentTypeQuestionBloc>().add(GetQuestions(
+                  widget.groupId, _searchValue, _selectedBranchId));
             },
             list: _contacts),
       ),

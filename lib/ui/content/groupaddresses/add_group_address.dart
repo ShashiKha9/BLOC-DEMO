@@ -384,7 +384,8 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
             id: address?.id,
             lat: _lat,
             long: _long,
-            branchIds: _selectedBranches.map((e) => e.id!).toList());
+            branchIds: _selectedBranches.map((e) => e.id!).toList(),
+            branchId: address?.branchId);
         if (address != null && address!.id != null) {
           context.read<AddUpdateGroupAddressBloc>().add(
               UpdateGroupIncidentAddress(groupId, address!.id!, addAddress));

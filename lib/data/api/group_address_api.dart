@@ -5,7 +5,7 @@ import 'base_api.dart';
 
 abstract class IGroupAddressApi {
   Future<ApiDataResponse<List<GroupAddressDto>>> getGroupIncidentAddresses(
-      String groupId, String? filter);
+      String groupId, String? filter, String? branchId);
   Future<ApiResponse> addGroupIncidentAddress(
       String groupId, GroupAddressDto address);
   Future<ApiResponse> updateGroupIncidentAddress(
@@ -37,10 +37,10 @@ class GroupAddressApi extends BaseApi implements IGroupAddressApi {
 
   @override
   Future<ApiDataResponse<List<GroupAddressDto>>> getGroupIncidentAddresses(
-      String groupId, String? filter) async {
+      String groupId, String? filter, String? branchId) async {
     return await wrapDataCall(() async {
-      var result = await dio
-          .get("/groups/addresses", queryParameters: {'Filter': filter});
+      var result = await dio.get("/groups/addresses",
+          queryParameters: {'Filter': filter, 'branchId': branchId});
       return OkData((result.data as Iterable)
           .map((e) => GroupAddressDto.fromJson(e))
           .toList());

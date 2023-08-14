@@ -33,6 +33,7 @@ class GroupIncidentTypeDto {
     data["Description"] = description;
     data["IconData"] = iconData;
     data["BranchIds"] = branches;
+    data["BranchId"] = branchId;
     return data;
   }
 }

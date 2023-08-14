@@ -17,11 +17,12 @@ abstract class GroupAddressEvent extends Equatable {
 class GetGroupIncidentAddresses extends GroupAddressEvent {
   final String? groupId;
   final String? filter;
+  final String? branchId;
 
-  GetGroupIncidentAddresses(this.groupId, this.filter);
+  GetGroupIncidentAddresses(this.groupId, this.filter, this.branchId);
 
   @override
-  List<Object?> get props => [groupId];
+  List<Object?> get props => [groupId, filter, branchId];
 }
 
 class DeleteGroupIncidentAddress extends GroupAddressEvent {
@@ -75,9 +76,21 @@ class GetBranches extends GroupAddressEvent {
   List<Object> get props => [groupId];
 }
 
+class BranchChangedEvent extends GroupAddressEvent {
+  final String? branchId;
+
+  BranchChangedEvent(this.branchId);
+
+  @override
+  List<Object?> get props => [branchId];
+}
+
+// This is just a notifier event to refresh the address list
+class RefreshAddressList extends GroupAddressEvent {}
+
 abstract class GroupAddressState extends Equatable {
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class GroupAddressInitialState extends GroupAddressState {}
@@ -123,6 +136,18 @@ class GetBranchesSuccessState extends GroupAddressState {
   List<Object> get props => [branches];
 }
 
+class BranchChangedState extends GroupAddressState {
+  final String? branchId;
+
+  BranchChangedState(this.branchId);
+
+  @override
+  List<Object?> get props => [branchId];
+}
+
+// This is just a notifier state to refresh the address list
+class RefreshAddressListState extends GroupAddressState {}
+
 class GroupAddressBloc extends Bloc<GroupAddressEvent, GroupAddressState> {
   final IGroupInfoApi _groupInfoApi;
   final IGroupAddressApi _addressApi;
@@ -147,8 +172,8 @@ class GroupAddressBloc extends Bloc<GroupAddressEvent, GroupAddressState> {
         groupId = event.groupId!;
       }
 
-      var result =
-          await _addressApi.getGroupIncidentAddresses(groupId, event.filter);
+      var result = await _addressApi.getGroupIncidentAddresses(
+          groupId, event.filter, event.branchId);
 
       if (result is OkData<List<GroupAddressDto>>) {
         if (result.dto.isNotEmpty) {
@@ -189,6 +214,16 @@ class GroupAddressBloc extends Bloc<GroupAddressEvent, GroupAddressState> {
         yield GroupAddressErrorState();
         return;
       }
+    }
+
+    if (event is BranchChangedEvent) {
+      yield BranchChangedState(event.branchId);
+      return;
+    }
+
+    if (event is RefreshAddressList) {
+      yield RefreshAddressListState();
+      return;
     }
   }
 }

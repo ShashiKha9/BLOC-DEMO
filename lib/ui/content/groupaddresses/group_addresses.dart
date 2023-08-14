@@ -10,12 +10,14 @@ import '../../widgets/dialogs.dart';
 import '../../widgets/loading_container.dart';
 import 'add_group_address.dart';
 
-class GroupAddressesContent extends StatefulWidget with FloatingActionMixin {
+class GroupAddressesContent extends StatefulWidget
+    with FloatingActionMixin, AppBarBranchSelectionMixin {
   final String groupId;
-  const GroupAddressesContent({
-    Key? key,
-    required this.groupId,
-  }) : super(key: key);
+  final String? selectedBranchId;
+
+  GroupAddressesContent(
+      {Key? key, required this.groupId, this.selectedBranchId})
+      : super(key: key);
 
   @override
   State<GroupAddressesContent> createState() => _GroupAddressesContentState();
@@ -31,23 +33,29 @@ class GroupAddressesContent extends StatefulWidget with FloatingActionMixin {
       return ModalRouteWidget(
           stateGenerator: () => AddUpdateGroupAddressModelState(groupId));
     })).then((_) {
-      context
-          .read<GroupAddressBloc>()
-          .add(GetGroupIncidentAddresses(groupId, ""));
+      // Inform state to refresh the list
+      context.read<GroupAddressBloc>().add(RefreshAddressList());
     });
+  }
+
+  @override
+  void branchSelection(BuildContext context, String? branchId) {
+    // Refresh the list with branchId
+    context.read<GroupAddressBloc>().add(BranchChangedEvent(branchId));
   }
 }
 
 class _GroupAddressesContentState extends State<GroupAddressesContent> {
+  String? _selectedBranchId;
   final LoadingController _loadingController = LoadingController();
   String _searchValue = "";
   final List<AdaptiveListItem> _addresses = [];
 
   @override
   void initState() {
-    context
-        .read<GroupAddressBloc>()
-        .add(GetGroupIncidentAddresses(widget.groupId, _searchValue));
+    _selectedBranchId = widget.selectedBranchId;
+    // context.read<GroupAddressBloc>().add(GetGroupIncidentAddresses(
+    //     widget.groupId, _searchValue, _selectedBranchId));
     super.initState();
   }
 
@@ -96,9 +104,9 @@ class _GroupAddressesContentState extends State<GroupAddressesContent> {
                             widget.groupId,
                             address: e));
                   })).then((_) {
-                    context
-                        .read<GroupAddressBloc>()
-                        .add(GetGroupIncidentAddresses(widget.groupId, ""));
+                    context.read<GroupAddressBloc>().add(
+                        GetGroupIncidentAddresses(
+                            widget.groupId, "", _selectedBranchId));
                   });
                 }));
                 if (!e.isDefault) {
@@ -141,15 +149,23 @@ class _GroupAddressesContentState extends State<GroupAddressesContent> {
             }
             if (state is DeleteGroupAddressSuccessState) {
               ToastDialog.success("Record deleted successfully");
-              context
-                  .read<GroupAddressBloc>()
-                  .add(GetGroupIncidentAddresses(widget.groupId, _searchValue));
+              context.read<GroupAddressBloc>().add(GetGroupIncidentAddresses(
+                  widget.groupId, _searchValue, _selectedBranchId));
             }
             if (state is ChangeDefaultGroupAddressSuccessState) {
               ToastDialog.success("Address updated successfully");
-              context
-                  .read<GroupAddressBloc>()
-                  .add(GetGroupIncidentAddresses(widget.groupId, _searchValue));
+              context.read<GroupAddressBloc>().add(GetGroupIncidentAddresses(
+                  widget.groupId, _searchValue, _selectedBranchId));
+            }
+            if (state is BranchChangedState) {
+              _selectedBranchId = state.branchId;
+              context.read<GroupAddressBloc>().add(GetGroupIncidentAddresses(
+                  widget.groupId, _searchValue, _selectedBranchId));
+            }
+
+            if (state is RefreshAddressListState) {
+              context.read<GroupAddressBloc>().add(GetGroupIncidentAddresses(
+                  widget.groupId, _searchValue, _selectedBranchId));
             }
           }
         },
@@ -158,9 +174,8 @@ class _GroupAddressesContentState extends State<GroupAddressesContent> {
             searchIcon: const Icon(Icons.search),
             onSearchSubmitted: (value) {
               _searchValue = value;
-              context
-                  .read<GroupAddressBloc>()
-                  .add(GetGroupIncidentAddresses(widget.groupId, _searchValue));
+              context.read<GroupAddressBloc>().add(GetGroupIncidentAddresses(
+                  widget.groupId, _searchValue, _selectedBranchId));
             },
             list: _addresses),
       ),

@@ -34,6 +34,7 @@ class GroupIncidentTypeModel {
         groupId: groupId,
         description: description,
         iconData: iconData,
-        branches: branches);
+        branches: branches,
+        branchId: branchId);
   }
 }
