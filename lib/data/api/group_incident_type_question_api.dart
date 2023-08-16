@@ -4,7 +4,7 @@ import 'package:rescu_organization_portal/data/dto/group_incident_type_question_
 
 abstract class IGroupIncidentTypeQuestionApi {
   Future<ApiDataResponse<List<GroupIncidentTypeQuestionDto>>> get(
-      String id, String filter, String branchId);
+      String id, String filter, String? branchId);
   Future<ApiResponse> add(String id, GroupIncidentTypeQuestionDto dto);
   Future<ApiResponse> update(
       String id, String questionId, GroupIncidentTypeQuestionDto dto);
@@ -18,7 +18,7 @@ class GroupIncidentTypeQuestionApi extends BaseApi
 
   @override
   Future<ApiDataResponse<List<GroupIncidentTypeQuestionDto>>> get(
-      String id, String filter, String branchId) async {
+      String id, String filter, String? branchId) async {
     return await wrapDataCall(() async {
       var result = await dio.get("groups/$id/incidenttypes/questions",
           queryParameters: {"Filter": filter, "BranchId": branchId});

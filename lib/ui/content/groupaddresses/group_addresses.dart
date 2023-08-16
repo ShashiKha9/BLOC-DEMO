@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rescu_organization_portal/ui/content/groupaddresses/copy_branch_address.dart';
+import 'package:rescu_organization_portal/ui/widgets/buttons.dart';
+import 'package:rescu_organization_portal/ui/widgets/spacer_size.dart';
 
 import '../../../data/blocs/group_address_bloc.dart';
 import '../../../data/constants/messages.dart';
@@ -169,15 +172,46 @@ class _GroupAddressesContentState extends State<GroupAddressesContent> {
             }
           }
         },
-        child: SearchableList(
-            searchHint: "Name",
-            searchIcon: const Icon(Icons.search),
-            onSearchSubmitted: (value) {
-              _searchValue = value;
-              context.read<GroupAddressBloc>().add(GetGroupIncidentAddresses(
-                  widget.groupId, _searchValue, _selectedBranchId));
-            },
-            list: _addresses),
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                    child: AppButtonWithIcon(
+                      icon: const Icon(Icons.copy),
+                      onPressed: () async {
+                        Navigator.of(context)
+                            .push(MaterialPageRoute(builder: (ctx) {
+                          return ModalRouteWidget(
+                              stateGenerator: () => CopyBranchAddressModalState(
+                                  groupId: widget.groupId,
+                                  branchId: _selectedBranchId!));
+                        })).then((_) {
+                          // Inform state to refresh the list
+                          context
+                              .read<GroupAddressBloc>()
+                              .add(RefreshAddressList());
+                        });
+                      },
+                      buttonText: "Copy From Branch",
+                    )),
+              ),
+              Expanded(
+                child: SearchableList(
+                    searchHint: "Name",
+                    searchIcon: const Icon(Icons.search),
+                    onSearchSubmitted: (value) {
+                      _searchValue = value;
+                      context.read<GroupAddressBloc>().add(
+                          GetGroupIncidentAddresses(
+                              widget.groupId, _searchValue, _selectedBranchId));
+                    },
+                    list: _addresses),
+              ),
+            ]),
       ),
     );
   }
