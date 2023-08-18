@@ -50,13 +50,14 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
   final LoadingController _loadingController = LoadingController();
   String _searchValue = "";
   final List<AdaptiveListItem> _contacts = [];
+  int _totalIncidentCount = 0;
 
   @override
   void initState() {
     _selectedBranchId = widget.branchId;
-    // context
-    //     .read<GroupIncidentTypeBloc>()
-    //     .add(GetIncidentTypes(_searchValue, _selectedBranchId));
+    context
+        .read<GroupIncidentTypeBloc>()
+        .add(GetIncidentTypesTotalCount(_selectedBranchId));
     super.initState();
   }
 
@@ -79,7 +80,7 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
             } else {
               _loadingController.hide();
               if (state is ClickedFabIconState) {
-                if (_contacts.isNotEmpty && _contacts.length >= 4) {
+                if (_totalIncidentCount >= 4) {
                   ToastDialog.error(
                       "You can add a maximum of 4 incident types.");
                 } else {
@@ -149,17 +150,29 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
                 context
                     .read<GroupIncidentTypeBloc>()
                     .add(GetIncidentTypes(_searchValue, _selectedBranchId));
+                context
+                    .read<GroupIncidentTypeBloc>()
+                    .add(GetIncidentTypesTotalCount(_selectedBranchId));
               }
               if (state is BranchChangedState) {
                 _selectedBranchId = state.branchId;
                 context
                     .read<GroupIncidentTypeBloc>()
                     .add(GetIncidentTypes(_searchValue, _selectedBranchId));
+                context
+                    .read<GroupIncidentTypeBloc>()
+                    .add(GetIncidentTypesTotalCount(_selectedBranchId));
               }
               if (state is RefreshIncidentTypesState) {
                 context
                     .read<GroupIncidentTypeBloc>()
                     .add(GetIncidentTypes(_searchValue, _selectedBranchId));
+                context
+                    .read<GroupIncidentTypeBloc>()
+                    .add(GetIncidentTypesTotalCount(_selectedBranchId));
+              }
+              if (state is IncidentTypeCountLoaded) {
+                _totalIncidentCount = state.count;
               }
             }
           },
@@ -174,13 +187,20 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
                       child: AppButtonWithIcon(
                         icon: const Icon(Icons.copy),
                         onPressed: () async {
+                          if (_totalIncidentCount >= 4) {
+                            ToastDialog.error(
+                                "You can add a maximum of 4 incident types.");
+                            return;
+                          }
                           Navigator.of(context)
                               .push(MaterialPageRoute(builder: (ctx) {
                             return ModalRouteWidget(
                                 stateGenerator: () =>
                                     CopyBranchIncidentTypeModalState(
                                         groupId: widget.groupId,
-                                        branchId: _selectedBranchId!));
+                                        branchId: _selectedBranchId!,
+                                        existingIncidentTypeCount:
+                                            _totalIncidentCount));
                           })).then((_) {
                             // Inform state to refresh the list
                             context

@@ -12,6 +12,7 @@ import 'package:rescu_organization_portal/data/api/group_user_api.dart';
 import 'package:rescu_organization_portal/data/blocs/change_passwod_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/copy_branch_address_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/copy_branch_incident_type_bloc.dart';
+import 'package:rescu_organization_portal/data/blocs/copy_branch_question_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/goup_branch_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_domain_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_incident_type_bloc.dart';
@@ -174,7 +175,10 @@ class DependencyConfiguration {
       BlocProvider<CopyBranchAddressBloc>(
           create: (ctx) => CopyBranchAddressBloc(ctx.read(), ctx.read())),
       BlocProvider<CopyBranchIncidentTypeBloc>(
-          create: (ctx) => CopyBranchIncidentTypeBloc(ctx.read(), ctx.read()))
+          create: (ctx) => CopyBranchIncidentTypeBloc(ctx.read(), ctx.read())),
+      BlocProvider<CopyBranchQuestionBloc>(
+          create: (ctx) =>
+              CopyBranchQuestionBloc(ctx.read(), ctx.read(), ctx.read())),
     ];
   }
 }

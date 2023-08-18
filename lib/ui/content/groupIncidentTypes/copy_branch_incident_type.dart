@@ -13,15 +13,18 @@ import 'package:rescu_organization_portal/ui/widgets/text_input_decoration.dart'
 class CopyBranchIncidentTypeModalState extends BaseModalRouteState {
   final String groupId;
   final String branchId;
+  final int existingIncidentTypeCount;
 
   CopyBranchIncidentTypeModalState(
-      {required this.groupId, required this.branchId});
+      {required this.groupId,
+      required this.branchId,
+      required this.existingIncidentTypeCount});
 
   String? _selectedBranchId;
   List<GroupBranchDto> _branches = [];
   final List<GroupIncidentTypeDto> _selectedIncidentTypes = [];
   List<GroupIncidentTypeDto> _incidentTypeList = [];
-  LoadingController _controller = LoadingController();
+  final LoadingController _controller = LoadingController();
 
   @override
   void initState() {
@@ -132,6 +135,11 @@ class CopyBranchIncidentTypeModalState extends BaseModalRouteState {
   List<AdaptiveItemAction> getActions() {
     return [
       AdaptiveItemAction("SAVE", const Icon(Icons.save), () async {
+        if ((_selectedIncidentTypes.length + existingIncidentTypeCount) > 4) {
+          ToastDialog.error(
+              "Total of existing incident types ($existingIncidentTypeCount) and selected incident types (${_selectedIncidentTypes.length}) cannot be more than 4.");
+          return;
+        }
         context
             .read<CopyBranchIncidentTypeBloc>()
             .add(SaveIncidentTypes(groupId, branchId, _selectedIncidentTypes));

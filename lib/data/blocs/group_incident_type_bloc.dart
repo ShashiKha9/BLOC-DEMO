@@ -76,6 +76,15 @@ class BranchChangedEvent extends GroupIncidentTypeEvent {
 
 class RefreshIncidentTypes extends GroupIncidentTypeEvent {}
 
+class GetIncidentTypesTotalCount extends GroupIncidentTypeEvent {
+  final String? branchId;
+
+  GetIncidentTypesTotalCount(this.branchId);
+
+  @override
+  List<Object?> get props => [branchId];
+}
+
 abstract class GroupIncidentTypeState extends Equatable {
   @override
   List<Object?> get props => [];
@@ -142,6 +151,15 @@ class BranchChangedState extends GroupIncidentTypeState {
 
 class RefreshIncidentTypesState extends GroupIncidentTypeState {}
 
+class IncidentTypeCountLoaded extends GroupIncidentTypeState {
+  final int count;
+
+  IncidentTypeCountLoaded(this.count);
+
+  @override
+  List<Object?> get props => [count];
+}
+
 class GroupIncidentTypeBloc
     extends Bloc<GroupIncidentTypeEvent, GroupIncidentTypeState> {
   final IGroupIncidentTypeApi _api;
@@ -179,6 +197,27 @@ class GroupIncidentTypeBloc
         return;
       }
     }
+
+    if (event is GetIncidentTypesTotalCount) {
+      yield GroupIncidentTypeLoadingState();
+
+      var result = await _api.get('', event.branchId);
+
+      if (result is OkData<List<GroupIncidentTypeDto>>) {
+        if (result.dto.isNotEmpty) {
+          yield IncidentTypeCountLoaded(result.dto.length);
+          return;
+        } else {
+          yield IncidentTypeCountLoaded(0);
+          return;
+        }
+      }
+      if (result is BadData<List<GroupIncidentTypeDto>>) {
+        yield GroupIncidentTypeFailedState(message: result.message);
+        return;
+      }
+    }
+
     if (event is AddIncidentType) {
       yield GroupIncidentTypeLoadingState();
 

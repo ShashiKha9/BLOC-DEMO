@@ -10,6 +10,8 @@ abstract class IGroupIncidentTypeQuestionApi {
       String id, String questionId, GroupIncidentTypeQuestionDto dto);
   Future<ApiDataResponse<GroupIncidentTypeQuestionDto>> getOne(String id);
   Future<ApiResponse> delete(String id, String questionId);
+  Future<ApiResponse> copy(String id, String branchId, String incidentTypeId,
+      List<String> questions);
 }
 
 class GroupIncidentTypeQuestionApi extends BaseApi
@@ -60,6 +62,19 @@ class GroupIncidentTypeQuestionApi extends BaseApi
     return await wrapDataCall(() async {
       var result = await dio.get("groups/incidenttypes/questions/$id");
       return OkData(GroupIncidentTypeQuestionDto.fromJson(result.data));
+    });
+  }
+
+  @override
+  Future<ApiResponse> copy(String id, String branchId, String incidentTypeId,
+      List<String> questions) async {
+    return await wrapCall(() async {
+      await dio.post("groups/$id/questions/copy", data: {
+        "BranchId": branchId,
+        "IncidentTypeId": incidentTypeId,
+        "Questions": questions
+      });
+      return Ok();
     });
   }
 }
