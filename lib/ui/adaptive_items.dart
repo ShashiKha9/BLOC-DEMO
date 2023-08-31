@@ -16,10 +16,11 @@ class AdaptiveListItem {
   final String? subtitle;
   final Widget icon;
   final List<AdaptiveContextualItem> contextualItems;
+  final ShapeBorder? borderDecoration;
   final Function()? onPressed;
 
   AdaptiveListItem(this.title, this.subtitle, this.icon, this.contextualItems,
-      {this.onPressed});
+      {this.onPressed, this.borderDecoration});
 }
 
 abstract class AdaptiveContextualItem {

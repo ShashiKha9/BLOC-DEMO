@@ -25,8 +25,9 @@ Widget roundEdgedButton(
 class AppButton extends StatelessWidget {
   final Function()? onPressed;
   final String? buttonText;
+  final FontWeight? weight;
 
-  const AppButton({Key? key, this.onPressed, this.buttonText})
+  const AppButton({Key? key, this.onPressed, this.buttonText, this.weight})
       : super(key: key);
 
   @override
@@ -35,8 +36,8 @@ class AppButton extends StatelessWidget {
       onPressed: onPressed,
       child: Text(
         buttonText ?? "NEXT",
-        style:
-            const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        style: TextStyle(
+            color: Colors.white, fontWeight: weight ?? FontWeight.w600),
       ),
       style: ButtonStyle(
           backgroundColor:

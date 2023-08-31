@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rescu_organization_portal/ui/widgets/buttons.dart';
+import 'package:rescu_organization_portal/ui/widgets/custom_colors.dart';
+import 'package:rescu_organization_portal/ui/widgets/multi_select_form_field.dart';
 import 'package:rescu_organization_portal/ui/widgets/text_input_decoration.dart';
 
 import '../adaptive_items.dart';
@@ -264,4 +266,44 @@ class ChatCurrentRoute {
   static String getChannelId() {
     return _channelId;
   }
+}
+
+Widget buildMultiSelectFormField(
+    {required BuildContext context,
+    required List<dynamic> items,
+    required Function(dynamic) onSaved,
+    String? title,
+    String? textField,
+    String? valueField,
+    required List<String> initialValue,
+    String? Function(dynamic)? validator,
+    bool? showSelectAll,
+    Key? formKey}) {
+  return Theme(
+      data: Theme.of(context).copyWith(
+          checkboxTheme: CheckboxThemeData(
+            fillColor: MaterialStateProperty.all(Colors.black54),
+          ),
+          textButtonTheme: TextButtonThemeData(
+              style: ButtonStyle(
+            backgroundColor:
+                MaterialStateProperty.all(AppColor.baseBlueBackground),
+            padding: MaterialStateProperty.all(
+                const EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
+            foregroundColor: MaterialStateProperty.all(Colors.white),
+          ))),
+      child: MultiSelectFormField(
+          key: formKey,
+          title: Text(title ?? "Select"),
+          dataSource: items.cast<dynamic>(),
+          hintWidget: const SizedBox(),
+          textField: textField ?? "display",
+          valueField: valueField ?? "value",
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(5.0)),
+          dialogTextStyle: const TextStyle(color: Colors.black87),
+          initialValue: initialValue,
+          trailing: null,
+          onSaved: onSaved,
+          showSelectAllButton: showSelectAll ?? false,
+          validator: validator));
 }
