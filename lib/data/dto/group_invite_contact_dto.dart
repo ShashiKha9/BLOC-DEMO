@@ -10,6 +10,8 @@ class GroupInviteContactDto {
   late String? loginWith;
   late bool? canCloseChat;
   late List<String>? incidentTypeList;
+  late List<String>? branchIds;
+
   GroupInviteContactDto(
       {required this.firstName,
       this.id,
@@ -21,7 +23,8 @@ class GroupInviteContactDto {
       this.designation,
       this.incidentTypeList,
       this.loginWith,
-      this.canCloseChat});
+      this.canCloseChat,
+      this.branchIds});
 
   GroupInviteContactDto.fromJson(Map<String, dynamic> json) {
     id = json['Id'];
@@ -35,6 +38,7 @@ class GroupInviteContactDto {
     loginWith = json["LoginWith"] ?? "";
     incidentTypeList = List<String>.from(json["IncidentTypeList"]);
     canCloseChat = json["CanCloseChat"];
+    branchIds = List<String>.from(json["BranchIds"]);
   }
 
   Map<String, dynamic> toJson() {
@@ -50,6 +54,7 @@ class GroupInviteContactDto {
     data["IncidentTypeList"] = incidentTypeList ?? [];
     data["LoginWith"] = loginWith;
     data["CanCloseChat"] = canCloseChat;
+    data["BranchIds"] = branchIds ?? [];
     return data;
   }
 }

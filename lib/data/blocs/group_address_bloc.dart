@@ -1,7 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rescu_organization_portal/data/api/base_api.dart';
+import 'package:rescu_organization_portal/data/api/group_branch_api.dart';
 import 'package:rescu_organization_portal/data/api/group_info_api.dart';
+import 'package:rescu_organization_portal/data/dto/group_branch_dto.dart';
 import 'package:rescu_organization_portal/data/dto/group_info_dto.dart';
 
 import '../api/group_address_api.dart';
@@ -15,11 +17,12 @@ abstract class GroupAddressEvent extends Equatable {
 class GetGroupIncidentAddresses extends GroupAddressEvent {
   final String? groupId;
   final String? filter;
+  final String? branchId;
 
-  GetGroupIncidentAddresses(this.groupId, this.filter);
+  GetGroupIncidentAddresses(this.groupId, this.filter, this.branchId);
 
   @override
-  List<Object?> get props => [groupId];
+  List<Object?> get props => [groupId, filter, branchId];
 }
 
 class DeleteGroupIncidentAddress extends GroupAddressEvent {
@@ -64,9 +67,30 @@ class UpdateGroupIncidentAddress extends GroupAddressEvent {
   List<Object> get props => [groupId, addressId, address];
 }
 
+class GetBranches extends GroupAddressEvent {
+  final String groupId;
+
+  GetBranches(this.groupId);
+
+  @override
+  List<Object> get props => [groupId];
+}
+
+class BranchChangedEvent extends GroupAddressEvent {
+  final String? branchId;
+
+  BranchChangedEvent(this.branchId);
+
+  @override
+  List<Object?> get props => [branchId];
+}
+
+// This is just a notifier event to refresh the address list
+class RefreshAddressList extends GroupAddressEvent {}
+
 abstract class GroupAddressState extends Equatable {
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class GroupAddressInitialState extends GroupAddressState {}
@@ -103,6 +127,27 @@ class AddressAddedSuccessState extends GroupAddressState {}
 
 class AddressUpdatedSuccessState extends GroupAddressState {}
 
+class GetBranchesSuccessState extends GroupAddressState {
+  final List<GroupBranchDto> branches;
+
+  GetBranchesSuccessState(this.branches);
+
+  @override
+  List<Object> get props => [branches];
+}
+
+class BranchChangedState extends GroupAddressState {
+  final String? branchId;
+
+  BranchChangedState(this.branchId);
+
+  @override
+  List<Object?> get props => [branchId];
+}
+
+// This is just a notifier state to refresh the address list
+class RefreshAddressListState extends GroupAddressState {}
+
 class GroupAddressBloc extends Bloc<GroupAddressEvent, GroupAddressState> {
   final IGroupInfoApi _groupInfoApi;
   final IGroupAddressApi _addressApi;
@@ -127,8 +172,8 @@ class GroupAddressBloc extends Bloc<GroupAddressEvent, GroupAddressState> {
         groupId = event.groupId!;
       }
 
-      var result =
-          await _addressApi.getGroupIncidentAddresses(groupId, event.filter);
+      var result = await _addressApi.getGroupIncidentAddresses(
+          groupId, event.filter, event.branchId);
 
       if (result is OkData<List<GroupAddressDto>>) {
         if (result.dto.isNotEmpty) {
@@ -170,13 +215,24 @@ class GroupAddressBloc extends Bloc<GroupAddressEvent, GroupAddressState> {
         return;
       }
     }
+
+    if (event is BranchChangedEvent) {
+      yield BranchChangedState(event.branchId);
+      return;
+    }
+
+    if (event is RefreshAddressList) {
+      yield RefreshAddressListState();
+      return;
+    }
   }
 }
 
 class AddUpdateGroupAddressBloc
     extends Bloc<GroupAddressEvent, GroupAddressState> {
   final IGroupAddressApi _addressApi;
-  AddUpdateGroupAddressBloc(this._addressApi)
+  final IGroupBranchApi _branchApi;
+  AddUpdateGroupAddressBloc(this._addressApi, this._branchApi)
       : super(GroupAddressInitialState());
 
   @override
@@ -203,6 +259,20 @@ class AddUpdateGroupAddressBloc
 
       if (result is Ok) {
         yield AddressUpdatedSuccessState();
+        return;
+      } else {
+        yield GroupAddressErrorState();
+        return;
+      }
+    }
+
+    if (event is GetBranches) {
+      yield GroupAddressLoadingState();
+
+      var result = await _branchApi.getGroupBranches(event.groupId, '');
+
+      if (result is OkData<List<GroupBranchDto>>) {
+        yield GetBranchesSuccessState(result.dto);
         return;
       } else {
         yield GroupAddressErrorState();

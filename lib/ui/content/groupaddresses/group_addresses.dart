@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rescu_organization_portal/ui/content/groupaddresses/copy_branch_address.dart';
+import 'package:rescu_organization_portal/ui/widgets/buttons.dart';
+import 'package:rescu_organization_portal/ui/widgets/spacer_size.dart';
 
 import '../../../data/blocs/group_address_bloc.dart';
 import '../../../data/constants/messages.dart';
@@ -10,12 +13,14 @@ import '../../widgets/dialogs.dart';
 import '../../widgets/loading_container.dart';
 import 'add_group_address.dart';
 
-class GroupAddressesContent extends StatefulWidget with FloatingActionMixin {
+class GroupAddressesContent extends StatefulWidget
+    with FloatingActionMixin, AppBarBranchSelectionMixin {
   final String groupId;
-  const GroupAddressesContent({
-    Key? key,
-    required this.groupId,
-  }) : super(key: key);
+  final String? selectedBranchId;
+
+  GroupAddressesContent(
+      {Key? key, required this.groupId, this.selectedBranchId})
+      : super(key: key);
 
   @override
   State<GroupAddressesContent> createState() => _GroupAddressesContentState();
@@ -31,23 +36,29 @@ class GroupAddressesContent extends StatefulWidget with FloatingActionMixin {
       return ModalRouteWidget(
           stateGenerator: () => AddUpdateGroupAddressModelState(groupId));
     })).then((_) {
-      context
-          .read<GroupAddressBloc>()
-          .add(GetGroupIncidentAddresses(groupId, ""));
+      // Inform state to refresh the list
+      context.read<GroupAddressBloc>().add(RefreshAddressList());
     });
+  }
+
+  @override
+  void branchSelection(BuildContext context, String? branchId) {
+    // Refresh the list with branchId
+    context.read<GroupAddressBloc>().add(BranchChangedEvent(branchId));
   }
 }
 
 class _GroupAddressesContentState extends State<GroupAddressesContent> {
+  String? _selectedBranchId;
   final LoadingController _loadingController = LoadingController();
   String _searchValue = "";
   final List<AdaptiveListItem> _addresses = [];
 
   @override
   void initState() {
-    context
-        .read<GroupAddressBloc>()
-        .add(GetGroupIncidentAddresses(widget.groupId, _searchValue));
+    _selectedBranchId = widget.selectedBranchId;
+    // context.read<GroupAddressBloc>().add(GetGroupIncidentAddresses(
+    //     widget.groupId, _searchValue, _selectedBranchId));
     super.initState();
   }
 
@@ -71,6 +82,7 @@ class _GroupAddressesContentState extends State<GroupAddressesContent> {
             _loadingController.hide();
             if (state is GetGroupAddressesSuccessState) {
               _addresses.clear();
+              state.addresses.sort((a, b) => b.isDefault ? 1 : -1);
               _addresses.addAll(state.addresses.map((e) {
                 List<AdaptiveContextualItem> contextualItems = [];
                 if (!e.isDefault) {
@@ -95,9 +107,9 @@ class _GroupAddressesContentState extends State<GroupAddressesContent> {
                             widget.groupId,
                             address: e));
                   })).then((_) {
-                    context
-                        .read<GroupAddressBloc>()
-                        .add(GetGroupIncidentAddresses(widget.groupId, ""));
+                    context.read<GroupAddressBloc>().add(
+                        GetGroupIncidentAddresses(
+                            widget.groupId, "", _selectedBranchId));
                   });
                 }));
                 if (!e.isDefault) {
@@ -140,28 +152,66 @@ class _GroupAddressesContentState extends State<GroupAddressesContent> {
             }
             if (state is DeleteGroupAddressSuccessState) {
               ToastDialog.success("Record deleted successfully");
-              context
-                  .read<GroupAddressBloc>()
-                  .add(GetGroupIncidentAddresses(widget.groupId, _searchValue));
+              context.read<GroupAddressBloc>().add(GetGroupIncidentAddresses(
+                  widget.groupId, _searchValue, _selectedBranchId));
             }
             if (state is ChangeDefaultGroupAddressSuccessState) {
               ToastDialog.success("Address updated successfully");
-              context
-                  .read<GroupAddressBloc>()
-                  .add(GetGroupIncidentAddresses(widget.groupId, _searchValue));
+              context.read<GroupAddressBloc>().add(GetGroupIncidentAddresses(
+                  widget.groupId, _searchValue, _selectedBranchId));
+            }
+            if (state is BranchChangedState) {
+              _selectedBranchId = state.branchId;
+              context.read<GroupAddressBloc>().add(GetGroupIncidentAddresses(
+                  widget.groupId, _searchValue, _selectedBranchId));
+            }
+
+            if (state is RefreshAddressListState) {
+              context.read<GroupAddressBloc>().add(GetGroupIncidentAddresses(
+                  widget.groupId, _searchValue, _selectedBranchId));
             }
           }
         },
-        child: SearchableList(
-            searchHint: "Name",
-            searchIcon: const Icon(Icons.search),
-            onSearchSubmitted: (value) {
-              _searchValue = value;
-              context
-                  .read<GroupAddressBloc>()
-                  .add(GetGroupIncidentAddresses(widget.groupId, _searchValue));
-            },
-            list: _addresses),
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                    child: AppButtonWithIcon(
+                      icon: const Icon(Icons.copy),
+                      onPressed: () async {
+                        Navigator.of(context)
+                            .push(MaterialPageRoute(builder: (ctx) {
+                          return ModalRouteWidget(
+                              stateGenerator: () => CopyBranchAddressModalState(
+                                  groupId: widget.groupId,
+                                  branchId: _selectedBranchId!));
+                        })).then((_) {
+                          // Inform state to refresh the list
+                          context
+                              .read<GroupAddressBloc>()
+                              .add(RefreshAddressList());
+                        });
+                      },
+                      buttonText: "Copy From Branch",
+                    )),
+              ),
+              Expanded(
+                child: SearchableList(
+                    searchHint: "Name",
+                    searchIcon: const Icon(Icons.search),
+                    onSearchSubmitted: (value) {
+                      _searchValue = value;
+                      context.read<GroupAddressBloc>().add(
+                          GetGroupIncidentAddresses(
+                              widget.groupId, _searchValue, _selectedBranchId));
+                    },
+                    list: _addresses),
+              ),
+            ]),
       ),
     );
   }

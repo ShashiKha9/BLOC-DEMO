@@ -10,6 +10,7 @@ class GroupIncidentTypeQuestionDto {
   late String? rootQuestionId;
   late String? parentOptionId;
   late List<GroupIncidentTypeQuestionOptionDto>? options;
+  late String? branchId;
 
   GroupIncidentTypeQuestionDto(
       {required this.question,
@@ -20,7 +21,8 @@ class GroupIncidentTypeQuestionDto {
       required this.questionType,
       this.parentOptionId,
       this.options,
-      this.rootQuestionId});
+      this.rootQuestionId,
+      this.branchId});
 
   GroupIncidentTypeQuestionDto.fromJson(Map<String, dynamic> json) {
     id = json["Id"];
@@ -38,6 +40,7 @@ class GroupIncidentTypeQuestionDto {
     questionType = getQuestionType(json["QuestionType"]);
     rootQuestionId = json["RootQuestionId"];
     parentOptionId = json["ParentOptionId"];
+    branchId = json['BranchId'];
   }
 
   Map<String, dynamic> toJson() {
@@ -50,6 +53,7 @@ class GroupIncidentTypeQuestionDto {
     data["QuestionType"] = getQuestionTypeString();
     data["RootQuestionId"] = rootQuestionId;
     data["ParentOptionId"] = parentOptionId;
+    data["BranchId"] = branchId;
     return data;
   }
 

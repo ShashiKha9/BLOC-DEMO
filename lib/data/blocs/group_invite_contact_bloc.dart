@@ -1,9 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rescu_organization_portal/data/api/base_api.dart';
+import 'package:rescu_organization_portal/data/api/group_branch_api.dart';
 import 'package:rescu_organization_portal/data/api/group_incident_type_api.dart';
 import 'package:rescu_organization_portal/data/api/group_info_api.dart';
 import 'package:rescu_organization_portal/data/constants/fleet_user_roles.dart';
+import 'package:rescu_organization_portal/data/dto/group_branch_dto.dart';
 import 'package:rescu_organization_portal/data/dto/group_incident_type_dto.dart';
 import 'package:rescu_organization_portal/data/dto/group_info_dto.dart';
 import 'package:rescu_organization_portal/data/models/group_incident_type_model.dart';
@@ -20,10 +22,11 @@ class GetGroupInviteContacts extends GroupInviteContactEvent {
   final String? groupId;
   final String? filter;
   final String role;
-  GetGroupInviteContacts(this.groupId, this.filter, this.role);
+  final String? branchId;
+  GetGroupInviteContacts(this.groupId, this.filter, this.role, this.branchId);
 
   @override
-  List<Object?> get props => [groupId, filter, role];
+  List<Object?> get props => [groupId, filter, role, branchId];
 }
 
 class GetIncidentTypes extends GroupInviteContactEvent {
@@ -77,6 +80,27 @@ class ActivateDeactivateGroupInviteContact extends GroupInviteContactEvent {
   @override
   List<Object> get props => [groupId, inviteId, contact];
 }
+
+class GetBranches extends GroupInviteContactEvent {
+  final String groupId;
+
+  GetBranches(this.groupId);
+
+  @override
+  List<Object?> get props => [groupId];
+}
+
+class BranchChangedEvent extends GroupInviteContactEvent {
+  final String? branchId;
+
+  BranchChangedEvent(this.branchId);
+
+  @override
+  List<Object?> get props => [branchId];
+}
+
+// This is just a notifier event to refresh the address list
+class RefreshContactList extends GroupInviteContactEvent {}
 
 abstract class GroupInviteContactState extends Equatable {
   @override
@@ -133,6 +157,27 @@ class GetIncidentTypeSuccessState extends GroupInviteContactState {
   List<Object?> get props => [model];
 }
 
+class GetBranchesSuccessState extends GroupInviteContactState {
+  final List<GroupBranchDto> branches;
+
+  GetBranchesSuccessState(this.branches);
+
+  @override
+  List<Object?> get props => [branches];
+}
+
+class BranchChangedState extends GroupInviteContactState {
+  final String? branchId;
+
+  BranchChangedState(this.branchId);
+
+  @override
+  List<Object?> get props => [branchId];
+}
+
+// This is just a notifier state to refresh the address list
+class RefreshContactListState extends GroupInviteContactState {}
+
 class GroupInviteContactBloc
     extends Bloc<GroupInviteContactEvent, GroupInviteContactState> {
   final IGroupInfoApi _groupInfoApi;
@@ -160,12 +205,15 @@ class GroupInviteContactBloc
       }
 
       var result = await _contactsApi.getGroupInviteContacts(
-          groupId, event.filter, event.role);
+          groupId, event.filter, event.role, event.branchId);
 
       if (result is OkData<List<GroupInviteContactDto>>) {
         if (event.role == FleetUserRoles.contact) {
           var adminResult = await _contactsApi.getGroupInviteContacts(
-              event.groupId!, event.filter, FleetUserRoles.admin);
+              event.groupId!,
+              event.filter,
+              FleetUserRoles.admin,
+              event.branchId);
           if (adminResult is OkData<List<GroupInviteContactDto>> &&
               adminResult.dto.isNotEmpty) {
             result.dto.add(adminResult.dto.first);
@@ -212,6 +260,16 @@ class GroupInviteContactBloc
         return;
       }
     }
+
+    if (event is BranchChangedEvent) {
+      yield BranchChangedState(event.branchId);
+      return;
+    }
+
+    if (event is RefreshContactList) {
+      yield RefreshContactListState();
+      return;
+    }
   }
 }
 
@@ -219,7 +277,9 @@ class AddUpdateGroupInviteContactBloc
     extends Bloc<GroupInviteContactEvent, GroupInviteContactState> {
   final IGroupInviteContactsApi _contactsApi;
   final IGroupIncidentTypeApi _incidentTypeApi;
-  AddUpdateGroupInviteContactBloc(this._contactsApi, this._incidentTypeApi)
+  final IGroupBranchApi _groupBranchApi;
+  AddUpdateGroupInviteContactBloc(
+      this._contactsApi, this._incidentTypeApi, this._groupBranchApi)
       : super(GroupInviteContactInitialState());
 
   @override
@@ -262,11 +322,23 @@ class AddUpdateGroupInviteContactBloc
     if (event is GetIncidentTypes) {
       yield GroupInviteContactLoadingState();
 
-      var result = await _incidentTypeApi.get(event.filter ?? "");
+      var result = await _incidentTypeApi.get(event.filter ?? "", null);
       if (result is OkData<List<GroupIncidentTypeDto>>) {
         yield GetIncidentTypeSuccessState(
             result.dto.map((e) => GroupIncidentTypeModel.fromDto(e)).toList());
       } else if (result is BadData<List<GroupIncidentTypeDto>>) {
+        yield GroupInviteContactErrorState(error: result.message);
+      } else {
+        yield GroupInviteContactErrorState();
+      }
+    }
+    if (event is GetBranches) {
+      yield GroupInviteContactLoadingState();
+
+      var result = await _groupBranchApi.getGroupBranches(event.groupId, "");
+      if (result is OkData<List<GroupBranchDto>>) {
+        yield GetBranchesSuccessState(result.dto);
+      } else if (result is BadData<List<GroupBranchDto>>) {
         yield GroupInviteContactErrorState(error: result.message);
       } else {
         yield GroupInviteContactErrorState();

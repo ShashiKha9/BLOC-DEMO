@@ -3,7 +3,8 @@ import 'package:rescu_organization_portal/data/api/base_api.dart';
 import 'package:rescu_organization_portal/data/dto/group_incident_type_dto.dart';
 
 abstract class IGroupIncidentTypeApi {
-  Future<ApiDataResponse<List<GroupIncidentTypeDto>>> get(String filter);
+  Future<ApiDataResponse<List<GroupIncidentTypeDto>>> get(
+      String filter, String? branchId);
   Future<ApiResponse> add(String id, GroupIncidentTypeDto dto);
   Future<ApiResponse> update(
       String id, String incidentId, GroupIncidentTypeDto dto);
@@ -14,9 +15,11 @@ class GroupIncidentTypeApi extends BaseApi implements IGroupIncidentTypeApi {
   GroupIncidentTypeApi(Dio dio) : super(dio);
 
   @override
-  Future<ApiDataResponse<List<GroupIncidentTypeDto>>> get(String filter) async {
+  Future<ApiDataResponse<List<GroupIncidentTypeDto>>> get(
+      String filter, String? branchId) async {
     return await wrapDataCall(() async {
-      var result = await dio.get("groups/incidenttypes?Filter=$filter");
+      var result = await dio.get("groups/incidenttypes",
+          queryParameters: {"Filter": filter, "BranchId": branchId});
       return OkData((result.data as Iterable)
           .map((e) => GroupIncidentTypeDto.fromJson(e))
           .toList());

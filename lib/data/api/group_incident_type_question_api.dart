@@ -4,12 +4,14 @@ import 'package:rescu_organization_portal/data/dto/group_incident_type_question_
 
 abstract class IGroupIncidentTypeQuestionApi {
   Future<ApiDataResponse<List<GroupIncidentTypeQuestionDto>>> get(
-      String id, String filter);
+      String id, String filter, String? branchId);
   Future<ApiResponse> add(String id, GroupIncidentTypeQuestionDto dto);
   Future<ApiResponse> update(
       String id, String questionId, GroupIncidentTypeQuestionDto dto);
   Future<ApiDataResponse<GroupIncidentTypeQuestionDto>> getOne(String id);
   Future<ApiResponse> delete(String id, String questionId);
+  Future<ApiResponse> copy(String id, String branchId, String incidentTypeId,
+      List<String> questions);
 }
 
 class GroupIncidentTypeQuestionApi extends BaseApi
@@ -18,10 +20,10 @@ class GroupIncidentTypeQuestionApi extends BaseApi
 
   @override
   Future<ApiDataResponse<List<GroupIncidentTypeQuestionDto>>> get(
-      String id, String filter) async {
+      String id, String filter, String? branchId) async {
     return await wrapDataCall(() async {
-      var result =
-          await dio.get("groups/$id/incidenttypes/questions?Filter=$filter");
+      var result = await dio.get("groups/$id/incidenttypes/questions",
+          queryParameters: {"Filter": filter, "BranchId": branchId});
       return OkData((result.data as Iterable)
           .map((e) => GroupIncidentTypeQuestionDto.fromJson(e))
           .toList());
@@ -60,6 +62,19 @@ class GroupIncidentTypeQuestionApi extends BaseApi
     return await wrapDataCall(() async {
       var result = await dio.get("groups/incidenttypes/questions/$id");
       return OkData(GroupIncidentTypeQuestionDto.fromJson(result.data));
+    });
+  }
+
+  @override
+  Future<ApiResponse> copy(String id, String branchId, String incidentTypeId,
+      List<String> questions) async {
+    return await wrapCall(() async {
+      await dio.post("groups/$id/questions/copy", data: {
+        "BranchId": branchId,
+        "IncidentTypeId": incidentTypeId,
+        "Questions": questions
+      });
+      return Ok();
     });
   }
 }

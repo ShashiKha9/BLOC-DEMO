@@ -13,12 +13,12 @@ import '../../widgets/loading_container.dart';
 import 'add_group_invite_contact.dart';
 
 class GroupInviteContactsContent extends StatefulWidget
-    with FloatingActionMixin {
+    with FloatingActionMixin, AppBarBranchSelectionMixin {
   final String groupId;
-  const GroupInviteContactsContent({
-    Key? key,
-    required this.groupId,
-  }) : super(key: key);
+  final String? branchId;
+  const GroupInviteContactsContent(
+      {Key? key, required this.groupId, required this.branchId})
+      : super(key: key);
 
   @override
   State<GroupInviteContactsContent> createState() =>
@@ -35,23 +35,28 @@ class GroupInviteContactsContent extends StatefulWidget
       return ModalRouteWidget(
           stateGenerator: () => AddUpdateGroupInviteContactModelState(groupId));
     })).then((_) {
-      context
-          .read<GroupInviteContactBloc>()
-          .add(GetGroupInviteContacts(groupId, "", FleetUserRoles.fleet));
+      context.read<GroupInviteContactBloc>().add(RefreshContactList());
     });
+  }
+
+  @override
+  void branchSelection(BuildContext context, String? branchId) {
+    context.read<GroupInviteContactBloc>().add(BranchChangedEvent(branchId));
   }
 }
 
 class _GroupInviteContactsContentState
     extends State<GroupInviteContactsContent> {
+  String? _selectedBranchId;
   final LoadingController _loadingController = LoadingController();
   String _searchValue = "";
   final List<AdaptiveListItem> _contacts = [];
 
   @override
   void initState() {
-    context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
-        widget.groupId, _searchValue, FleetUserRoles.fleet));
+    _selectedBranchId = widget.branchId;
+    // context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
+    //     widget.groupId, _searchValue, FleetUserRoles.fleet, _selectedBranchId));
     super.initState();
   }
 
@@ -87,8 +92,8 @@ class _GroupInviteContactsContentState
                                 contact: e));
                   })).then((_) {
                     context.read<GroupInviteContactBloc>().add(
-                        GetGroupInviteContacts(
-                            widget.groupId, "", FleetUserRoles.fleet));
+                        GetGroupInviteContacts(widget.groupId, "",
+                            FleetUserRoles.fleet, _selectedBranchId));
                   });
                 }));
                 contextualItems.add(AdaptiveItemButton(
@@ -141,12 +146,34 @@ class _GroupInviteContactsContentState
             if (state is DeleteGroupInviteContactSuccessState) {
               ToastDialog.success("Record deleted successfully");
               context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
-                  widget.groupId, _searchValue, FleetUserRoles.fleet));
+                  widget.groupId,
+                  _searchValue,
+                  FleetUserRoles.fleet,
+                  _selectedBranchId));
             }
             if (state is ActivateDeActivateContactSuccessState) {
               ToastDialog.success("Record updated successfully");
               context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
-                  widget.groupId, _searchValue, FleetUserRoles.fleet));
+                  widget.groupId,
+                  _searchValue,
+                  FleetUserRoles.fleet,
+                  _selectedBranchId));
+            }
+            if (state is BranchChangedState) {
+              _selectedBranchId = state.branchId;
+              context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
+                  widget.groupId,
+                  _searchValue,
+                  FleetUserRoles.fleet,
+                  _selectedBranchId));
+            }
+
+            if (state is RefreshContactList) {
+              context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
+                  widget.groupId,
+                  _searchValue,
+                  FleetUserRoles.fleet,
+                  _selectedBranchId));
             }
           }
         },
@@ -156,7 +183,10 @@ class _GroupInviteContactsContentState
             onSearchSubmitted: (value) {
               _searchValue = value;
               context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
-                  widget.groupId, _searchValue, FleetUserRoles.fleet));
+                  widget.groupId,
+                  _searchValue,
+                  FleetUserRoles.fleet,
+                  _selectedBranchId));
             },
             list: _contacts),
       ),

@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:rescu_organization_portal/data/blocs/group_incident_type_bloc.dart';
 import 'package:rescu_organization_portal/data/constants/messages.dart';
+import 'package:rescu_organization_portal/data/dto/group_branch_dto.dart';
 import 'package:rescu_organization_portal/data/models/group_incident_type_model.dart';
 import 'package:rescu_organization_portal/ui/adaptive_items.dart';
 import 'package:rescu_organization_portal/ui/widgets/buttons.dart';
@@ -27,6 +28,11 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
   final TextEditingController _descriptionController = TextEditingController();
   Icon? _icon;
 
+  List<GroupBranchDto> _branches = [];
+  List<GroupBranchDto> _selectedBranches = [];
+
+  final multiSelectState = GlobalKey<FormFieldState>();
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +45,8 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
             )
           : null;
     }
+
+    context.read<GroupIncidentTypeBloc>().add(GetBranches(groupId, ""));
   }
 
   @override
@@ -77,6 +85,11 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
             ToastDialog.success("Incident Type updated successfully");
             Navigator.of(context).pop();
           }
+          if (state is GetBranchesSuccessState) {
+            setState(() {
+              _branches = state.model;
+            });
+          }
         }
       },
       child: Form(
@@ -87,6 +100,34 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (incidentType == null)
+                buildMultiSelectFormField(
+                  context: context,
+                  formKey: multiSelectState,
+                  showSelectAll: true,
+                  items: _branches
+                      .map((e) => {
+                            "display": e.name,
+                            "value": e.id.toString(),
+                          })
+                      .toList(),
+                  onSaved: (value) {
+                    if (value == null) return;
+                    _selectedBranches = _branches
+                        .where((element) => value.contains(element.id))
+                        .toList();
+                  },
+                  title: "Select Branches",
+                  initialValue:
+                      _selectedBranches.map((e) => e.id.toString()).toList(),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Please select branches";
+                    }
+                    return null;
+                  },
+                ),
+              if (incidentType == null) SpacerSize.at(1.5),
               TextFormField(
                   decoration: TextInputDecoration(labelText: "Name"),
                   controller: _nameController,
@@ -141,16 +182,18 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
         if (!_formKey.currentState!.validate()) return;
         FocusScope.of(context).unfocus();
         var addIncidentType = GroupIncidentTypeModel(
-          groupId: groupId,
-          name: _nameController.text,
-          description: _descriptionController.text,
-          iconData:
-              _icon != null ? jsonEncode(serializeIcon(_icon!.icon!)) : null,
-        );
+            groupId: groupId,
+            name: _nameController.text,
+            description: _descriptionController.text,
+            iconData:
+                _icon != null ? jsonEncode(serializeIcon(_icon!.icon!)) : null,
+            branchId: incidentType?.branchId);
         if (incidentType != null && incidentType!.id != null) {
           context.read<GroupIncidentTypeBloc>().add(
               UpdateIncidentType(groupId, incidentType!.id!, addIncidentType));
         } else {
+          addIncidentType.branches =
+              _selectedBranches.map((e) => e.id!).toList();
           context
               .read<GroupIncidentTypeBloc>()
               .add(AddIncidentType(groupId, addIncidentType));

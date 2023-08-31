@@ -91,7 +91,7 @@ class ViewGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
                                                           groupId,
                                                           parentOption: e,
                                                           rootQuestion:
-                                                              questionDto));
+                                                              rootQuestion));
                                             })).then((_) {
                                               context
                                                   .read<
@@ -161,7 +161,7 @@ class ViewGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
             stateGenerator: () => AddUpdateGroupIncidentTypeQuestionModelState(
                 groupId,
                 questionDto: e,
-                rootQuestion: questionDto));
+                rootQuestion: rootQuestion));
       })).then((_) {
         context
             .read<GroupIncidentTypeQuestionBloc>()
