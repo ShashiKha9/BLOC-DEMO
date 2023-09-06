@@ -26,7 +26,7 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
   final TextEditingController _nameController = TextEditingController();
 
   final TextEditingController _descriptionController = TextEditingController();
-  Icon? _icon;
+  Icon _icon = const Icon(Icons.report);
 
   List<GroupBranchDto> _branches = [];
   List<GroupBranchDto> _selectedBranches = [];
@@ -39,11 +39,11 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
     if (incidentType != null && incidentType?.id != null) {
       _nameController.text = incidentType!.name;
       _descriptionController.text = incidentType!.description;
-      _icon = incidentType!.iconData != null
-          ? Icon(
-              deserializeIcon(jsonDecode(incidentType!.iconData!)),
-            )
-          : null;
+      if (incidentType!.iconData != null) {
+        _icon = Icon(
+          deserializeIcon(jsonDecode(incidentType!.iconData!)),
+        );
+      }
     }
 
     context.read<GroupIncidentTypeBloc>().add(GetBranches(groupId, ""));
@@ -59,9 +59,10 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
     IconData? icon = await FlutterIconPicker.showIconPicker(context,
         iconPackModes: [IconPack.material, IconPack.fontAwesomeIcons],
         backgroundColor: AppColor.baseBackground);
-
-    _icon = Icon(icon);
-    setState(() {});
+    if (icon != null) {
+      _icon = Icon(icon);
+      setState(() {});
+    }
   }
 
   @override
@@ -158,7 +159,7 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
                 children: [
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
-                    child: _icon ?? Container(),
+                    child: _icon,
                   ),
                   const SizedBox(width: 10),
                   AppButton(
@@ -185,8 +186,7 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
             groupId: groupId,
             name: _nameController.text,
             description: _descriptionController.text,
-            iconData:
-                _icon != null ? jsonEncode(serializeIcon(_icon!.icon!)) : null,
+            iconData: jsonEncode(serializeIcon(_icon.icon!)),
             branchId: incidentType?.branchId);
         if (incidentType != null && incidentType!.id != null) {
           context.read<GroupIncidentTypeBloc>().add(
