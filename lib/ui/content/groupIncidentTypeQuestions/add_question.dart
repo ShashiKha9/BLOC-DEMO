@@ -44,8 +44,6 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
   List<GroupBranchDto> _branches = [];
   GroupBranchDto? _selectedBranch;
 
-  final _multiSelectFieldKey = GlobalKey<FormFieldState>();
-
   @override
   void initState() {
     super.initState();

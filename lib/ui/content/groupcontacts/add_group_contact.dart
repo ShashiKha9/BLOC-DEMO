@@ -32,7 +32,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
   bool _validMobileNumber = false;
   late List<GroupIncidentTypeModel> _incidentList = [];
   late List<GroupIncidentTypeModel> _preSelectedIncidents = [];
-  List<GroupIncidentTypeModel> _selectedIncidents = [];
+  final List<GroupIncidentTypeModel> _selectedIncidents = [];
   List<GroupBranchDto> _branches = [];
   List<GroupBranchDto> _selectedBranches = [];
   String _selectedLoginMode = "Phone";
@@ -337,6 +337,10 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
       AdaptiveItemAction("SAVE", const Icon(Icons.save), () async {
         if (!_formKey.currentState!.validate()) return;
         FocusScope.of(context).unfocus();
+        if (_selectedBranches.isEmpty) {
+          ToastDialog.error("Please select at least one branch.");
+          return;
+        }
         var formattedMobileNumber = await PhoneNumberUtility.parseToE164Format(
             phoneNumber: _phoneNumberController.text);
         _selectedIncidents.removeWhere((element) => element.id == 'all');

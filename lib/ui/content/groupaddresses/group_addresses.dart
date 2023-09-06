@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rescu_organization_portal/ui/content/groupaddresses/copy_branch_address.dart';
 import 'package:rescu_organization_portal/ui/widgets/buttons.dart';
-import 'package:rescu_organization_portal/ui/widgets/spacer_size.dart';
 
 import '../../../data/blocs/group_address_bloc.dart';
 import '../../../data/constants/messages.dart';

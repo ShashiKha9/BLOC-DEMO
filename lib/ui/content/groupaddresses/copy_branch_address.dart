@@ -21,7 +21,7 @@ class CopyBranchAddressModalState extends BaseModalRouteState {
   List<GroupBranchDto> _branches = [];
   final List<GroupAddressDto> _selectedAddresses = [];
   List<GroupAddressDto> _addressList = [];
-  LoadingController _controller = LoadingController();
+  final LoadingController _controller = LoadingController();
 
   @override
   void initState() {

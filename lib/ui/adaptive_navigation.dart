@@ -11,7 +11,6 @@ import 'package:rescu_organization_portal/ui/content/groupIncidentTypeQuestions/
 import 'package:rescu_organization_portal/ui/content/groupIncidentTypes/group_incident_types.dart';
 import 'package:rescu_organization_portal/ui/content/login/login_route.dart';
 import 'package:rescu_organization_portal/ui/content/users/users.dart';
-import 'package:rescu_organization_portal/ui/widgets/text_input_decoration.dart';
 import '../data/api/base_api.dart';
 import '../data/dto/group_info_dto.dart';
 import 'adaptive_utils.dart';
@@ -81,7 +80,6 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
   ValueNotifier<NavigationItem>? navigationNotifier;
 
   bool _screenLoaded = false;
-  bool _isFleetUser = false;
   List<GroupBranchDto>? _branches;
   ValueNotifier<String?>? _selectedBranch;
 
@@ -94,7 +92,6 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
   void _determineMenuItems() async {
     var result = await context.read<IGroupInfoApi>().getLoggedInUserGroup();
     if (result is OkData<GroupInfoDto> && result.dto.isFleetUser()) {
-      _isFleetUser = true;
       var branchRes = await context
           .read<IGroupBranchApi>()
           .getGroupBranches(result.dto.id, "");
