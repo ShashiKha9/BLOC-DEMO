@@ -146,7 +146,7 @@ class _GroupAddressesContentState extends State<GroupAddressesContent> {
             }
             if (state is GetGroupAddressesNotFoundState) {
               _addresses.clear();
-              ToastDialog.success("No records found");
+              ToastDialog.warning("At least one address is require to send dispatches.");
               setState(() {});
             }
             if (state is DeleteGroupAddressSuccessState) {
