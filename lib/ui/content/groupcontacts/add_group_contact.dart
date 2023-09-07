@@ -108,6 +108,8 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                 _preSelectedIncidents = _incidentList
                     .where((e) => contact!.incidentTypeList!.contains(e.id))
                     .toList();
+                _selectedIncidents.clear();
+                _selectedIncidents.addAll(_preSelectedIncidents);
               }
             });
           }
