@@ -37,6 +37,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
   List<GroupBranchDto> _selectedBranches = [];
   String _selectedLoginMode = "Phone";
   bool _canCloseChat = false;
+  bool _emailAndLoginWithReadOnly = false;
 
   @override
   void initState() {
@@ -50,6 +51,9 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
       _canCloseChat = contact!.canCloseChat ?? false;
       _validateContactNumber(contact!.phoneNumber);
       _selectedLoginMode = contact!.loginWith ?? "Phone";
+      if (contact!.role == 'Admin') {
+        _emailAndLoginWithReadOnly = true;
+      }
     }
     context.read<AddUpdateGroupInviteContactBloc>().add(GetIncidentTypes(""));
     context.read<AddUpdateGroupInviteContactBloc>().add(GetBranches(groupId));
@@ -136,8 +140,8 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
         autovalidateMode: AutovalidateMode.onUserInteraction,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: ListView(
+            //crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextFormField(
                   decoration: TextInputDecoration(labelText: "First Name"),
@@ -186,6 +190,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
               TextFormField(
                   decoration: TextInputDecoration(labelText: "Email"),
                   controller: _emailController,
+                  readOnly: _emailAndLoginWithReadOnly,
                   validator: (value) {
                     if (value?.isEmpty ?? true) {
                       return null;
@@ -219,11 +224,17 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                       decoration: TextInputDecoration(labelText: "Login With"),
                       hint: const Text("Login With"),
                       value: _selectedLoginMode,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedLoginMode = value ?? "Phone";
-                        });
-                      },
+                      disabledHint: _emailAndLoginWithReadOnly
+                          ? const Text(
+                              "Login with change not allowed for admin users.")
+                          : null,
+                      onChanged: _emailAndLoginWithReadOnly
+                          ? null
+                          : (value) {
+                              setState(() {
+                                _selectedLoginMode = value ?? "Phone";
+                              });
+                            },
                       validator: (value) {
                         return null;
                       },
@@ -292,8 +303,8 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                                       children: [
                                         _selectedBranches.contains(e)
                                             ? const Icon(Icons.check_box)
-                                            : const Icon(
-                                                Icons.check_box_outline_blank),
+                                            : const Icon(Icons
+                                                .check_box_outline_blank),
                                         const SizedBox(
                                           width: 10,
                                         ),
@@ -362,6 +373,10 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
             ],
             branchIds: _selectedBranches.map((e) => e.id!).toList());
         if (contact != null && contact!.id != null) {
+          if (contact!.role == "Admin") {
+            addContact.email = contact!.email;
+            addContact.loginWith = contact!.loginWith;
+          }
           context
               .read<AddUpdateGroupInviteContactBloc>()
               .add(UpdateGroupInviteContact(groupId, contact!.id!, addContact));

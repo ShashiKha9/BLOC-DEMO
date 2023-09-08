@@ -109,22 +109,20 @@ class _GroupInviteContactsContentState
                             lastName: e.lastName,
                             phoneNumber: e.phoneNumber,
                             isActive: !e.isActive,
+                            branchIds: e.branchIds,
+                            canCloseChat: e.canCloseChat,
+                            designation: e.designation,
+                            email: e.email,
+                            id: e.id,
+                            incidentTypeList: e.incidentTypeList,
+                            loginWith: e.loginWith,
                             role: FleetUserRoles.fleet);
                         context.read<GroupInviteContactBloc>().add(
                             ActivateDeactivateGroupInviteContact(
                                 widget.groupId, e.id!, updateContact));
                       });
                 }));
-                // contextualItems.add(AdaptiveItemButton(
-                //     "Delete", const Icon(Icons.delete), () async {
-                //   showConfirmationDialog(
-                //       context: context,
-                //       body: "Are you sure you want to this record?",
-                //       onPressedOk: () {
-                //         context.read<GroupInviteContactBloc>().add(
-                //             DeleteGroupInviteContact(widget.groupId, e.id!));
-                //       });
-                // }));
+                
                 return AdaptiveListItem(
                     "Name: ${e.firstName} ${e.lastName}",
                     "Contact Number: ${e.phoneNumber}\nEmail: ${e.email}",
