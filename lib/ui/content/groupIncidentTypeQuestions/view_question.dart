@@ -50,64 +50,66 @@ class ViewGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
       },
       child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: questionDto.options != null &&
-                      questionDto.options!.isNotEmpty
-                  ? [
-                      const Text(
-                        "Single Picklist Options",
-                        style: TextStyle(fontSize: 20),
-                      ),
-                      const Divider(
-                        thickness: 1,
-                      ),
-                      SpacerSize.at(2.5),
-                      ...questionDto.options!
-                          .map((e) => Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    e.optionText,
-                                    style: const TextStyle(fontSize: 18),
-                                  ),
-                                  const Divider(
-                                    thickness: 2,
-                                  ),
-                                  e.childQuestions != null &&
-                                          e.childQuestions!.isNotEmpty
-                                      ? AdaptiveListTile(
-                                          item: _getQuestionListItem(
-                                              e.childQuestions!.first))
-                                      : AppButtonWithIcon(
-                                          icon: const Icon(Icons.add),
-                                          onPressed: () async {
-                                            Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                    builder: (ctx) {
-                                              return ModalRouteWidget(
-                                                  stateGenerator: () =>
-                                                      AddUpdateGroupIncidentTypeQuestionModelState(
-                                                          groupId,
-                                                          parentOption: e,
-                                                          rootQuestion:
-                                                              rootQuestion));
-                                            })).then((_) {
-                                              context
-                                                  .read<
-                                                      GroupIncidentTypeQuestionBloc>()
-                                                  .add(GetQuestion(
-                                                      questionDto.id!));
-                                            });
-                                          },
-                                          buttonText: "Add Question",
-                                        ),
-                                  SpacerSize.at(1.5)
-                                ],
-                              ))
-                          .toList(),
-                    ]
-                  : [Text(questionDto.getQuestionTypeString())])),
+          child: SingleChildScrollView(
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: questionDto.options != null &&
+                        questionDto.options!.isNotEmpty
+                    ? [
+                        const Text(
+                          "Single Picklist Options",
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        const Divider(
+                          thickness: 1,
+                        ),
+                        SpacerSize.at(2.5),
+                        ...questionDto.options!
+                            .map((e) => Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      e.optionText,
+                                      style: const TextStyle(fontSize: 18),
+                                    ),
+                                    const Divider(
+                                      thickness: 2,
+                                    ),
+                                    e.childQuestions != null &&
+                                            e.childQuestions!.isNotEmpty
+                                        ? AdaptiveListTile(
+                                            item: _getQuestionListItem(
+                                                e.childQuestions!.first))
+                                        : AppButtonWithIcon(
+                                            icon: const Icon(Icons.add),
+                                            onPressed: () async {
+                                              Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                      builder: (ctx) {
+                                                return ModalRouteWidget(
+                                                    stateGenerator: () =>
+                                                        AddUpdateGroupIncidentTypeQuestionModelState(
+                                                            groupId,
+                                                            parentOption: e,
+                                                            rootQuestion:
+                                                                rootQuestion));
+                                              })).then((_) {
+                                                context
+                                                    .read<
+                                                        GroupIncidentTypeQuestionBloc>()
+                                                    .add(GetQuestion(
+                                                        questionDto.id!));
+                                              });
+                                            },
+                                            buttonText: "Add Question",
+                                          ),
+                                    SpacerSize.at(1.5)
+                                  ],
+                                ))
+                            .toList(),
+                      ]
+                    : [Text(questionDto.getQuestionTypeString())]),
+          )),
     );
   }
 
