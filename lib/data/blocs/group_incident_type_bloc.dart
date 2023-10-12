@@ -290,11 +290,13 @@ class GroupIncidentTypeBloc
     }
 
     if (event is BranchChangedEvent) {
+      yield GroupIncidentTypeLoadingState();
       yield BranchChangedState(event.branchId);
       return;
     }
 
     if (event is RefreshIncidentTypes) {
+      yield GroupIncidentTypeLoadingState();
       yield RefreshIncidentTypesState();
       return;
     }

@@ -217,11 +217,13 @@ class GroupAddressBloc extends Bloc<GroupAddressEvent, GroupAddressState> {
     }
 
     if (event is BranchChangedEvent) {
+      yield GroupAddressLoadingState();
       yield BranchChangedState(event.branchId);
       return;
     }
 
     if (event is RefreshAddressList) {
+      yield GroupAddressLoadingState();
       yield RefreshAddressListState();
       return;
     }

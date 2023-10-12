@@ -262,11 +262,13 @@ class GroupInviteContactBloc
     }
 
     if (event is BranchChangedEvent) {
+      yield GroupInviteContactLoadingState();
       yield BranchChangedState(event.branchId);
       return;
     }
 
     if (event is RefreshContactList) {
+      yield GroupInviteContactLoadingState();
       yield RefreshContactListState();
       return;
     }
