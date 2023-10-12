@@ -170,7 +170,7 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
         if (item is ContentNavigationItem) {
           viewNotifier!.value = item.content;
           if (item.content is AppBarBranchSelectionMixin) {
-            Future.delayed(const Duration(milliseconds: 10), (() {
+            Future.delayed(const Duration(milliseconds: 300), (() {
               (item.content as AppBarBranchSelectionMixin)
                   .branchSelection(context, _selectedBranch!.value);
             }));
@@ -178,6 +178,16 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
         }
       });
     });
+
+    var item = navigationNotifier!.value;
+    if (item is ContentNavigationItem) {
+      if (item.content is AppBarBranchSelectionMixin) {
+        Future.delayed(const Duration(milliseconds: 300), (() {
+          (item.content as AppBarBranchSelectionMixin)
+              .branchSelection(context, _selectedBranch!.value);
+        }));
+      }
+    }
 
     setState(() {});
   }

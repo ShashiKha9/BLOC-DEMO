@@ -54,11 +54,11 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
   @override
   void initState() {
     _selectedBranchId = widget.branchId;
-    context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
-        widget.groupId,
-        _searchValue,
-        FleetUserRoles.contact,
-        _selectedBranchId));
+    // context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
+    //     widget.groupId,
+    //     _searchValue,
+    //     FleetUserRoles.contact,
+    //     _selectedBranchId));
     super.initState();
   }
 

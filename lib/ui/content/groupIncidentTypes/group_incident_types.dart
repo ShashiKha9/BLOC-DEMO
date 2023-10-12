@@ -55,9 +55,9 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
   @override
   void initState() {
     _selectedBranchId = widget.branchId;
-    context
-        .read<GroupIncidentTypeBloc>()
-        .add(GetIncidentTypesTotalCount(_selectedBranchId));
+    // context
+    //     .read<GroupIncidentTypeBloc>()
+    //     .add(GetIncidentTypesTotalCount(_selectedBranchId));
     super.initState();
   }
 

@@ -288,11 +288,15 @@ class GroupIncidentTypeQuestionBloc extends Bloc<GroupIncidentTypeQuestionEvent,
     }
 
     if (event is BranchChangedEvent) {
+      yield GroupIncidentTypeQuestionLoadingState();
       yield BranchChangedState(event.branchId);
+      return;
     }
 
     if (event is RefreshQuestions) {
+      yield GroupIncidentTypeQuestionLoadingState();
       yield RefreshQuestionsState();
+      return;
     }
   }
 }
