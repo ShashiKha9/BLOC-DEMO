@@ -80,8 +80,8 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
   ValueNotifier<NavigationItem>? navigationNotifier;
 
   bool _screenLoaded = false;
-  List<GroupBranchDto>? _branches;
-  ValueNotifier<String?>? _selectedBranch;
+  List<GroupBranchDto>? _branches = [];
+  ValueNotifier<String?>? _selectedBranch = ValueNotifier("");
 
   @override
   void initState() {
