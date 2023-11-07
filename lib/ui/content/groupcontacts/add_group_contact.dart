@@ -265,13 +265,13 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                           _canCloseChat = !_canCloseChat;
                         });
                       },
-                      child: const Text("Can close incident"))
+                      child: const Text("Allow user to close all incidents"))
                 ],
               ),
               if (contact == null || contact!.role != 'Admin')
                 SpacerSize.at(1.5),
               if (contact == null || contact!.role != 'Admin')
-                const Text("Select Branches"),
+                const Text("Assign branches to user"),
               if (contact == null || contact!.role != 'Admin') SpacerSize.at(1),
               if (contact == null || contact!.role != 'Admin')
                 Column(
@@ -436,11 +436,12 @@ class _IncidentTypeSelectionState extends State<IncidentTypeSelection> {
       constraints:
           BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.6),
       margin: const EdgeInsets.only(left: 35),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Select Incident Types:"),
+          const Text("Select incident types to get notified:"),
           const SizedBox(
-            width: 10,
+            height: 5,
           ),
           Wrap(
             spacing: 20,
