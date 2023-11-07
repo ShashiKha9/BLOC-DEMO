@@ -18,8 +18,9 @@ class GetQuestions extends GroupIncidentTypeQuestionEvent {
   final String groupId;
   final String filter;
   final String? branchId;
+  final String? incidentTypeId;
 
-  GetQuestions(this.groupId, this.filter, this.branchId);
+  GetQuestions(this.groupId, this.filter, this.branchId, this.incidentTypeId);
 
   @override
   List<Object?> get props => [groupId, filter, branchId];
@@ -191,7 +192,13 @@ class GroupIncidentTypeQuestionBloc extends Bloc<GroupIncidentTypeQuestionEvent,
     if (event is GetQuestions) {
       yield GroupIncidentTypeQuestionLoadingState();
 
-      var result = await _api.get(event.groupId, event.filter, event.branchId!);
+      var result = await _api.get(
+          event.groupId,
+          event.filter,
+          event.branchId!,
+          event.incidentTypeId != null && event.incidentTypeId!.isNotEmpty
+              ? event.incidentTypeId
+              : null);
 
       if (result is OkData<List<GroupIncidentTypeQuestionDto>>) {
         if (result.dto.isNotEmpty) {

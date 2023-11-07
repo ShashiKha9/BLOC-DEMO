@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_incident_type_question_bloc.dart';
+import 'package:rescu_organization_portal/data/dto/group_incident_type_dto.dart';
 import 'package:rescu_organization_portal/data/dto/group_incident_type_question_dto.dart';
 import 'package:rescu_organization_portal/ui/content/groupIncidentTypeQuestions/add_question.dart';
 import 'package:rescu_organization_portal/ui/content/groupIncidentTypeQuestions/copy_branch_questions.dart';
 import 'package:rescu_organization_portal/ui/content/groupIncidentTypeQuestions/view_question.dart';
 import 'package:rescu_organization_portal/ui/widgets/buttons.dart';
 
+import '../../../data/api/base_api.dart';
+import '../../../data/api/group_incident_type_api.dart';
 import '../../../data/constants/messages.dart';
 import '../../adaptive_items.dart';
 import '../../adaptive_navigation.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/dialogs.dart';
 import '../../widgets/loading_container.dart';
+import '../../widgets/text_input_decoration.dart';
 
 class GroupIncidentTypeQuestionContent extends StatefulWidget
     with FloatingActionMixin, AppBarBranchSelectionMixin {
@@ -55,9 +59,14 @@ class GroupIncidentTypeQuestionContent extends StatefulWidget
 class _GroupIncidentTypeQuestionContentState
     extends State<GroupIncidentTypeQuestionContent> {
   String? _selectedBranchId;
+  String _selectedIncidentTypeId = "";
   final LoadingController _loadingController = LoadingController();
   String _searchValue = "";
   final List<AdaptiveListItem> _contacts = [];
+  final List<GroupIncidentTypeDto> _incidents = [
+    GroupIncidentTypeDto(id: "", name: "ALL", description: "", groupId: "")
+  ];
+  final List<GroupIncidentTypeQuestionDto> _questions = [];
 
   @override
   void initState() {
@@ -81,17 +90,28 @@ class _GroupIncidentTypeQuestionContentState
       blockPopOnLoad: true,
       child: BlocListener(
           bloc: context.read<GroupIncidentTypeQuestionBloc>(),
-          listener: (context, state) {
+          listener: (context, state) async {
             if (state is GroupIncidentTypeQuestionLoadingState) {
               _loadingController.show();
             } else {
               _loadingController.hide();
               if (state is GetGroupIncidentTypeQuestionsSuccessState) {
-                _contacts.clear();
-                _contacts.addAll(state.model
+                _questions.clear();
+                _questions.addAll(state.model
                     .where((element) => element.rootQuestionId == null)
-                    .map((e) {
+                    .toList());
+                _contacts.clear();
+                _contacts.addAll(_questions.map((e) {
                   List<AdaptiveContextualItem> contextualItems = [];
+                  if (_showMoveUpDownButton(e, "up")) {
+                    contextualItems.add(AdaptiveItemButton("Move Up",
+                        const Icon(Icons.arrow_circle_up), () async {}));
+                  }
+                  if (_showMoveUpDownButton(e, "down")) {
+                    contextualItems.add(AdaptiveItemButton("Move Down",
+                        const Icon(Icons.arrow_circle_down), () async {}));
+                  }
+
                   if (e.questionType == QuestionType.singlePickList) {
                     contextualItems.add(AdaptiveItemButton(
                         "View", const Icon(Icons.view_headline), () async {
@@ -107,8 +127,8 @@ class _GroupIncidentTypeQuestionContentState
                                 ));
                       })).then((_) {
                         context.read<GroupIncidentTypeQuestionBloc>().add(
-                            GetQuestions(
-                                widget.groupId, "", _selectedBranchId));
+                            GetQuestions(widget.groupId, "", _selectedBranchId,
+                                _selectedIncidentTypeId));
                       });
                     }));
                   }
@@ -124,7 +144,8 @@ class _GroupIncidentTypeQuestionContentState
                                   questionDto: e));
                     })).then((_) {
                       context.read<GroupIncidentTypeQuestionBloc>().add(
-                          GetQuestions(widget.groupId, "", _selectedBranchId));
+                          GetQuestions(widget.groupId, "", _selectedBranchId,
+                              _selectedIncidentTypeId));
                     });
                   }));
                   contextualItems.add(AdaptiveItemButton(
@@ -161,16 +182,27 @@ class _GroupIncidentTypeQuestionContentState
               if (state is DeleteGroupIncidentTypeQuestionSuccessState) {
                 ToastDialog.success("Record deleted successfully");
                 context.read<GroupIncidentTypeQuestionBloc>().add(GetQuestions(
-                    widget.groupId, _searchValue, _selectedBranchId));
+                    widget.groupId,
+                    _searchValue,
+                    _selectedBranchId,
+                    _selectedIncidentTypeId));
               }
               if (state is BranchChangedState) {
                 _selectedBranchId = state.branchId;
+                _selectedIncidentTypeId = "";
+                await _loadIncidentTypesForBranches();
                 context.read<GroupIncidentTypeQuestionBloc>().add(GetQuestions(
-                    widget.groupId, _searchValue, _selectedBranchId));
+                    widget.groupId,
+                    _searchValue,
+                    _selectedBranchId,
+                    _selectedIncidentTypeId));
               }
               if (state is RefreshQuestionsState) {
                 context.read<GroupIncidentTypeQuestionBloc>().add(GetQuestions(
-                    widget.groupId, _searchValue, _selectedBranchId));
+                    widget.groupId,
+                    _searchValue,
+                    _selectedBranchId,
+                    _selectedIncidentTypeId));
               }
             }
           },
@@ -178,41 +210,112 @@ class _GroupIncidentTypeQuestionContentState
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                      child: AppButtonWithIcon(
-                        icon: const Icon(Icons.copy),
-                        onPressed: () async {
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (ctx) {
-                            return ModalRouteWidget(
-                                stateGenerator: () =>
-                                    CopyBranchQuestionsModalState(
-                                        widget.groupId, _selectedBranchId!));
-                          })).then((_) {
-                            // Inform state to refresh the list
-                            context
-                                .read<GroupIncidentTypeQuestionBloc>()
-                                .add(RefreshQuestions());
-                          });
-                        },
-                        buttonText: "Copy From Branch",
-                      )),
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Container(
+                          constraints: const BoxConstraints(minWidth: 100),
+                          child: DropdownButtonFormField<String>(
+                              decoration: TextInputDecoration(
+                                  labelText:
+                                      "Select incident type to reorder questions"),
+                              value: _selectedIncidentTypeId,
+                              isExpanded: false,
+                              isDense: true,
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedIncidentTypeId = value ?? "";
+                                });
+                                context
+                                    .read<GroupIncidentTypeQuestionBloc>()
+                                    .add(GetQuestions(
+                                        widget.groupId,
+                                        _searchValue,
+                                        _selectedBranchId,
+                                        _selectedIncidentTypeId));
+                              },
+                              items: _incidents.map<DropdownMenuItem<String>>(
+                                  (GroupIncidentTypeDto value) {
+                                return DropdownMenuItem<String>(
+                                  value: value.id,
+                                  child: Text(
+                                    value.name,
+                                  ),
+                                );
+                              }).toList()),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: AppButtonWithIcon(
+                            icon: const Icon(Icons.copy),
+                            onPressed: () async {
+                              Navigator.of(context)
+                                  .push(MaterialPageRoute(builder: (ctx) {
+                                return ModalRouteWidget(
+                                    stateGenerator: () =>
+                                        CopyBranchQuestionsModalState(
+                                            widget.groupId,
+                                            _selectedBranchId!));
+                              })).then((_) {
+                                // Inform state to refresh the list
+                                context
+                                    .read<GroupIncidentTypeQuestionBloc>()
+                                    .add(RefreshQuestions());
+                              });
+                            },
+                            buttonText: "Copy From Branch",
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 Expanded(
                     child: SearchableList(
-                        searchHint: "Question and Incident Type",
+                        searchHint: "Question",
                         searchIcon: const Icon(Icons.search),
                         onSearchSubmitted: (value) {
                           _searchValue = value;
                           context.read<GroupIncidentTypeQuestionBloc>().add(
                               GetQuestions(widget.groupId, _searchValue,
-                                  _selectedBranchId));
+                                  _selectedBranchId, _selectedIncidentTypeId));
                         },
                         list: _contacts)),
               ])),
     );
+  }
+
+  bool _showMoveUpDownButton(GroupIncidentTypeQuestionDto e, String type) {
+    if (_selectedIncidentTypeId.isEmpty) return false;
+    if (_questions.isEmpty || _questions.length == 1) {
+      return false;
+    }
+    var indexOf = _questions.indexOf(e);
+    if (type == "up" && indexOf == 0) return false;
+    if (type == "down" && indexOf == (_questions.length - 1)) return false;
+    return true;
+  }
+
+  _loadIncidentTypesForBranches() async {
+    _incidents.clear();
+    _incidents.add(GroupIncidentTypeDto(
+        id: "", name: "ALL", description: "", groupId: ""));
+    _loadingController.show();
+    var result =
+        await context.read<IGroupIncidentTypeApi>().get("", _selectedBranchId);
+    if (result is OkData<List<GroupIncidentTypeDto>>) {
+      _incidents.addAll(result.dto);
+    }
+    _loadingController.hide();
+    setState(() {});
   }
 }
