@@ -96,6 +96,17 @@ class BranchChangedEvent extends GroupIncidentTypeQuestionEvent {
 // This is just a dummy event to refresh the questions
 class RefreshQuestions extends GroupIncidentTypeQuestionEvent {}
 
+class ChangeQuestionOrder extends GroupIncidentTypeQuestionEvent {
+  final String incidentTypeId;
+  final String questionId;
+  final String order;
+
+  ChangeQuestionOrder(this.incidentTypeId, this.questionId, this.order);
+
+  @override
+  List<Object> get props => [incidentTypeId, questionId, order];
+}
+
 abstract class GroupIncidentTypeQuestionState extends Equatable {
   @override
   List<Object?> get props => [];
@@ -176,6 +187,8 @@ class BranchChangedState extends GroupIncidentTypeQuestionState {
 }
 
 class RefreshQuestionsState extends GroupIncidentTypeQuestionState {}
+
+class ChangeQuestionOrderSuccessState extends GroupIncidentTypeQuestionState {}
 
 class GroupIncidentTypeQuestionBloc extends Bloc<GroupIncidentTypeQuestionEvent,
     GroupIncidentTypeQuestionState> {
@@ -304,6 +317,19 @@ class GroupIncidentTypeQuestionBloc extends Bloc<GroupIncidentTypeQuestionEvent,
       yield GroupIncidentTypeQuestionLoadingState();
       yield RefreshQuestionsState();
       return;
+    }
+
+    if (event is ChangeQuestionOrder) {
+      yield GroupIncidentTypeQuestionLoadingState();
+      var result = await _api.changeQuestionOrder(
+          event.incidentTypeId, event.questionId, event.order);
+      if (result is Ok) {
+        yield ChangeQuestionOrderSuccessState();
+      } else if (result is Bad) {
+        yield GroupIncidentTypeQuestionFailedState(message: result.message);
+      } else {
+        yield GroupIncidentTypeQuestionFailedState();
+      }
     }
   }
 }

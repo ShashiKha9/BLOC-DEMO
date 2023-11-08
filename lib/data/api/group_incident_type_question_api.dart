@@ -12,6 +12,8 @@ abstract class IGroupIncidentTypeQuestionApi {
   Future<ApiResponse> delete(String id, String questionId);
   Future<ApiResponse> copy(String id, String branchId, String incidentTypeId,
       List<String> questions);
+  Future<ApiResponse> changeQuestionOrder(
+      String incidentTypeId, String questionId, String order);
 }
 
 class GroupIncidentTypeQuestionApi extends BaseApi
@@ -19,11 +21,15 @@ class GroupIncidentTypeQuestionApi extends BaseApi
   GroupIncidentTypeQuestionApi(Dio dio) : super(dio);
 
   @override
-  Future<ApiDataResponse<List<GroupIncidentTypeQuestionDto>>> get(
-      String id, String filter, String? branchId, String? incidentTypeId) async {
+  Future<ApiDataResponse<List<GroupIncidentTypeQuestionDto>>> get(String id,
+      String filter, String? branchId, String? incidentTypeId) async {
     return await wrapDataCall(() async {
       var result = await dio.get("groups/$id/incidenttypes/questions",
-          queryParameters: {"Filter": filter, "BranchId": branchId, "incidentTypeId": incidentTypeId});
+          queryParameters: {
+            "Filter": filter,
+            "BranchId": branchId,
+            "incidentTypeId": incidentTypeId
+          });
       return OkData((result.data as Iterable)
           .map((e) => GroupIncidentTypeQuestionDto.fromJson(e))
           .toList());
@@ -74,6 +80,16 @@ class GroupIncidentTypeQuestionApi extends BaseApi
         "IncidentTypeId": incidentTypeId,
         "Questions": questions
       });
+      return Ok();
+    });
+  }
+
+  @override
+  Future<ApiResponse> changeQuestionOrder(
+      String incidentTypeId, String questionId, String order) async {
+    return await wrapCall(() async {
+      await dio.put(
+          "groups/incidenttypes/$incidentTypeId/questions/$questionId/reorder/$order");
       return Ok();
     });
   }

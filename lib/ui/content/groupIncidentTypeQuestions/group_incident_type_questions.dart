@@ -104,12 +104,21 @@ class _GroupIncidentTypeQuestionContentState
                 _contacts.addAll(_questions.map((e) {
                   List<AdaptiveContextualItem> contextualItems = [];
                   if (_showMoveUpDownButton(e, "up")) {
-                    contextualItems.add(AdaptiveItemButton("Move Up",
-                        const Icon(Icons.arrow_circle_up), () async {}));
+                    contextualItems.add(AdaptiveItemButton(
+                        "Move Up", const Icon(Icons.arrow_circle_up), () async {
+                      context.read<GroupIncidentTypeQuestionBloc>().add(
+                          ChangeQuestionOrder(
+                              _selectedIncidentTypeId, e.id!, "up"));
+                    }));
                   }
                   if (_showMoveUpDownButton(e, "down")) {
-                    contextualItems.add(AdaptiveItemButton("Move Down",
-                        const Icon(Icons.arrow_circle_down), () async {}));
+                    contextualItems.add(AdaptiveItemButton(
+                        "Move Down", const Icon(Icons.arrow_circle_down),
+                        () async {
+                      context.read<GroupIncidentTypeQuestionBloc>().add(
+                          ChangeQuestionOrder(
+                              _selectedIncidentTypeId, e.id!, "down"));
+                    }));
                   }
 
                   if (e.questionType == QuestionType.singlePickList) {
@@ -172,7 +181,8 @@ class _GroupIncidentTypeQuestionContentState
                 setState(() {});
               }
               if (state is GroupIncidentTypeQuestionFailedState) {
-                ToastDialog.error(MessagesConst.internalServerError);
+                ToastDialog.error(
+                    state.message ?? MessagesConst.internalServerError);
               }
               if (state is GetGroupIncidentTypeQuestionsNotFoundState) {
                 _contacts.clear();
@@ -198,6 +208,14 @@ class _GroupIncidentTypeQuestionContentState
                     _selectedIncidentTypeId));
               }
               if (state is RefreshQuestionsState) {
+                context.read<GroupIncidentTypeQuestionBloc>().add(GetQuestions(
+                    widget.groupId,
+                    _searchValue,
+                    _selectedBranchId,
+                    _selectedIncidentTypeId));
+              }
+              if (state is ChangeQuestionOrderSuccessState) {
+                ToastDialog.success("Record updated successfully");
                 context.read<GroupIncidentTypeQuestionBloc>().add(GetQuestions(
                     widget.groupId,
                     _searchValue,
