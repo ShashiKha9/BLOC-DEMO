@@ -18,8 +18,9 @@ class GetQuestions extends GroupIncidentTypeQuestionEvent {
   final String groupId;
   final String filter;
   final String? branchId;
+  final String? incidentTypeId;
 
-  GetQuestions(this.groupId, this.filter, this.branchId);
+  GetQuestions(this.groupId, this.filter, this.branchId, this.incidentTypeId);
 
   @override
   List<Object?> get props => [groupId, filter, branchId];
@@ -94,6 +95,17 @@ class BranchChangedEvent extends GroupIncidentTypeQuestionEvent {
 
 // This is just a dummy event to refresh the questions
 class RefreshQuestions extends GroupIncidentTypeQuestionEvent {}
+
+class ChangeQuestionOrder extends GroupIncidentTypeQuestionEvent {
+  final String incidentTypeId;
+  final String questionId;
+  final String order;
+
+  ChangeQuestionOrder(this.incidentTypeId, this.questionId, this.order);
+
+  @override
+  List<Object> get props => [incidentTypeId, questionId, order];
+}
 
 abstract class GroupIncidentTypeQuestionState extends Equatable {
   @override
@@ -176,6 +188,8 @@ class BranchChangedState extends GroupIncidentTypeQuestionState {
 
 class RefreshQuestionsState extends GroupIncidentTypeQuestionState {}
 
+class ChangeQuestionOrderSuccessState extends GroupIncidentTypeQuestionState {}
+
 class GroupIncidentTypeQuestionBloc extends Bloc<GroupIncidentTypeQuestionEvent,
     GroupIncidentTypeQuestionState> {
   final IGroupIncidentTypeQuestionApi _api;
@@ -191,7 +205,13 @@ class GroupIncidentTypeQuestionBloc extends Bloc<GroupIncidentTypeQuestionEvent,
     if (event is GetQuestions) {
       yield GroupIncidentTypeQuestionLoadingState();
 
-      var result = await _api.get(event.groupId, event.filter, event.branchId!);
+      var result = await _api.get(
+          event.groupId,
+          event.filter,
+          event.branchId!,
+          event.incidentTypeId != null && event.incidentTypeId!.isNotEmpty
+              ? event.incidentTypeId
+              : null);
 
       if (result is OkData<List<GroupIncidentTypeQuestionDto>>) {
         if (result.dto.isNotEmpty) {
@@ -297,6 +317,19 @@ class GroupIncidentTypeQuestionBloc extends Bloc<GroupIncidentTypeQuestionEvent,
       yield GroupIncidentTypeQuestionLoadingState();
       yield RefreshQuestionsState();
       return;
+    }
+
+    if (event is ChangeQuestionOrder) {
+      yield GroupIncidentTypeQuestionLoadingState();
+      var result = await _api.changeQuestionOrder(
+          event.incidentTypeId, event.questionId, event.order);
+      if (result is Ok) {
+        yield ChangeQuestionOrderSuccessState();
+      } else if (result is Bad) {
+        yield GroupIncidentTypeQuestionFailedState(message: result.message);
+      } else {
+        yield GroupIncidentTypeQuestionFailedState();
+      }
     }
   }
 }

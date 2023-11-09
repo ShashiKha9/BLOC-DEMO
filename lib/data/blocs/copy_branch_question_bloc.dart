@@ -128,7 +128,7 @@ class CopyBranchQuestionBloc
       yield CopyBranchQuestionLoading();
       try {
         final questions = await _groupIncidentTypeQuestionApi.get(
-            event.groupId, "", event.branchId);
+            event.groupId, "", event.branchId, null);
 
         if (questions is OkData<List<GroupIncidentTypeQuestionDto>>) {
           yield CopyBranchQuestionLoaded(questions.dto);
