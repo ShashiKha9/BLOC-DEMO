@@ -97,6 +97,26 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
                             FleetUserRoles.contact, _selectedBranchId));
                   });
                 }));
+                contextualItems.add(AdaptiveItemButton(
+                    "${e.isActive ? "De-" : ""}Activate",
+                    const Icon(Icons.manage_accounts), () async {
+                  if (e.role == FleetUserRoles.admin) {
+                    ToastDialog.error(
+                        "Can not modify Admin users.");
+                    return;
+                  }
+                  showConfirmationDialog(
+                      context: context,
+                      body:
+                          "Are you sure you want to ${e.isActive ? "De-" : ""}Activate this record?",
+                      onPressedOk: () {
+                        var updateContact = e;
+                        updateContact.isActive = !e.isActive;
+                        context.read<GroupInviteContactBloc>().add(
+                            ActivateDeactivateGroupInviteContact(
+                                widget.groupId, e.id!, updateContact));
+                      });
+                }));
                 // contextualItems.add(AdaptiveItemButton(
                 //     "Delete", const Icon(Icons.delete), () async {
                 //   showConfirmationDialog(
@@ -141,6 +161,14 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
                   _selectedBranchId));
             }
             if (state is RefreshContactListState) {
+              context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
+                  widget.groupId,
+                  _searchValue,
+                  FleetUserRoles.contact,
+                  _selectedBranchId));
+            }
+            if (state is ActivateDeActivateContactSuccessState) {
+              ToastDialog.success("Record updated successfully");
               context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
                   widget.groupId,
                   _searchValue,

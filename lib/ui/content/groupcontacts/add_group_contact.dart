@@ -361,7 +361,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
             firstName: _firstNameController.text,
             lastName: _lastNameController.text,
             phoneNumber: formattedMobileNumber,
-            isActive: true,
+            isActive: contact?.isActive ?? true,
             role: FleetUserRoles.contact,
             email: _emailController.text,
             designation: _designationController.text,
