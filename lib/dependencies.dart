@@ -8,6 +8,7 @@ import 'package:rescu_organization_portal/data/api/group_branch_api.dart';
 import 'package:rescu_organization_portal/data/api/group_domain_api.dart';
 import 'package:rescu_organization_portal/data/api/group_incident_type_api.dart';
 import 'package:rescu_organization_portal/data/api/group_incident_type_question_api.dart';
+import 'package:rescu_organization_portal/data/api/group_report_api.dart';
 import 'package:rescu_organization_portal/data/api/group_user_api.dart';
 import 'package:rescu_organization_portal/data/blocs/change_passwod_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/copy_branch_address_bloc.dart';
@@ -15,6 +16,7 @@ import 'package:rescu_organization_portal/data/blocs/copy_branch_incident_type_b
 import 'package:rescu_organization_portal/data/blocs/copy_branch_question_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/goup_branch_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_domain_bloc.dart';
+import 'package:rescu_organization_portal/data/blocs/group_incident_history_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_incident_type_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_incident_type_question_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_users_bloc.dart';
@@ -124,7 +126,8 @@ class DependencyConfiguration {
       ),
       Provider<IGroupIncidentTypeQuestionApi>(
           create: (ctx) => GroupIncidentTypeQuestionApi(ctx.read())),
-      Provider<IGroupBranchApi>(create: (ctx) => GroupBranchApi(ctx.read()))
+      Provider<IGroupBranchApi>(create: (ctx) => GroupBranchApi(ctx.read())),
+      Provider<IGroupReportApi>(create: (ctx) => GroupReportApi(ctx.read()))
     ];
   }
 
@@ -179,6 +182,8 @@ class DependencyConfiguration {
       BlocProvider<CopyBranchQuestionBloc>(
           create: (ctx) =>
               CopyBranchQuestionBloc(ctx.read(), ctx.read(), ctx.read())),
+      BlocProvider<GroupIncidentHistoryBloc>(
+          create: (ctx) => GroupIncidentHistoryBloc(ctx.read()))
     ];
   }
 }
