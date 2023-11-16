@@ -7,6 +7,7 @@ import 'package:rescu_organization_portal/data/dto/group_branch_dto.dart';
 import 'package:rescu_organization_portal/ui/content/account/change_password.dart';
 import 'package:rescu_organization_portal/ui/content/domains/domains.dart';
 import 'package:rescu_organization_portal/ui/content/groupBranches/group_branches.dart';
+import 'package:rescu_organization_portal/ui/content/groupIncidentHistory/group_incident_history.dart';
 import 'package:rescu_organization_portal/ui/content/groupIncidentTypeQuestions/group_incident_type_questions.dart';
 import 'package:rescu_organization_portal/ui/content/groupIncidentTypes/group_incident_types.dart';
 import 'package:rescu_organization_portal/ui/content/login/login_route.dart';
@@ -138,6 +139,15 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
             )),
         ContentNavigationItem("Branches", const Icon(Icons.apartment),
             GroupBranchesContent(groupId: result.dto.id)),
+        ExpansionNavigationItem("Reports", const Icon(Icons.dashboard), [
+          ContentNavigationItem(
+              "Incident History",
+              const Icon(Icons.report),
+              GroupIncidentHistoryContent(
+                groupId: result.dto.id,
+                branchId: _selectedBranch!.value!,
+              ))
+        ]),
         ContentNavigationItem("Change Password", const Icon(Icons.lock_clock),
             const ChangePasswordContent()),
         ActionNavigationItem("Logout", const Icon(Icons.logout), (context) {
