@@ -37,6 +37,15 @@ class BranchChangedEvent extends GroupIncidentHistoryEvent {
   List<Object?> get props => [branchId];
 }
 
+class CloseIncident extends GroupIncidentHistoryEvent {
+  final String signalId;
+
+  CloseIncident(this.signalId);
+
+  @override
+  List<Object> get props => [signalId];
+}
+
 abstract class GroupIncidentHistoryState extends Equatable {
   @override
   List<Object?> get props => [];
@@ -64,6 +73,15 @@ class GroupIncidentHistoryDetailsLoaded extends GroupIncidentHistoryState {
   List<Object> get props => [groupIncidentHistory];
 }
 
+class GetGroupIncidentDetailError extends GroupIncidentHistoryState {
+  final String message;
+
+  GetGroupIncidentDetailError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
 class GroupIncidentHistoryError extends GroupIncidentHistoryState {
   final String message;
 
@@ -82,7 +100,9 @@ class BranchChangedState extends GroupIncidentHistoryState {
   List<Object?> get props => [branchId];
 }
 
-class RefreshContactList extends GroupIncidentHistoryState {}
+class RefreshIncidentList extends GroupIncidentHistoryState {}
+
+class CloseIncidentSuccess extends GroupIncidentHistoryState {}
 
 class GroupIncidentHistoryBloc
     extends Bloc<GroupIncidentHistoryEvent, GroupIncidentHistoryState> {
@@ -115,6 +135,42 @@ class GroupIncidentHistoryBloc
     if (event is BranchChangedEvent) {
       yield GroupIncidentHistoryLoading();
       yield BranchChangedState(event.branchId);
+    }
+
+    if (event is GetGroupIncidentHistoryDetails) {
+      yield GroupIncidentHistoryLoading();
+      try {
+        var result = await _groupReportApi.get(event.id);
+
+        if (result is OkData<GroupIncidentHistoryDto>) {
+          yield GroupIncidentHistoryDetailsLoaded(result.dto);
+          return;
+        }
+        if (result is BadData<GroupIncidentHistoryDto>) {
+          yield GetGroupIncidentDetailError(result.message);
+          return;
+        }
+      } catch (e) {
+        yield GetGroupIncidentDetailError(e.toString());
+      }
+    }
+
+    if (event is CloseIncident) {
+      yield GroupIncidentHistoryLoading();
+      try {
+        var result = await _groupReportApi.closeIncident(event.signalId);
+
+        if (result is Ok) {
+          yield CloseIncidentSuccess();
+          return;
+        }
+        if (result is Bad) {
+          yield GroupIncidentHistoryError(result.message);
+          return;
+        }
+      } catch (e) {
+        yield GroupIncidentHistoryError(e.toString());
+      }
     }
   }
 }

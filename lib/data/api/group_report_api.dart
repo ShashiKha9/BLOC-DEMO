@@ -5,6 +5,10 @@ import 'package:rescu_organization_portal/data/dto/group_incident_history_dto.da
 abstract class IGroupReportApi {
   Future<ApiDataResponse<List<GroupIncidentHistoryDto>>>
       getGroupIncidentHistory(String groupId, String? filter, String branchId);
+
+  Future<ApiDataResponse<GroupIncidentHistoryDto>> get(String signalId);
+
+  Future<ApiResponse> closeIncident(String signalId);
 }
 
 class GroupReportApi extends BaseApi implements IGroupReportApi {
@@ -24,6 +28,24 @@ class GroupReportApi extends BaseApi implements IGroupReportApi {
       return OkData((result.data as Iterable)
           .map((e) => GroupIncidentHistoryDto.fromJson(e))
           .toList());
+    });
+  }
+
+  @override
+  Future<ApiDataResponse<GroupIncidentHistoryDto>> get(String signalId) async {
+    return await wrapDataCall(() async {
+      var result = await dio.get("/report/incidents/$signalId");
+
+      return OkData(GroupIncidentHistoryDto.fromJson(result.data));
+    });
+  }
+
+  @override
+  Future<ApiResponse> closeIncident(String signalId) async {
+    return await wrapCall(() async {
+      await dio.post("/signal/$signalId/close",
+          queryParameters: {'api-version': '2.0'});
+      return Ok();
     });
   }
 }

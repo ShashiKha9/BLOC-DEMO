@@ -4,12 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:rescu_organization_portal/data/blocs/group_incident_history_bloc.dart';
+import 'package:rescu_organization_portal/data/dto/group_incident_history_dto.dart';
 import 'package:rescu_organization_portal/data/helpers/date_time_helper.dart';
 import 'package:rescu_organization_portal/ui/adaptive_items.dart';
 import 'package:rescu_organization_portal/ui/adaptive_navigation.dart';
+import 'package:rescu_organization_portal/ui/content/groupIncidentHistory/group_incident_detail.dart';
 import 'package:rescu_organization_portal/ui/widgets/common_widgets.dart';
 import 'package:rescu_organization_portal/ui/widgets/dialogs.dart';
 import 'package:rescu_organization_portal/ui/widgets/loading_container.dart';
+import 'package:rescu_organization_portal/ui/widgets/signal_icons.dart';
 
 class GroupIncidentHistoryContent extends StatefulWidget
     with AppBarBranchSelectionMixin {
@@ -68,17 +71,41 @@ class _GroupIncidentHistoryContentState
                 List<AdaptiveContextualItem> contextualItems = [];
 
                 contextualItems.add(AdaptiveItemButton(
-                    "View", const Icon(Icons.remove_red_eye), () async {}));
+                    "View", const Icon(Icons.remove_red_eye), () async {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+                    return ModalRouteWidget(
+                        stateGenerator: () =>
+                            ViewGroupIncidentDetailModalState(e.signalId));
+                  }));
+                }));
 
-                contextualItems.add(AdaptiveItemButton(
-                    "Close", const Icon(Icons.close), () async {}));
+                if (e.closed == false && e.signalType == SignalType.incident) {
+                  contextualItems.add(AdaptiveItemButton(
+                      "Close", const Icon(Icons.close), () async {
+                    showConfirmationDialog(
+                        context: context,
+                        body: "Are you sure you want to close this incident?",
+                        onPressedOk: () {
+                          context
+                              .read<GroupIncidentHistoryBloc>()
+                              .add(CloseIncident(e.signalId));
+                        });
+                  }));
+                }
 
                 return AdaptiveListItem(
                     "Incident Type: ${e.incidentType}",
-                    "Employee Name: ${e.username}\nSent On: ${e.incidentDate != null ? DateTimeHelper.forDispatchDetails(e.incidentDate!) : ''}",
-                    e.iconData.isNotEmpty
-                        ? Icon(deserializeIcon(jsonDecode(e.iconData)))
-                        : const Icon(Icons.report),
+                    "Employee Name: ${e.username}"
+                        "\nReported On: ${e.incidentDate != null ? DateTimeHelper.forDispatchDetails(e.incidentDate!) : ''}",
+                    e.signalType != SignalType.incident
+                        ? iconFromSignalCode(
+                            signalType: e.signalType,
+                            height: 25,
+                            width: 25,
+                            iconColor: Colors.white)
+                        : e.iconData.isNotEmpty
+                            ? Icon(deserializeIcon(jsonDecode(e.iconData)))
+                            : const Icon(Icons.report),
                     contextualItems,
                     onPressed: () {});
               }));
@@ -94,7 +121,14 @@ class _GroupIncidentHistoryContentState
                       _searchValue, _selectedBranchId, widget.groupId));
             }
 
-            if (state is RefreshContactList) {
+            if (state is RefreshIncidentList) {
+              context.read<GroupIncidentHistoryBloc>().add(
+                  GetGroupIncidentHistory(
+                      _searchValue, _selectedBranchId, widget.groupId));
+            }
+
+            if (state is CloseIncidentSuccess) {
+              ToastDialog.success("Incident closed successfully");
               context.read<GroupIncidentHistoryBloc>().add(
                   GetGroupIncidentHistory(
                       _searchValue, _selectedBranchId, widget.groupId));
