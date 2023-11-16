@@ -84,7 +84,9 @@ class _GroupIncidentHistoryContentState
                       "Close", const Icon(Icons.close), () async {
                     showConfirmationDialog(
                         context: context,
-                        body: "Are you sure you want to close this incident?",
+                        body:
+                            "The communication on the channel will be closed. "
+                            "\nAre you sure you want to close this incident?",
                         onPressedOk: () {
                           context
                               .read<GroupIncidentHistoryBloc>()
