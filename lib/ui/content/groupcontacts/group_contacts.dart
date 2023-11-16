@@ -101,8 +101,7 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
                     "${e.isActive ? "De-" : ""}Activate",
                     const Icon(Icons.manage_accounts), () async {
                   if (e.role == FleetUserRoles.admin) {
-                    ToastDialog.error(
-                        "Can not modify Admin users.");
+                    ToastDialog.error("Can not modify Admin users.");
                     return;
                   }
                   showConfirmationDialog(
@@ -137,7 +136,8 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
               setState(() {});
             }
             if (state is GroupInviteContactErrorState) {
-              ToastDialog.error(MessagesConst.internalServerError);
+              ToastDialog.error(
+                  state.error ?? MessagesConst.internalServerError);
             }
             if (state is GetGroupInviteContactsNotFoundState) {
               _contacts.clear();
