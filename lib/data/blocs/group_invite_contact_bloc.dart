@@ -23,7 +23,9 @@ class GetGroupInviteContacts extends GroupInviteContactEvent {
   final String? filter;
   final String role;
   final String? branchId;
-  GetGroupInviteContacts(this.groupId, this.filter, this.role, this.branchId);
+  final String active;
+  GetGroupInviteContacts(
+      this.groupId, this.filter, this.role, this.branchId, this.active);
 
   @override
   List<Object?> get props => [groupId, filter, role, branchId];
@@ -205,7 +207,7 @@ class GroupInviteContactBloc
       }
 
       var result = await _contactsApi.getGroupInviteContacts(
-          groupId, event.filter, event.role, event.branchId);
+          groupId, event.filter, event.role, event.branchId, event.active);
 
       if (result is OkData<List<GroupInviteContactDto>>) {
         if (event.role == FleetUserRoles.contact) {
@@ -213,7 +215,8 @@ class GroupInviteContactBloc
               event.groupId!,
               event.filter,
               FleetUserRoles.admin,
-              event.branchId);
+              event.branchId,
+              event.active);
           if (adminResult is OkData<List<GroupInviteContactDto>> &&
               adminResult.dto.isNotEmpty) {
             result.dto.add(adminResult.dto.first);
