@@ -9,6 +9,7 @@ import '../../adaptive_navigation.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/dialogs.dart';
 import '../../widgets/loading_container.dart';
+import '../../widgets/text_input_decoration.dart';
 import 'add_group_contact.dart';
 
 class GroupContactsContent extends StatefulWidget
@@ -50,6 +51,12 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
   final LoadingController _loadingController = LoadingController();
   String _searchValue = "";
   final List<AdaptiveListItem> _contacts = [];
+  String _active = "active";
+  final _activeFilter = {
+    "All": "all",
+    "Active": "active",
+    "Inactive": "inactive"
+  };
 
   @override
   void initState() {
@@ -93,8 +100,12 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
                             contact: e));
                   })).then((_) {
                     context.read<GroupInviteContactBloc>().add(
-                        GetGroupInviteContacts(widget.groupId, "",
-                            FleetUserRoles.contact, _selectedBranchId));
+                        GetGroupInviteContacts(
+                            widget.groupId,
+                            "",
+                            FleetUserRoles.contact,
+                            _selectedBranchId,
+                            _active));
                   });
                 }));
                 contextualItems.add(AdaptiveItemButton(
@@ -150,7 +161,8 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
                   widget.groupId,
                   _searchValue,
                   FleetUserRoles.contact,
-                  _selectedBranchId));
+                  _selectedBranchId,
+                  _active));
             }
             if (state is BranchChangedState) {
               _selectedBranchId = state.branchId;
@@ -158,14 +170,16 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
                   widget.groupId,
                   _searchValue,
                   FleetUserRoles.contact,
-                  _selectedBranchId));
+                  _selectedBranchId,
+                  _active));
             }
             if (state is RefreshContactListState) {
               context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
                   widget.groupId,
                   _searchValue,
                   FleetUserRoles.contact,
-                  _selectedBranchId));
+                  _selectedBranchId,
+                  _active));
             }
             if (state is ActivateDeActivateContactSuccessState) {
               ToastDialog.success("Record updated successfully");
@@ -173,22 +187,68 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
                   widget.groupId,
                   _searchValue,
                   FleetUserRoles.contact,
-                  _selectedBranchId));
+                  _selectedBranchId,
+                  _active));
             }
           }
         },
-        child: SearchableList(
-            searchHint: "First Name, Last Name",
-            searchIcon: const Icon(Icons.search),
-            onSearchSubmitted: (value) {
-              _searchValue = value;
-              context.read<GroupInviteContactBloc>().add(GetGroupInviteContacts(
-                  widget.groupId,
-                  _searchValue,
-                  FleetUserRoles.contact,
-                  _selectedBranchId));
-            },
-            list: _contacts),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 120),
+                  child: DropdownButtonFormField<String>(
+                      decoration: TextInputDecoration(labelText: "Select"),
+                      value: _active,
+                      isExpanded: true,
+                      isDense: true,
+                      onChanged: (value) {
+                        setState(() {
+                          _active = value ?? "";
+                        });
+                        context.read<GroupInviteContactBloc>().add(
+                            GetGroupInviteContacts(
+                                widget.groupId,
+                                _searchValue,
+                                FleetUserRoles.contact,
+                                _selectedBranchId,
+                                _active));
+                      },
+                      items: _activeFilter
+                          .map((description, value) {
+                            return MapEntry(
+                                description,
+                                DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(description),
+                                ));
+                          })
+                          .values
+                          .toList()),
+                ),
+              ),
+            ),
+            Expanded(
+              child: SearchableList(
+                  searchHint: "First Name, Last Name",
+                  searchIcon: const Icon(Icons.search),
+                  onSearchSubmitted: (value) {
+                    _searchValue = value;
+                    context.read<GroupInviteContactBloc>().add(
+                        GetGroupInviteContacts(
+                            widget.groupId,
+                            _searchValue,
+                            FleetUserRoles.contact,
+                            _selectedBranchId,
+                            _active));
+                  },
+                  list: _contacts),
+            ),
+          ],
+        ),
       ),
     );
   }
