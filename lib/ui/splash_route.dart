@@ -19,7 +19,9 @@ class _SplashRouteState extends State<SplashRoute> {
   @override
   void initState() {
     super.initState();
-    context.read<SplashBloc>().add(SplashDetermineMove());
+    Future.delayed(const Duration(seconds: 1), () {
+      context.read<SplashBloc>().add(SplashDetermineMove());
+    });
   }
 
   @override
