@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:rescu_organization_portal/data/api/group_branch_api.dart';
 import 'package:rescu_organization_portal/data/api/group_info_api.dart';
 import 'package:rescu_organization_portal/data/blocs/logout_bloc.dart';
@@ -21,6 +22,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'content/groupaddresses/group_addresses.dart';
 import 'content/groupcontacts/group_contacts.dart';
 import 'content/groupinvitecontacts/group_invite_contacts.dart';
+import 'widgets/custom_colors.dart';
+import 'widgets/size_config.dart';
 
 /*
 This is a collection of responsive widgets which adapt to the user's
@@ -240,7 +243,15 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
                       _branches!, _selectedBranch!);
                 },
               )
-            : const SizedBox());
+            : Container(
+                color: AppColor.baseBackground,
+                child: Center(
+                  child: SpinKitFadingCircle(
+                    color: Colors.white,
+                    size: SizeConfig.size(4),
+                  ),
+                ),
+              ));
   }
 }
 
