@@ -19,7 +19,9 @@ class _SplashRouteState extends State<SplashRoute> {
   @override
   void initState() {
     super.initState();
-    context.read<SplashBloc>().add(SplashDetermineMove());
+    Future.delayed(const Duration(seconds: 1), () {
+      context.read<SplashBloc>().add(SplashDetermineMove());
+    });
   }
 
   @override
@@ -29,11 +31,13 @@ class _SplashRouteState extends State<SplashRoute> {
       bloc: context.read<SplashBloc>(),
       listener: (context, state) {
         if (state is SplashShouldMoveToDashboard) {
-          Navigator.of(context).pushReplacement(MaterialPageRoute(
+          Navigator.of(context).popUntil((route) => false);
+          Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => const AdaptiveNavigationLayout()));
         }
         if (state is SplashShouldMoveToLogin) {
-          Navigator.of(context).pushReplacement(
+          Navigator.of(context).popUntil((route) => false);
+          Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const LoginRoute()));
         }
       },
