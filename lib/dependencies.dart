@@ -19,6 +19,7 @@ import 'package:rescu_organization_portal/data/blocs/group_domain_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_incident_history_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_incident_type_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_incident_type_question_bloc.dart';
+import 'package:rescu_organization_portal/data/blocs/group_manage_contacts_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_users_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/login_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/logout_bloc.dart';
@@ -33,6 +34,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'data/api/group_address_api.dart';
 import 'data/api/group_info_api.dart';
 import 'data/api/group_invite_contact_api.dart';
+import 'data/api/group_manage_contacts_api.dart';
 import 'data/blocs/group_address_bloc.dart';
 import 'data/blocs/group_invite_contact_bloc.dart';
 import 'data/services/address/address_service.dart';
@@ -127,7 +129,9 @@ class DependencyConfiguration {
       Provider<IGroupIncidentTypeQuestionApi>(
           create: (ctx) => GroupIncidentTypeQuestionApi(ctx.read())),
       Provider<IGroupBranchApi>(create: (ctx) => GroupBranchApi(ctx.read())),
-      Provider<IGroupReportApi>(create: (ctx) => GroupReportApi(ctx.read()))
+      Provider<IGroupReportApi>(create: (ctx) => GroupReportApi(ctx.read())),
+      Provider<IManageGroupContactsApi>(
+          create: (ctx) => ManageGroupContactsApi(ctx.read()))
     ];
   }
 
@@ -183,7 +187,9 @@ class DependencyConfiguration {
           create: (ctx) =>
               CopyBranchQuestionBloc(ctx.read(), ctx.read(), ctx.read())),
       BlocProvider<GroupIncidentHistoryBloc>(
-          create: (ctx) => GroupIncidentHistoryBloc(ctx.read()))
+          create: (ctx) => GroupIncidentHistoryBloc(ctx.read())),
+      BlocProvider<GroupManageContactsBloc>(
+          create: (ctx) => GroupManageContactsBloc(ctx.read()))
     ];
   }
 }
