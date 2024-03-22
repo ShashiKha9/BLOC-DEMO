@@ -11,8 +11,10 @@ abstract class GroupManageContactsEvent extends Equatable {
 
 class GetManageContacts extends GroupManageContactsEvent {
   final String groupId;
+  final String? filter;
+  final String? branchId;
 
-  GetManageContacts(this.groupId);
+  GetManageContacts(this.groupId, this.filter, this.branchId);
 
   @override
   List<Object?> get props => [groupId];
@@ -54,8 +56,8 @@ class GroupManageContactsBloc
       GroupManageContactsEvent event) async* {
     if (event is GetManageContacts) {
       yield GroupManageContactsLoadingState();
-      var result =
-          await _api.getGroupContactBranchIncidentDetails(event.groupId);
+      var result = await _api.getGroupContactBranchIncidentDetails(
+          event.groupId, event.filter ?? "", event.branchId ?? "");
       if (result is OkData<List<GroupManageContactBranchDto>>) {
         if (result.dto.isEmpty) {
           yield GroupManageContactsNotFoundState();

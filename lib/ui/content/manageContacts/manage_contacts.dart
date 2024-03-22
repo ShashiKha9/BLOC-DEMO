@@ -10,58 +10,21 @@ import '../../widgets/loading_container.dart';
 class ManageGroupContactsContent extends BaseModalRouteState {
   final LoadingController _loadingController = LoadingController();
   final Map<int, bool> _checkboxState = {};
-  String? _selectedBranch;
-  final String groupId;
+  final String _groupId;
+  String? _selectedFilter;
+  String? _selectedBranchId;
 
-  ManageGroupContactsContent(this.groupId);
+  ManageGroupContactsContent(this._groupId);
   List<GroupManageContactBranchDto> tableData = [];
-  List<Map<String, dynamic>> tableData1 = [
-    {
-      'name': 'Sandeep',
-      'username': 'sandeep@yopmail.com',
-      'branch': ['Group QA'],
-      'incidents': [
-        'All',
-        'test group qa',
-        'QA reg',
-        'QA reg 1',
-        'QA reg 2',
-        'QA reg 3',
-        'QA reg 4',
-        'QA reg 5'
-      ]
-    },
-    {
-      'name': 'Sandeep',
-      'username': 'sandeep@yopmail.com',
-      'branch': ['Sanfleet 01'],
-      'incidents': ['All', 'test group qa']
-    },
-    {
-      'name': 'Sandeep',
-      'username': 'sandeep@yopmail.com',
-      'branch': ['QA Regression'],
-      'incidents': ['All', 'test group qa']
-    },
-    {
-      'name': 'Alice',
-      'username': 'alice@yopmail.com',
-      'branch': ['Group QA'],
-      'incidents': ['All', 'test group qa', 'QA reg']
-    },
-    {
-      'name': 'Bob',
-      'username': 'bob@yopmail.com',
-      'branch': ['Group QA'],
-      'incidents': ['All', 'test group qa']
-    },
-  ];
+  List<ContactBranch> branchData = [];
 
   @override
   void initState() {
     super.initState();
 
-    context.read<GroupManageContactsBloc>().add(GetManageContacts(groupId));
+    context
+        .read<GroupManageContactsBloc>()
+        .add(GetManageContacts(_groupId, _selectedFilter, _selectedBranchId));
     for (int i = 0; i < tableData.length; i++) {
       _checkboxState[i] = false;
     }
@@ -87,9 +50,23 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                 _loadingController.hide();
                 setState(() {});
               } else {
+                _loadingController.hide();
                 if (state is GetManageContactsSuccessState) {
                   tableData.clear();
                   tableData = state.manageContactsData;
+
+                  if (branchData.isEmpty) {
+                    branchData.add(ContactBranch(name: "All"));
+
+                    Set<String> uniqueIds = {};
+                    for (var data in tableData) {
+                      if (!uniqueIds.contains(data.contactBranch?.branchId)) {
+                        uniqueIds.add(data.contactBranch?.branchId ?? "");
+                        branchData.add(data.contactBranch!);
+                      }
+                    }
+                  }
+
                   setState(() {});
                 }
               }
@@ -107,7 +84,9 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                               hintText: 'Name, Phone Number',
                               border: OutlineInputBorder(),
                             ),
-                            onChanged: (value) {},
+                            onChanged: (value) {
+                              _selectedFilter = value;
+                            },
                           ),
                         ),
                         const SizedBox(width: 20.0),
@@ -115,28 +94,16 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                           child: DropdownButtonFormField<String>(
                             hint: const Text("Branch"),
                             isDense: true,
-                            value: _selectedBranch,
-                            items: tableData
-                                .where((element) =>
-                                    element.contactBranch?.id != null)
-                                .fold<Set<String>>(
-                                    <String>{},
-                                    (Set<String> set, element) => set
-                                      ..add(
-                                          element.contactBranch?.id ?? "")).map(
-                                    (id) {
-                              final branch = tableData
-                                  .firstWhere((element) =>
-                                      element.contactBranch?.id == id)
-                                  .contactBranch;
+                            value: _selectedBranchId,
+                            items: branchData.map((branchName) {
                               return DropdownMenuItem(
-                                child: Text(branch?.name ?? ""),
-                                value: branch?.id ?? "",
+                                child: Text(branchName.name ?? ""),
+                                value: branchName.branchId ?? "",
                               );
                             }).toList(),
                             onChanged: (value) {
                               setState(() {
-                                _selectedBranch = value;
+                                _selectedBranchId = value;
                               });
                             },
                           ),
@@ -145,9 +112,9 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                         AppButtonWithIcon(
                           icon: const Icon(Icons.search),
                           onPressed: () async {
-                            context
-                                .read<GroupManageContactsBloc>()
-                                .add(GetManageContacts(groupId));
+                            context.read<GroupManageContactsBloc>().add(
+                                GetManageContacts(_groupId, _selectedFilter,
+                                    _selectedBranchId));
                           },
                           buttonText: "Search",
                         ),
@@ -160,10 +127,11 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                     child: SingleChildScrollView(
                       scrollDirection: Axis.vertical,
                       child: DataTable(
+                        dataRowHeight: 75,
                         columns: const [
                           DataColumn(label: Text('Name')),
-                          DataColumn(label: Text('Username')),
                           DataColumn(label: Text('Phone Number')),
+                          DataColumn(label: Text('Email')),
                           DataColumn(label: Text('Branch')),
                           DataColumn(label: Text('Incidents')),
                           DataColumn(label: Text('')),
@@ -172,8 +140,8 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                           return DataRow(
                             cells: [
                               DataCell(Text(data.name ?? "name")),
-                              DataCell(Text(data.email ?? "email")),
                               DataCell(Text(data.phoneNumber ?? "phoneNumber")),
+                              DataCell(Text(data.email ?? "email")),
                               DataCell(
                                 Wrap(
                                   spacing: 8.0,
@@ -193,26 +161,32 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                                   ],
                                 ),
                               ),
-                              DataCell(
-                                Wrap(
-                                  spacing: 8.0,
-                                  children: (data.contactBranch
-                                              ?.contactBrancheIncidents ??
-                                          [])
-                                      .map<Widget>((incident) {
-                                    return Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Checkbox(
-                                          value: incident.canAccess ?? false,
-                                          onChanged: (newValue) {},
-                                        ),
-                                        Text(incident.name ?? ''),
-                                      ],
-                                    );
-                                  }).toList(),
+                              DataCell(Expanded(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Wrap(
+                                      spacing: 8.0,
+                                      children: (data.contactBranch
+                                                  ?.contactBranchesIncidents ??
+                                              [])
+                                          .map<Widget>((incident) {
+                                        return Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Checkbox(
+                                              value:
+                                                  incident.canAccess ?? false,
+                                              onChanged: (newValue) {},
+                                            ),
+                                            Text(incident.name ?? ''),
+                                          ],
+                                        );
+                                      }).toList(),
+                                    )
+                                  ],
                                 ),
-                              ),
+                              )),
                               DataCell(
                                 AppButtonWithIcon(
                                   icon: const Icon(Icons.save),

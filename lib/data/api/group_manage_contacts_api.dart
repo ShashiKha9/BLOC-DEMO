@@ -4,7 +4,8 @@ import '../dto/group_manage_contacts_dto.dart';
 
 abstract class IManageGroupContactsApi {
   Future<ApiDataResponse<List<GroupManageContactBranchDto>>>
-      getGroupContactBranchIncidentDetails(String groupId);
+      getGroupContactBranchIncidentDetails(
+          String groupId, String filter, String branchId);
 }
 
 class ManageGroupContactsApi extends BaseApi
@@ -13,9 +14,11 @@ class ManageGroupContactsApi extends BaseApi
 
   @override
   Future<ApiDataResponse<List<GroupManageContactBranchDto>>>
-      getGroupContactBranchIncidentDetails(String groupId) async {
+      getGroupContactBranchIncidentDetails(
+          String groupId, String filter, String branchId) async {
     return await wrapDataCall(() async {
-      var result = await dio.get("/groups/$groupId/contacts");
+      var result = await dio.get("/groups/$groupId/contacts/branch/incidents",
+          queryParameters: {"Filter": filter, "BranchId": branchId});
       return OkData((result.data as Iterable)
           .map((e) => GroupManageContactBranchDto.fromJson(e))
           .toList());

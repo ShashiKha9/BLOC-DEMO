@@ -1,5 +1,5 @@
 class GroupManageContactBranchDto {
-  String? id;
+  String? inviteId;
   String? groupInfoId;
   String? name;
   String? phoneNumber;
@@ -10,7 +10,7 @@ class GroupManageContactBranchDto {
   ContactBranch? contactBranch;
 
   GroupManageContactBranchDto(
-      {this.id,
+      {this.inviteId,
       this.groupInfoId,
       this.name,
       this.phoneNumber,
@@ -21,7 +21,7 @@ class GroupManageContactBranchDto {
       this.contactBranch});
 
   GroupManageContactBranchDto.fromJson(Map<String, dynamic> json) {
-    id = json['Id'];
+    inviteId = json['InviteId'];
     groupInfoId = json['GroupInfoId'];
     name = json['Name'];
     phoneNumber = json['PhoneNumber'];
@@ -36,7 +36,7 @@ class GroupManageContactBranchDto {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['Id'] = id;
+    data['InviteId'] = inviteId;
     data['GroupInfoId'] = groupInfoId;
     data['Name'] = name;
     data['PhoneNumber'] = phoneNumber;
@@ -52,62 +52,62 @@ class GroupManageContactBranchDto {
 }
 
 class ContactBranch {
-  String? id;
+  String? branchId;
   String? name;
   String? groupInfoId;
   bool? canAccess;
-  List<ContactBrancheIncidents>? contactBrancheIncidents;
+  List<ContactBranchesIncidents>? contactBranchesIncidents;
 
   ContactBranch(
-      {this.id,
+      {this.branchId,
       this.name,
       this.groupInfoId,
       this.canAccess,
-      this.contactBrancheIncidents});
+      this.contactBranchesIncidents});
 
   ContactBranch.fromJson(Map<String, dynamic> json) {
-    id = json['Id'];
+    branchId = json['BranchId'];
     name = json['Name'];
     groupInfoId = json['GroupInfoId'];
     canAccess = json['CanAccess'];
-    if (json['ContactBrancheIncidents'] != null) {
-      contactBrancheIncidents = <ContactBrancheIncidents>[];
-      json['ContactBrancheIncidents'].forEach((v) {
-        contactBrancheIncidents!.add(ContactBrancheIncidents.fromJson(v));
+    if (json['ContactBranchesIncidents'] != null) {
+      contactBranchesIncidents = <ContactBranchesIncidents>[];
+      json['ContactBranchesIncidents'].forEach((v) {
+        contactBranchesIncidents!.add(ContactBranchesIncidents.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['Id'] = id;
+    data['BranchId'] = branchId;
     data['Name'] = name;
     data['GroupInfoId'] = groupInfoId;
     data['CanAccess'] = canAccess;
-    if (contactBrancheIncidents != null) {
-      data['ContactBrancheIncidents'] =
-          contactBrancheIncidents!.map((v) => v.toJson()).toList();
+    if (contactBranchesIncidents != null) {
+      data['ContactBranchesIncidents'] =
+          contactBranchesIncidents!.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
-class ContactBrancheIncidents {
-  String? id;
+class ContactBranchesIncidents {
+  String? incidentId;
   String? groupBranchId;
   String? name;
   String? description;
   bool? canAccess;
 
-  ContactBrancheIncidents(
-      {this.id,
+  ContactBranchesIncidents(
+      {this.incidentId,
       this.groupBranchId,
       this.name,
       this.description,
       this.canAccess});
 
-  ContactBrancheIncidents.fromJson(Map<String, dynamic> json) {
-    id = json['Id'];
+  ContactBranchesIncidents.fromJson(Map<String, dynamic> json) {
+    incidentId = json['IncidentId'];
     groupBranchId = json['GroupBranchId'];
     name = json['Name'];
     description = json['Description'];
@@ -116,7 +116,7 @@ class ContactBrancheIncidents {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['Id'] = id;
+    data['IncidentId'] = incidentId;
     data['GroupBranchId'] = groupBranchId;
     data['Name'] = name;
     data['Description'] = description;
