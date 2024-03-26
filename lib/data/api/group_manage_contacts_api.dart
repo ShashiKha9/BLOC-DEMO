@@ -6,6 +6,9 @@ abstract class IManageGroupContactsApi {
   Future<ApiDataResponse<List<GroupManageContactBranchDto>>>
       getGroupContactBranchIncidentDetails(
           String groupId, String filter, String branchId);
+
+  Future<ApiResponse> updateGroupContactBranchIncidentDetails(String groupId,
+      String contactID, GroupManageContactBranchDto branchDetails);
 }
 
 class ManageGroupContactsApi extends BaseApi
@@ -22,6 +25,16 @@ class ManageGroupContactsApi extends BaseApi
       return OkData((result.data as Iterable)
           .map((e) => GroupManageContactBranchDto.fromJson(e))
           .toList());
+    });
+  }
+
+  @override
+  Future<ApiResponse> updateGroupContactBranchIncidentDetails(String groupId,
+      String contactID, GroupManageContactBranchDto branchDetails) async {
+    return await wrapCall(() async {
+      await dio.put("/groups/$groupId/contacts/$contactID/branch/incidents",
+          data: branchDetails.toJson());
+      return Ok();
     });
   }
 }

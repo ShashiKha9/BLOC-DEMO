@@ -20,6 +20,17 @@ class GetManageContacts extends GroupManageContactsEvent {
   List<Object?> get props => [groupId];
 }
 
+class UpdateManageContacts extends GroupManageContactsEvent {
+  final String groupId;
+  final String? contactID;
+  final GroupManageContactBranchDto? branchDetails;
+
+  UpdateManageContacts(this.groupId, this.contactID, this.branchDetails);
+
+  @override
+  List<Object?> get props => [groupId];
+}
+
 abstract class ManageContactsState extends Equatable {
   @override
   List<Object?> get props => [];
@@ -46,6 +57,9 @@ class GetManageContactsSuccessState extends ManageContactsState {
   List<Object?> get props => [manageContactsData];
 }
 
+class UpdateManageContactsSuccessState extends ManageContactsState {}
+class UpdateManageContactsErrorState extends ManageContactsState {}
+
 class GroupManageContactsBloc
     extends Bloc<GroupManageContactsEvent, ManageContactsState> {
   final IManageGroupContactsApi _api;
@@ -68,6 +82,19 @@ class GroupManageContactsBloc
 
       if (result is BadData<List<GroupManageContactBranchDto>>) {
         yield GroupManageContactsErrorState(result.message);
+        return;
+      }
+    }
+
+    if (event is UpdateManageContacts) {
+      yield GroupManageContactsLoadingState();
+      var result = await _api.updateGroupContactBranchIncidentDetails(
+          event.groupId, event.contactID ?? "", event.branchDetails!);
+      if (result is Ok) {
+        yield UpdateManageContactsSuccessState();
+        return;
+      } else {
+        yield UpdateManageContactsErrorState();
         return;
       }
     }

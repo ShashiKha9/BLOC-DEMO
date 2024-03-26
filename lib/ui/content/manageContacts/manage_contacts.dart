@@ -6,6 +6,7 @@ import '../../../data/dto/group_manage_contacts_dto.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/loading_container.dart';
+import '../../widgets/text_input_decoration.dart';
 
 class ManageGroupContactsContent extends BaseModalRouteState {
   final LoadingController _loadingController = LoadingController();
@@ -49,6 +50,12 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                 tableData.clear();
                 _loadingController.hide();
                 setState(() {});
+              } else if (state is UpdateManageContactsSuccessState) {
+                _loadingController.hide();
+                context.read<GroupManageContactsBloc>().add(GetManageContacts(
+                    _groupId, _selectedFilter, _selectedBranchId));
+              } else if (state is UpdateManageContactsErrorState) {
+                _loadingController.hide();
               } else {
                 _loadingController.hide();
                 if (state is GetManageContactsSuccessState) {
@@ -92,6 +99,9 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                         const SizedBox(width: 20.0),
                         Expanded(
                           child: DropdownButtonFormField<String>(
+                            decoration:
+                                TextInputDecoration(labelText: "Select"),
+                            isExpanded: true,
                             hint: const Text("Branch"),
                             isDense: true,
                             value: _selectedBranchId,
@@ -136,7 +146,9 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                           DataColumn(label: Text('Incidents')),
                           DataColumn(label: Text('')),
                         ],
-                        rows: tableData.map<DataRow>((data) {
+                        rows: tableData.asMap().entries.map<DataRow>((entry) {
+                          final int index = entry.key;
+                          final GroupManageContactBranchDto data = entry.value;
                           return DataRow(
                             cells: [
                               DataCell(Text(data.name ?? "name")),
@@ -153,7 +165,22 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                                           value:
                                               data.contactBranch?.canAccess ??
                                                   false,
-                                          onChanged: (newValue) {},
+                                          onChanged: (newValue) {
+                                            if (newValue != null) {
+                                              setState(() {
+                                                _checkboxState[index] =
+                                                    newValue;
+                                                data.contactBranch?.canAccess =
+                                                    newValue;
+                                                for (var incident in data
+                                                        .contactBranch
+                                                        ?.contactBranchesIncidents ??
+                                                    []) {
+                                                  incident.canAccess = newValue;
+                                                }
+                                              });
+                                            }
+                                          },
                                         ),
                                         Text(data.contactBranch?.name ?? ''),
                                       ],
@@ -161,36 +188,104 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                                   ],
                                 ),
                               ),
-                              DataCell(Expanded(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Wrap(
-                                      spacing: 8.0,
-                                      children: (data.contactBranch
-                                                  ?.contactBranchesIncidents ??
-                                              [])
-                                          .map<Widget>((incident) {
-                                        return Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Checkbox(
-                                              value:
-                                                  incident.canAccess ?? false,
-                                              onChanged: (newValue) {},
-                                            ),
-                                            Text(incident.name ?? ''),
-                                          ],
-                                        );
-                                      }).toList(),
-                                    )
-                                  ],
+                              DataCell(
+                                Expanded(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Wrap(
+                                        spacing: 8.0,
+                                        children: [
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Checkbox(
+                                                value: _allIncidentsSelected(data
+                                                    .contactBranch
+                                                    ?.contactBranchesIncidents),
+                                                onChanged: (newValue) {
+                                                  if (newValue != null) {
+                                                    setState(() {
+                                                      data.contactBranch
+                                                              ?.canAccess =
+                                                          newValue;
+                                                      for (var incident in data
+                                                              .contactBranch
+                                                              ?.contactBranchesIncidents ??
+                                                          []) {
+                                                        incident.canAccess =
+                                                            newValue;
+                                                      }
+                                                    });
+                                                  }
+                                                },
+                                              ),
+                                              const Text('All'),
+                                            ],
+                                          ),
+                                          ...(data.contactBranch
+                                                      ?.contactBranchesIncidents ??
+                                                  [])
+                                              .asMap()
+                                              .entries
+                                              .map<Widget>((entry) {
+                                            final ContactBranchesIncidents
+                                                incident = entry.value;
+                                            return Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Checkbox(
+                                                  value: incident.canAccess ??
+                                                      false,
+                                                  onChanged: (newValue) {
+                                                    if (newValue != null) {
+                                                      setState(() {
+                                                        incident.canAccess =
+                                                            newValue;
+                      
+                                                        for (var all in data
+                                                            .contactBranch!
+                                                            .contactBranchesIncidents!) {
+                                                          if (all.canAccess ==
+                                                              true) {
+                                                            data.contactBranch
+                                                                    ?.canAccess =
+                                                                true;
+                                                            break;
+                                                          } else {
+                                                            data.contactBranch
+                                                                    ?.canAccess =
+                                                                false;
+                                                          }
+                                                        }
+                                                      });
+                                                    }
+                                                  },
+                                                ),
+                                                Text(incident.name ?? ''),
+                                              ],
+                                            );
+                                          }).toList(),
+                                        ],
+                                      )
+                                    ],
+                                  ),
                                 ),
-                              )),
+                              ),
                               DataCell(
                                 AppButtonWithIcon(
                                   icon: const Icon(Icons.save),
-                                  onPressed: () async {},
+                                  onPressed: () async {
+                                    print("updated data is");
+                                    print("____________");
+                                    print(data.toJson());
+                      
+                                    context.read<GroupManageContactsBloc>().add(
+                                        UpdateManageContacts(
+                                            _groupId,
+                                            data.inviteId,
+                                            data));
+                                  },
                                   buttonText: "Update",
                                 ),
                               ),
@@ -202,6 +297,20 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                   ),
               ],
             )));
+  }
+
+  bool _allIncidentsSelected(List<ContactBranchesIncidents>? incidents) {
+    if (incidents == null || incidents.isEmpty) {
+      return false; // If no incidents, return false
+    }
+
+    for (var incident in incidents) {
+      if (!(incident.canAccess ?? false)) {
+        return false; // If any incident is not selected, return false
+      }
+    }
+
+    return true; // If all incidents are selected, return true
   }
 
   @override
