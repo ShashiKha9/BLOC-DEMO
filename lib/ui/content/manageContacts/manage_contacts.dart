@@ -5,6 +5,7 @@ import '../../../data/blocs/group_manage_contacts_bloc.dart';
 import '../../../data/dto/group_manage_contacts_dto.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/common_widgets.dart';
+import '../../widgets/dialogs.dart';
 import '../../widgets/loading_container.dart';
 import '../../widgets/text_input_decoration.dart';
 
@@ -14,7 +15,7 @@ class ManageGroupContactsContent extends BaseModalRouteState {
   final String _groupId;
   String? _selectedFilter;
   String? _selectedBranchId;
-  double? _dataRowHeight;
+  double? dataRowHeight;
   int maxIncidents = 0;
 
   ManageGroupContactsContent(this._groupId);
@@ -28,9 +29,6 @@ class ManageGroupContactsContent extends BaseModalRouteState {
     context
         .read<GroupManageContactsBloc>()
         .add(GetManageContacts(_groupId, _selectedFilter, _selectedBranchId));
-    for (int i = 0; i < tableData.length; i++) {
-      _checkboxState[i] = false;
-    }
   }
 
   @override
@@ -54,6 +52,7 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                 setState(() {});
               } else if (state is UpdateManageContactsSuccessState) {
                 _loadingController.hide();
+                ToastDialog.success("Record updated successfully");
                 context.read<GroupManageContactsBloc>().add(GetManageContacts(
                     _groupId, _selectedFilter, _selectedBranchId));
               } else if (state is UpdateManageContactsErrorState) {
@@ -80,8 +79,7 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                         maxIncidents = data.contactBranch!
                                 .contactBranchesIncidents!.length +
                             1;
-
-                        _dataRowHeight = ((maxIncidents / 3) * 70);
+                        dataRowHeight = ((maxIncidents / 3) * 70);
                       }
                     }
                   }
@@ -152,7 +150,7 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                         width: double.infinity,
                         child: DataTable(
                           headingRowHeight: 55,
-                          dataRowHeight: _dataRowHeight ?? 70,
+                          dataRowHeight: dataRowHeight,
                           columns: [
                             const DataColumn(label: Text('Name')),
                             const DataColumn(label: Text('Phone Number')),
@@ -164,7 +162,10 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                                     const Text('Branch'),
                                     IconButton(
                                       icon: const Icon(Icons.info_outline),
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        ToastDialog.warning(
+                                            "Assign branch to user");
+                                      },
                                     ),
                                   ],
                                 ),
@@ -177,7 +178,10 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                                     const Text('Incidents'),
                                     IconButton(
                                       icon: const Icon(Icons.info_outline),
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        ToastDialog.warning(
+                                            "Select incident types to get notified");
+                                      },
                                     ),
                                   ],
                                 ),
@@ -333,10 +337,6 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                   ),
               ],
             )));
-  }
-
-  double calculateRowHeight() {
-    return 120;
   }
 
   bool _allIncidentsSelected(List<ContactBranchesIncidents>? incidents) {
