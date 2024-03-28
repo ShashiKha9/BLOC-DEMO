@@ -14,6 +14,8 @@ class ManageGroupContactsContent extends BaseModalRouteState {
   final String _groupId;
   String? _selectedFilter;
   String? _selectedBranchId;
+  double? _dataRowHeight;
+  int maxIncidents = 0;
 
   ManageGroupContactsContent(this._groupId);
   List<GroupManageContactBranchDto> tableData = [];
@@ -64,12 +66,22 @@ class ManageGroupContactsContent extends BaseModalRouteState {
 
                   if (branchData.isEmpty) {
                     branchData.add(ContactBranch(name: "All"));
-
                     Set<String> uniqueIds = {};
                     for (var data in tableData) {
                       if (!uniqueIds.contains(data.contactBranch?.branchId)) {
                         uniqueIds.add(data.contactBranch?.branchId ?? "");
                         branchData.add(data.contactBranch!);
+                      }
+
+                      if ((data.contactBranch?.contactBranchesIncidents
+                                  ?.length ??
+                              0) >
+                          maxIncidents) {
+                        maxIncidents = data.contactBranch!
+                                .contactBranchesIncidents!.length +
+                            1;
+
+                        _dataRowHeight = ((maxIncidents / 3) * 70);
                       }
                     }
                   }
@@ -100,9 +112,9 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                         Expanded(
                           child: DropdownButtonFormField<String>(
                             decoration:
-                                TextInputDecoration(labelText: "Select"),
+                                TextInputDecoration(labelText: "Select Branch"),
                             isExpanded: true,
-                            hint: const Text("Branch"),
+                            hint: const Text("All"),
                             isDense: true,
                             value: _selectedBranchId,
                             items: branchData.map((branchName) {
@@ -136,61 +148,90 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                   Expanded(
                     child: SingleChildScrollView(
                       scrollDirection: Axis.vertical,
-                      child: DataTable(
-                        dataRowHeight: 75,
-                        columns: const [
-                          DataColumn(label: Text('Name')),
-                          DataColumn(label: Text('Phone Number')),
-                          DataColumn(label: Text('Email')),
-                          DataColumn(label: Text('Branch')),
-                          DataColumn(label: Text('Incidents')),
-                          DataColumn(label: Text('')),
-                        ],
-                        rows: tableData.asMap().entries.map<DataRow>((entry) {
-                          final int index = entry.key;
-                          final GroupManageContactBranchDto data = entry.value;
-                          return DataRow(
-                            cells: [
-                              DataCell(Text(data.name ?? "name")),
-                              DataCell(Text(data.phoneNumber ?? "phoneNumber")),
-                              DataCell(Text(data.email ?? "email")),
-                              DataCell(
-                                Wrap(
-                                  spacing: 8.0,
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: DataTable(
+                          headingRowHeight: 55,
+                          dataRowHeight: _dataRowHeight ?? 70,
+                          columns: [
+                            const DataColumn(label: Text('Name')),
+                            const DataColumn(label: Text('Phone Number')),
+                            const DataColumn(label: Text('Email')),
+                            DataColumn(
+                              label: Expanded(
+                                child: Row(
                                   children: [
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Checkbox(
-                                          value:
-                                              data.contactBranch?.canAccess ??
-                                                  false,
-                                          onChanged: (newValue) {
-                                            if (newValue != null) {
-                                              setState(() {
-                                                _checkboxState[index] =
-                                                    newValue;
-                                                data.contactBranch?.canAccess =
-                                                    newValue;
-                                                for (var incident in data
-                                                        .contactBranch
-                                                        ?.contactBranchesIncidents ??
-                                                    []) {
-                                                  incident.canAccess = newValue;
-                                                }
-                                              });
-                                            }
-                                          },
-                                        ),
-                                        Text(data.contactBranch?.name ?? ''),
-                                      ],
+                                    const Text('Branch'),
+                                    IconButton(
+                                      icon: const Icon(Icons.info_outline),
+                                      onPressed: () {},
                                     ),
                                   ],
                                 ),
                               ),
-                              DataCell(
-                                Expanded(
-                                  child: Column(
+                            ),
+                            DataColumn(
+                              label: Expanded(
+                                child: Row(
+                                  children: [
+                                    const Text('Incidents'),
+                                    IconButton(
+                                      icon: const Icon(Icons.info_outline),
+                                      onPressed: () {},
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const DataColumn(label: Text('')),
+                          ],
+                          rows: tableData.asMap().entries.map<DataRow>((entry) {
+                            final int index = entry.key;
+                            final GroupManageContactBranchDto data =
+                                entry.value;
+                            return DataRow(
+                              cells: [
+                                DataCell(Text(data.name ?? "name")),
+                                DataCell(
+                                    Text(data.phoneNumber ?? "phoneNumber")),
+                                DataCell(Text(data.email ?? "email")),
+                                DataCell(
+                                  Wrap(
+                                    spacing: 8.0,
+                                    children: [
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Checkbox(
+                                            value:
+                                                data.contactBranch?.canAccess ??
+                                                    false,
+                                            onChanged: (newValue) {
+                                              if (newValue != null) {
+                                                setState(() {
+                                                  _checkboxState[index] =
+                                                      newValue;
+                                                  data.contactBranch
+                                                      ?.canAccess = newValue;
+                                                  for (var incident in data
+                                                          .contactBranch
+                                                          ?.contactBranchesIncidents ??
+                                                      []) {
+                                                    incident.canAccess =
+                                                        newValue;
+                                                  }
+                                                });
+                                              }
+                                            },
+                                          ),
+                                          Text(data.contactBranch?.name ?? ''),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                DataCell(
+                                  Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Wrap(
@@ -242,7 +283,7 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                                                       setState(() {
                                                         incident.canAccess =
                                                             newValue;
-                      
+
                                                         for (var all in data
                                                             .contactBranch!
                                                             .contactBranchesIncidents!) {
@@ -271,27 +312,22 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                                     ],
                                   ),
                                 ),
-                              ),
-                              DataCell(
-                                AppButtonWithIcon(
-                                  icon: const Icon(Icons.save),
-                                  onPressed: () async {
-                                    print("updated data is");
-                                    print("____________");
-                                    print(data.toJson());
-                      
-                                    context.read<GroupManageContactsBloc>().add(
-                                        UpdateManageContacts(
-                                            _groupId,
-                                            data.inviteId,
-                                            data));
-                                  },
-                                  buttonText: "Update",
+                                DataCell(
+                                  AppButtonWithIcon(
+                                    icon: const Icon(Icons.save),
+                                    onPressed: () async {
+                                      context
+                                          .read<GroupManageContactsBloc>()
+                                          .add(UpdateManageContacts(
+                                              _groupId, data.inviteId, data));
+                                    },
+                                    buttonText: "Update",
+                                  ),
                                 ),
-                              ),
-                            ],
-                          );
-                        }).toList(),
+                              ],
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ),
                   ),
@@ -299,18 +335,22 @@ class ManageGroupContactsContent extends BaseModalRouteState {
             )));
   }
 
+  double calculateRowHeight() {
+    return 120;
+  }
+
   bool _allIncidentsSelected(List<ContactBranchesIncidents>? incidents) {
     if (incidents == null || incidents.isEmpty) {
-      return false; // If no incidents, return false
+      return false;
     }
 
     for (var incident in incidents) {
       if (!(incident.canAccess ?? false)) {
-        return false; // If any incident is not selected, return false
+        return false;
       }
     }
 
-    return true; // If all incidents are selected, return true
+    return true;
   }
 
   @override
