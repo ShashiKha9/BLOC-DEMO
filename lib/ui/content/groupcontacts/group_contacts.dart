@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/group_invite_contact_bloc.dart';
+import 'package:rescu_organization_portal/ui/content/manageContacts/manage_contacts.dart';
 
 import '../../../data/constants/fleet_user_roles.dart';
 import '../../../data/constants/messages.dart';
 import '../../adaptive_items.dart';
 import '../../adaptive_navigation.dart';
+import '../../widgets/buttons.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/dialogs.dart';
 import '../../widgets/loading_container.dart';
@@ -196,56 +198,79 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 120),
-                  child: DropdownButtonFormField<String>(
-                      decoration: TextInputDecoration(labelText: "Select"),
-                      value: _active,
-                      isExpanded: true,
-                      isDense: true,
-                      onChanged: (value) {
-                        setState(() {
-                          _active = value ?? "";
-                        });
-                        context.read<GroupInviteContactBloc>().add(
-                            GetGroupInviteContacts(
-                                widget.groupId,
-                                _searchValue,
-                                FleetUserRoles.contact,
-                                _selectedBranchId,
-                                _active));
-                      },
-                      items: _activeFilter
-                          .map((description, value) {
-                            return MapEntry(
-                                description,
-                                DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(description),
-                                ));
-                          })
-                          .values
-                          .toList()),
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 120),
+                        child: DropdownButtonFormField<String>(
+                          decoration: TextInputDecoration(labelText: "Select"),
+                          value: _active,
+                          isExpanded: true,
+                          isDense: true,
+                          onChanged: (value) {
+                            setState(() {
+                              _active = value ?? "";
+                            });
+                            context.read<GroupInviteContactBloc>().add(
+                                  GetGroupInviteContacts(
+                                    widget.groupId,
+                                    _searchValue,
+                                    FleetUserRoles.contact,
+                                    _selectedBranchId,
+                                    _active,
+                                  ),
+                                );
+                          },
+                          items: _activeFilter
+                              .map((description, value) {
+                                return MapEntry(
+                                  description,
+                                  DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(description),
+                                  ),
+                                );
+                              })
+                              .values
+                              .toList(),
+                        ),
+                      ),
+                    ),
+                  ),
+                  AppButtonWithIcon(
+                    icon: const Icon(Icons.contacts_rounded),
+                    onPressed: () async {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (ctx) => ModalRouteWidget(
+                              stateGenerator: () =>
+                                  ManageGroupContactsContent(widget.groupId))));
+                    },
+                    buttonText: "Manage Contacts",
+                  ),
+                ],
               ),
             ),
             Expanded(
               child: SearchableList(
-                  searchHint: "First Name, Last Name",
-                  searchIcon: const Icon(Icons.search),
-                  onSearchSubmitted: (value) {
-                    _searchValue = value;
-                    context.read<GroupInviteContactBloc>().add(
+                searchHint: "First Name, Last Name",
+                searchIcon: const Icon(Icons.search),
+                onSearchSubmitted: (value) {
+                  _searchValue = value;
+                  context.read<GroupInviteContactBloc>().add(
                         GetGroupInviteContacts(
-                            widget.groupId,
-                            _searchValue,
-                            FleetUserRoles.contact,
-                            _selectedBranchId,
-                            _active));
-                  },
-                  list: _contacts),
+                          widget.groupId,
+                          _searchValue,
+                          FleetUserRoles.contact,
+                          _selectedBranchId,
+                          _active,
+                        ),
+                      );
+                },
+                list: _contacts,
+              ),
             ),
           ],
         ),
