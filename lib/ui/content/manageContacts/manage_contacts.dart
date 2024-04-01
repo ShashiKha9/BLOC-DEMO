@@ -63,6 +63,7 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                   tableData.clear();
                   if (state.manageContactsData.isEmpty) {
                     ToastDialog.warning("No records found");
+                    return;
                   }
                   tableData = state.manageContactsData;
                   if (branchData.isEmpty) {
