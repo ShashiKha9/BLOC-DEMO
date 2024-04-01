@@ -61,8 +61,10 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                 _loadingController.hide();
                 if (state is GetManageContactsSuccessState) {
                   tableData.clear();
+                  if (state.manageContactsData.isEmpty) {
+                    ToastDialog.warning("No records found");
+                  }
                   tableData = state.manageContactsData;
-
                   if (branchData.isEmpty) {
                     branchData.add(ContactBranch(name: "All"));
                     Set<String> uniqueIds = {};
