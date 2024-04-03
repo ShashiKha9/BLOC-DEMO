@@ -219,7 +219,7 @@ class GroupInviteContactBloc
               event.active);
           if (adminResult is OkData<List<GroupInviteContactDto>> &&
               adminResult.dto.isNotEmpty) {
-            result.dto.add(adminResult.dto.first);
+            result.dto.addAll(adminResult.dto);
           }
         }
         if (result.dto.isNotEmpty) {
