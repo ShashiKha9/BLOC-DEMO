@@ -303,8 +303,8 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                                       children: [
                                         _selectedBranches.contains(e)
                                             ? const Icon(Icons.check_box)
-                                            : const Icon(Icons
-                                                .check_box_outline_blank),
+                                            : const Icon(
+                                                Icons.check_box_outline_blank),
                                         const SizedBox(
                                           width: 10,
                                         ),
@@ -350,9 +350,17 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
       AdaptiveItemAction("SAVE", const Icon(Icons.save), () async {
         if (!_formKey.currentState!.validate()) return;
         FocusScope.of(context).unfocus();
+
         if (_selectedBranches.isEmpty) {
-          ToastDialog.error("Please select at least one branch.");
-          return;
+          if (contact != null && contact!.id != null) {
+            if (contact!.role != "Admin") {
+              ToastDialog.error("Please select at least one branch.");
+              return;
+            }
+          } else {
+            ToastDialog.error("Please select at least one branch.");
+            return;
+          }
         }
         var formattedMobileNumber = await PhoneNumberUtility.parseToE164Format(
             phoneNumber: _phoneNumberController.text);
@@ -376,6 +384,8 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
           if (contact!.role == "Admin") {
             addContact.email = contact!.email;
             addContact.loginWith = contact!.loginWith;
+            addContact.incidentTypeList = [];
+            addContact.branchIds = [];
           }
           context
               .read<AddUpdateGroupInviteContactBloc>()
