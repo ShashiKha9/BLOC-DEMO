@@ -8,6 +8,7 @@ class GroupIncidentTypeModel {
   late String? iconData;
   late String? branchId;
   late List<String>? branches;
+  late String color;
 
   GroupIncidentTypeModel(
       {this.id,
@@ -16,7 +17,8 @@ class GroupIncidentTypeModel {
       required this.groupId,
       this.iconData,
       this.branchId,
-      this.branches});
+      this.branches,
+      required this.color});
 
   GroupIncidentTypeModel.fromDto(GroupIncidentTypeDto dto) {
     id = dto.id;
@@ -25,6 +27,7 @@ class GroupIncidentTypeModel {
     description = dto.description;
     iconData = dto.iconData;
     branchId = dto.branchId;
+    color = dto.color;
   }
 
   GroupIncidentTypeDto toDto() {
@@ -35,6 +38,7 @@ class GroupIncidentTypeModel {
         description: description,
         iconData: iconData,
         branches: branches,
-        branchId: branchId);
+        branchId: branchId,
+        color: color);
   }
 }

@@ -105,7 +105,8 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                       name: 'All',
                       groupId: _incidentList.first.groupId,
                       description: "",
-                      branchId: 'all'));
+                      branchId: 'all',
+                      color: ""));
               if (contact != null &&
                   contact!.incidentTypeList != null &&
                   contact!.incidentTypeList!.isNotEmpty) {
