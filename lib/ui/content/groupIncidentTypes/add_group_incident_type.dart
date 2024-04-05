@@ -97,23 +97,25 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
       ),
       showMaterialName: true,
       showColorName: true,
-      showColorCode: true,
+      showColorCode: false,
       copyPasteBehavior: const ColorPickerCopyPasteBehavior(
         longPressMenu: true,
       ),
       materialNameTextStyle: const TextStyle(color: Colors.black),
       colorNameTextStyle: const TextStyle(color: Colors.black),
       colorCodeTextStyle: const TextStyle(color: Colors.black),
+      pickerTypeTextStyle: const TextStyle(color: Colors.black),
       pickersEnabled: const <ColorPickerType, bool>{
         ColorPickerType.both: false,
         ColorPickerType.primary: true,
         ColorPickerType.accent: true,
         ColorPickerType.bw: false,
-        ColorPickerType.custom: true,
+        ColorPickerType.custom: false,
         ColorPickerType.wheel: true,
       },
     ).showPickerDialog(
       context,
+      titleTextStyle: const TextStyle(color: Colors.black),
       constraints:
           const BoxConstraints(minHeight: 460, minWidth: 300, maxWidth: 320),
     );
@@ -226,27 +228,34 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
               SpacerSize.at(1.5),
               const Text("Incident Type Color"),
               SpacerSize.at(1),
-              Row(
-                children: [
-                  Container(
-                    color: _dialogPickerColor,
-                    width: 25,
-                    height: 25,
-                  ),
-                  const SizedBox(width: 10),
-                  AppButton(
-                    buttonText: "Change",
-                    onPressed: () async {
-                      final Color colorBeforeDialog = _dialogPickerColor;
-                      if (!(await _colorPickerDialog())) {
-                        setState(() {
-                          _dialogPickerColor = colorBeforeDialog;
-                        });
-                      }
-                    },
-                    weight: FontWeight.w400,
-                  )
-                ],
+              Theme(
+                data: Theme.of(context).copyWith(
+                    colorScheme:
+                        const ColorScheme.light(primary: Colors.black)),
+                child: Row(
+                  children: [
+                    ColorIndicator(
+                      width: 44,
+                      height: 44,
+                      borderRadius: 4,
+                      color: _dialogPickerColor,
+                      onSelectFocus: false,
+                    ),
+                    const SizedBox(width: 10),
+                    AppButton(
+                      buttonText: "Change",
+                      onPressed: () async {
+                        final Color colorBeforeDialog = _dialogPickerColor;
+                        if (!(await _colorPickerDialog())) {
+                          setState(() {
+                            _dialogPickerColor = colorBeforeDialog;
+                          });
+                        }
+                      },
+                      weight: FontWeight.w400,
+                    )
+                  ],
+                ),
               ),
             ],
           ),
