@@ -36,6 +36,7 @@ import 'data/api/group_info_api.dart';
 import 'data/api/group_invite_contact_api.dart';
 import 'data/api/group_manage_contacts_api.dart';
 import 'data/blocs/group_address_bloc.dart';
+import 'data/blocs/group_admins_bloc.dart';
 import 'data/blocs/group_invite_contact_bloc.dart';
 import 'data/services/address/address_service.dart';
 
@@ -189,7 +190,11 @@ class DependencyConfiguration {
       BlocProvider<GroupIncidentHistoryBloc>(
           create: (ctx) => GroupIncidentHistoryBloc(ctx.read())),
       BlocProvider<GroupManageContactsBloc>(
-          create: (ctx) => GroupManageContactsBloc(ctx.read()))
+          create: (ctx) => GroupManageContactsBloc(ctx.read())),
+      BlocProvider<GroupAdminBloc>(
+          create: (ctx) => GroupAdminBloc(ctx.read(), ctx.read())),
+      BlocProvider<AddUpdateGroupAdminBloc>(
+          create: (ctx) => AddUpdateGroupAdminBloc(ctx.read())),
     ];
   }
 }
