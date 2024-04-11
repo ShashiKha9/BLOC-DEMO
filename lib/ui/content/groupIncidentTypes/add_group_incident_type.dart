@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -27,6 +28,7 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
 
   final TextEditingController _descriptionController = TextEditingController();
   Icon _icon = const Icon(Icons.report);
+  Color _dialogPickerColor = const Color(0xFFED3032);
 
   List<GroupBranchDto> _branches = [];
   List<GroupBranchDto> _selectedBranches = [];
@@ -44,6 +46,9 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
           deserializeIcon(jsonDecode(incidentType!.iconData!)),
         );
       }
+      _dialogPickerColor = Color(
+          int.parse(incidentType!.color.substring(1, 7), radix: 16) +
+              0xFF000000);
     }
 
     context.read<GroupIncidentTypeBloc>().add(GetBranches(groupId, ""));
@@ -63,6 +68,57 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
       _icon = Icon(icon);
       setState(() {});
     }
+  }
+
+  Future<bool> _colorPickerDialog() async {
+    return ColorPicker(
+      // Use the dialogPickerColor as start color.
+      color: _dialogPickerColor,
+      // Update the dialogPickerColor using the callback.
+      onColorChanged: (Color color) =>
+          setState(() => _dialogPickerColor = color),
+      width: 40,
+      height: 40,
+      borderRadius: 4,
+      spacing: 5,
+      runSpacing: 5,
+      wheelDiameter: 155,
+      heading: const Text(
+        'Select color',
+        style: TextStyle(color: Colors.black),
+      ),
+      subheading: const Text(
+        'Select color shade',
+        style: TextStyle(color: Colors.black),
+      ),
+      wheelSubheading: const Text(
+        'Selected color and its shades',
+        style: TextStyle(color: Colors.black),
+      ),
+      showMaterialName: true,
+      showColorName: true,
+      showColorCode: false,
+      copyPasteBehavior: const ColorPickerCopyPasteBehavior(
+        longPressMenu: true,
+      ),
+      materialNameTextStyle: const TextStyle(color: Colors.black),
+      colorNameTextStyle: const TextStyle(color: Colors.black),
+      colorCodeTextStyle: const TextStyle(color: Colors.black),
+      pickerTypeTextStyle: const TextStyle(color: Colors.black),
+      pickersEnabled: const <ColorPickerType, bool>{
+        ColorPickerType.both: false,
+        ColorPickerType.primary: true,
+        ColorPickerType.accent: true,
+        ColorPickerType.bw: false,
+        ColorPickerType.custom: false,
+        ColorPickerType.wheel: true,
+      },
+    ).showPickerDialog(
+      context,
+      titleTextStyle: const TextStyle(color: Colors.black),
+      constraints:
+          const BoxConstraints(minHeight: 460, minWidth: 300, maxWidth: 320),
+    );
   }
 
   @override
@@ -169,6 +225,38 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
                   )
                 ],
               ),
+              SpacerSize.at(1.5),
+              const Text("Incident Type Color"),
+              SpacerSize.at(1),
+              Theme(
+                data: Theme.of(context).copyWith(
+                    colorScheme:
+                        const ColorScheme.light(primary: Colors.black)),
+                child: Row(
+                  children: [
+                    ColorIndicator(
+                      width: 44,
+                      height: 44,
+                      borderRadius: 4,
+                      color: _dialogPickerColor,
+                      onSelectFocus: false,
+                    ),
+                    const SizedBox(width: 10),
+                    AppButton(
+                      buttonText: "Change",
+                      onPressed: () async {
+                        final Color colorBeforeDialog = _dialogPickerColor;
+                        if (!(await _colorPickerDialog())) {
+                          setState(() {
+                            _dialogPickerColor = colorBeforeDialog;
+                          });
+                        }
+                      },
+                      weight: FontWeight.w400,
+                    )
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -185,6 +273,7 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
         var addIncidentType = GroupIncidentTypeModel(
             groupId: groupId,
             name: _nameController.text,
+            color: "#${_dialogPickerColor.hex}",
             description: _descriptionController.text,
             iconData: jsonEncode(serializeIcon(_icon.icon!)),
             branchId: incidentType?.branchId);

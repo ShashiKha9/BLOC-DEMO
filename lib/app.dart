@@ -23,7 +23,7 @@ class App extends StatelessWidget {
         colorScheme: const ColorScheme.dark(primary: Colors.tealAccent),
         textButtonTheme: TextButtonThemeData(
             style: TextButton.styleFrom(
-          primary: Colors.white,
+          primary: Colors.black,
         )),
         backgroundColor: AppColor.baseBackground,
         elevatedButtonTheme: ElevatedButtonThemeData(
