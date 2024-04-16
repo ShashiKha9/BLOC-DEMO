@@ -84,7 +84,7 @@ class _GroupAdminsContentState extends State<GroupAdminsContent> {
                     return ModalRouteWidget(
                         stateGenerator: () => AddUpdateGroupAdminModelState(
                             widget.groupId,
-                            contact: e));
+                            contact: e.clone()));
                   })).then((_) {
                     context
                         .read<GroupAdminBloc>()
@@ -99,7 +99,7 @@ class _GroupAdminsContentState extends State<GroupAdminsContent> {
                       body:
                           "Are you sure you want to ${e.isActive ? "De-" : ""}Activate this record?",
                       onPressedOk: () {
-                        var updateContact = e;
+                        var updateContact = e.clone();
                         updateContact.isActive = !e.isActive;
                         context.read<GroupAdminBloc>().add(
                             ActivateDeactivateGroupAdmin(

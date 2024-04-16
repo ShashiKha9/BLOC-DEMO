@@ -132,9 +132,16 @@ class AddUpdateGroupAdminModelState extends BaseModalRouteState {
               TextFormField(
                   decoration: TextInputDecoration(labelText: "Email"),
                   controller: _emailController,
+                  readOnly: contact != null && contact!.id != null,
+                  onTap: () {
+                    if (contact != null && contact!.id != null) {
+                      ToastDialog.error(
+                          "Email cannot be changed. It is used to log into Group Portal & Rescu Ops.");
+                    }
+                  },
                   validator: (value) {
                     if (value?.isEmpty ?? true) {
-                      return null;
+                      return "Please enter email";
                     }
                     if (!EmailValidator.validate(value!)) {
                       return "Please enter valid email";
@@ -146,6 +153,16 @@ class AddUpdateGroupAdminModelState extends BaseModalRouteState {
                       setState(() {});
                     }
                   }),
+              SpacerSize.at(0.5),
+              contact != null && contact!.id != null
+                  ? const SizedBox(
+                      height: 0,
+                    )
+                  : const Text(
+                      "This Email should be used to log into Group Portal & Rescu Ops. User will receive the credentials on the email.",
+                      style:
+                          TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                    )
             ],
           ),
         ),
