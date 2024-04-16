@@ -43,7 +43,7 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
 
   List<GroupBranchDto> _branches = [];
   GroupBranchDto? _selectedBranch;
-  bool isQuestionMandatory = false;
+  bool isQuestionMandatory = true;
 
   @override
   void initState() {
