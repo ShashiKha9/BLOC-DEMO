@@ -57,4 +57,21 @@ class GroupInviteContactDto {
     data["BranchIds"] = branchIds ?? [];
     return data;
   }
+
+  GroupInviteContactDto clone() {
+    return GroupInviteContactDto(
+      firstName: firstName,
+      isActive: isActive,
+      lastName: lastName,
+      phoneNumber: phoneNumber,
+      role: role,
+      branchIds: branchIds,
+      canCloseChat: canCloseChat,
+      designation: designation,
+      email: email,
+      id: id,
+      incidentTypeList: incidentTypeList,
+      loginWith: loginWith,
+    );
+  }
 }

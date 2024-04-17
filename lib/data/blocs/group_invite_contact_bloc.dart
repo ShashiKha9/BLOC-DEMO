@@ -4,7 +4,6 @@ import 'package:rescu_organization_portal/data/api/base_api.dart';
 import 'package:rescu_organization_portal/data/api/group_branch_api.dart';
 import 'package:rescu_organization_portal/data/api/group_incident_type_api.dart';
 import 'package:rescu_organization_portal/data/api/group_info_api.dart';
-import 'package:rescu_organization_portal/data/constants/fleet_user_roles.dart';
 import 'package:rescu_organization_portal/data/dto/group_branch_dto.dart';
 import 'package:rescu_organization_portal/data/dto/group_incident_type_dto.dart';
 import 'package:rescu_organization_portal/data/dto/group_info_dto.dart';
@@ -210,18 +209,6 @@ class GroupInviteContactBloc
           groupId, event.filter, event.role, event.branchId, event.active);
 
       if (result is OkData<List<GroupInviteContactDto>>) {
-        if (event.role == FleetUserRoles.contact) {
-          var adminResult = await _contactsApi.getGroupInviteContacts(
-              event.groupId!,
-              event.filter,
-              FleetUserRoles.admin,
-              event.branchId,
-              event.active);
-          if (adminResult is OkData<List<GroupInviteContactDto>> &&
-              adminResult.dto.isNotEmpty) {
-            result.dto.addAll(adminResult.dto);
-          }
-        }
         if (result.dto.isNotEmpty) {
           yield GetGroupInviteContactsSuccessState(result.dto);
         } else {

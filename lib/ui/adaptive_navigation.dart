@@ -19,6 +19,7 @@ import 'adaptive_utils.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'content/groupAdmins/group_admins.dart';
 import 'content/groupaddresses/group_addresses.dart';
 import 'content/groupcontacts/group_contacts.dart';
 import 'content/groupinvitecontacts/group_invite_contacts.dart';
@@ -111,6 +112,12 @@ class AdaptiveNavigationLayoutState extends State<AdaptiveNavigationLayout> {
             GroupContactsContent(
               groupId: result.dto.id,
               branchId: _selectedBranch!.value,
+            )),
+        ContentNavigationItem(
+            "Admins",
+            const Icon(Icons.contacts),
+            GroupAdminsContent(
+              groupId: result.dto.id,
             )),
         ContentNavigationItem(
             "Addresses",
