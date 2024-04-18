@@ -61,6 +61,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           isPortalRequest: true);
 
       if (result is OkData<LoginDto>) {
+        if (result.dto.role != "GroupAdmin") {
+          yield LoginInvalidCredentialsState();
+          return;
+        }
         await _dataManager.clearAll();
         await _tokenStore.save(result.dto.accessToken);
         if (result.dto.isFirstLogin.toLowerCase() == "true") {
