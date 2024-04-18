@@ -11,6 +11,7 @@ class GroupIncidentTypeQuestionDto {
   late String? parentOptionId;
   late List<GroupIncidentTypeQuestionOptionDto>? options;
   late String? branchId;
+  late bool? isMandatory;
 
   GroupIncidentTypeQuestionDto(
       {required this.question,
@@ -22,7 +23,8 @@ class GroupIncidentTypeQuestionDto {
       this.parentOptionId,
       this.options,
       this.rootQuestionId,
-      this.branchId});
+      this.branchId,
+      this.isMandatory});
 
   GroupIncidentTypeQuestionDto.fromJson(Map<String, dynamic> json) {
     id = json["Id"];
@@ -41,6 +43,7 @@ class GroupIncidentTypeQuestionDto {
     rootQuestionId = json["RootQuestionId"];
     parentOptionId = json["ParentOptionId"];
     branchId = json['BranchId'];
+    isMandatory = json['IsMandatory'];
   }
 
   Map<String, dynamic> toJson() {
@@ -54,6 +57,7 @@ class GroupIncidentTypeQuestionDto {
     data["RootQuestionId"] = rootQuestionId;
     data["ParentOptionId"] = parentOptionId;
     data["BranchId"] = branchId;
+    data["IsMandatory"] = isMandatory;
     return data;
   }
 

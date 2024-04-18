@@ -43,6 +43,7 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
 
   List<GroupBranchDto> _branches = [];
   GroupBranchDto? _selectedBranch;
+  bool isQuestionMandatory = true;
 
   @override
   void initState() {
@@ -51,6 +52,7 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
       _nameController.text = questionDto!.question;
       _selectedIncidentType = questionDto!.incidentTypeId;
       _selectedQuestionType = questionDto!.questionType;
+      isQuestionMandatory = questionDto!.isMandatory ?? true;
       _options.clear();
       _options.addAll(questionDto!.options!);
 
@@ -196,7 +198,28 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
                   minLines: 3,
                   maxLines: 3,
                 ),
-                SpacerSize.at(1.5),
+                SpacerSize.at(2.5),
+                Row(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(left: 12),
+                      child: Text(
+                        'Required?',
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
+                    ),
+                    const SizedBox(width: 10.0),
+                    Checkbox(
+                      value: isQuestionMandatory,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          isQuestionMandatory = value ?? false;
+                        });
+                      },
+                    )
+                  ],
+                ),
+                SpacerSize.at(2.5),
                 DropdownButtonFormField<QuestionType>(
                     decoration: TextInputDecoration(labelText: "Question Type"),
                     hint: const Text("Select Question Type"),
@@ -275,6 +298,7 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
             questionType: _selectedQuestionType!,
             rootQuestionId: rootQuestion?.id,
             parentOptionId: parentOption?.id,
+            isMandatory: isQuestionMandatory,
             options: _options
                 .where((element) => element.optionText.isNotEmpty)
                 .toList(),
