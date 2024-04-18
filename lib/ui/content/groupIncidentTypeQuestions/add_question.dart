@@ -52,6 +52,7 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
       _nameController.text = questionDto!.question;
       _selectedIncidentType = questionDto!.incidentTypeId;
       _selectedQuestionType = questionDto!.questionType;
+      isQuestionMandatory = questionDto!.isMandatory ?? true;
       _options.clear();
       _options.addAll(questionDto!.options!);
 
@@ -212,9 +213,7 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
                       value: isQuestionMandatory,
                       onChanged: (bool? value) {
                         setState(() {
-                          if (value != null) {
-                            isQuestionMandatory = value;
-                          }
+                          isQuestionMandatory = value ?? false;
                         });
                       },
                     )
