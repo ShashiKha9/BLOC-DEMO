@@ -14,6 +14,8 @@ import 'package:rescu_organization_portal/ui/widgets/size_config.dart';
 import 'package:rescu_organization_portal/ui/widgets/spacer_size.dart';
 import 'package:rescu_organization_portal/ui/widgets/text_input_decoration.dart';
 
+import 'forgotPassword/forgot_password_route.dart';
+
 class LoginRoute extends StatefulWidget {
   const LoginRoute({Key? key}) : super(key: key);
 
@@ -82,103 +84,121 @@ class _LoginRouteState extends State<LoginRoute> {
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         key: _formKey,
                         child: Center(
-                          child: SingleChildScrollView(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  "assets/images/rescu_logo.png",
-                                  height: SizeConfig.size(10),
-                                  width: SizeConfig.size(10),
-                                ),
-                                SpacerSize.at(1.5),
-                                Center(
-                                  child: Text("Rescu Group Portal",
-                                      style: TextStyle(
-                                          fontSize: SizeConfig.size(2),
-                                          color: const Color(0xff203542))),
-                                ),
-                                SpacerSize.at(0.5),
-                                Center(
-                                  child: Text("Login to your Account",
-                                      style: TextStyle(
-                                          fontSize: SizeConfig.size(2),
-                                          color: const Color(0xff6f8494))),
-                                ),
-                                SpacerSize.at(1.5),
-                                TextFormField(
-                                  keyboardType: TextInputType.emailAddress,
-                                  textInputAction: TextInputAction.next,
-                                  autocorrect: false,
-                                  decoration: LoginInputDecoration(
-                                      labelText: "Email Address"),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return ValidationMessagesConst
-                                          .loginEmailRequired;
-                                    }
-                                    if (!EmailValidator.validate(value)) {
-                                      return ValidationMessagesConst
-                                          .loginEmailInvalid;
-                                    }
-                                    return null;
-                                  },
-                                  controller: _emailAddressController,
-                                  style: const LoginInputDecorationStyle(),
-                                  cursorColor: Colors.teal,
-                                ),
-                                SpacerSize.at(1.5),
-                                TextFormField(
-                                  textInputAction: TextInputAction.done,
-                                  autocorrect: false,
-                                  obscureText: _obscureText,
-                                  decoration: LoginInputDecoration(
-                                      labelText: "Password",
-                                      suffixIcon: IconButton(
-                                        icon: Icon(
-                                          _obscureText
-                                              ? Icons.visibility_off
-                                              : Icons.visibility,
-                                          color: AppColor.baseBackground,
-                                        ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Image.asset(
+                                      "assets/images/rescu_logo.png",
+                                      height: SizeConfig.size(10),
+                                      width: SizeConfig.size(10),
+                                    ),
+                                    SpacerSize.at(1.5),
+                                    Center(
+                                      child: Text("Rescu Group Portal",
+                                          style: TextStyle(
+                                              fontSize: SizeConfig.size(2),
+                                              color: const Color(0xff203542))),
+                                    ),
+                                    SpacerSize.at(0.5),
+                                    Center(
+                                      child: Text("Login to your Account",
+                                          style: TextStyle(
+                                              fontSize: SizeConfig.size(2),
+                                              color: const Color(0xff6f8494))),
+                                    ),
+                                    SpacerSize.at(1.5),
+                                    TextFormField(
+                                      keyboardType: TextInputType.emailAddress,
+                                      textInputAction: TextInputAction.next,
+                                      autocorrect: false,
+                                      decoration: LoginInputDecoration(
+                                          labelText: "Email Address"),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return ValidationMessagesConst
+                                              .loginEmailRequired;
+                                        }
+                                        if (!EmailValidator.validate(value)) {
+                                          return ValidationMessagesConst
+                                              .loginEmailInvalid;
+                                        }
+                                        return null;
+                                      },
+                                      controller: _emailAddressController,
+                                      style: const LoginInputDecorationStyle(),
+                                      cursorColor: Colors.teal,
+                                    ),
+                                    SpacerSize.at(1.5),
+                                    TextFormField(
+                                      textInputAction: TextInputAction.done,
+                                      autocorrect: false,
+                                      obscureText: _obscureText,
+                                      decoration: LoginInputDecoration(
+                                          labelText: "Password",
+                                          suffixIcon: IconButton(
+                                            icon: Icon(
+                                              _obscureText
+                                                  ? Icons.visibility_off
+                                                  : Icons.visibility,
+                                              color: AppColor.baseBackground,
+                                            ),
+                                            onPressed: () {
+                                              setState(() =>
+                                                  _obscureText = !_obscureText);
+                                            },
+                                          )),
+                                      onFieldSubmitted: (v) {
+                                        if (!_formKey.currentState!
+                                            .validate()) {
+                                          return;
+                                        }
+                                        context.read<LoginBloc>().add(
+                                            SubmitLogin(
+                                                _emailAddressController.text,
+                                                _passwordController.text));
+                                      },
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return ValidationMessagesConst
+                                              .loginPasswordRequired;
+                                        }
+                                        return null;
+                                      },
+                                      controller: _passwordController,
+                                      style: const LoginInputDecorationStyle(),
+                                      cursorColor: Colors.teal,
+                                    ),
+                                    SpacerSize.at(1.5),
+                                    TextButton(
                                         onPressed: () {
-                                          setState(() =>
-                                              _obscureText = !_obscureText);
+                                          Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const ForgotPasswordRoute()));
                                         },
-                                      )),
-                                  onFieldSubmitted: (v) {
+                                        child: Text(
+                                          "Forgot Password ?",
+                                          style: TextStyle(
+                                              fontSize: SizeConfig.size(2)),
+                                        ))
+                                  ],
+                                ),
+                              ),
+                              roundEdgedButton(
+                                  buttonText: "Login",
+                                  onPressed: () {
                                     if (!_formKey.currentState!.validate()) {
                                       return;
                                     }
                                     context.read<LoginBloc>().add(SubmitLogin(
                                         _emailAddressController.text,
                                         _passwordController.text));
-                                  },
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return ValidationMessagesConst
-                                          .loginPasswordRequired;
-                                    }
-                                    return null;
-                                  },
-                                  controller: _passwordController,
-                                  style: const LoginInputDecorationStyle(),
-                                  cursorColor: Colors.teal,
-                                ),
-                                SpacerSize.at(1.5),
-                                roundEdgedButton(
-                                    buttonText: "Login",
-                                    onPressed: () {
-                                      if (!_formKey.currentState!.validate()) {
-                                        return;
-                                      }
-                                      context.read<LoginBloc>().add(SubmitLogin(
-                                          _emailAddressController.text,
-                                          _passwordController.text));
-                                    })
-                              ],
-                            ),
+                                  })
+                            ],
                           ),
                         )),
                   ),
@@ -191,6 +211,9 @@ class _LoginRouteState extends State<LoginRoute> {
 
   @override
   void dispose() {
+    _loadingController.dispose();
+    _emailAddressController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 }

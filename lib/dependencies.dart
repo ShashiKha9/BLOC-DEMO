@@ -35,9 +35,12 @@ import 'data/api/group_address_api.dart';
 import 'data/api/group_info_api.dart';
 import 'data/api/group_invite_contact_api.dart';
 import 'data/api/group_manage_contacts_api.dart';
+import 'data/blocs/forgot_password_bloc.dart';
 import 'data/blocs/group_address_bloc.dart';
 import 'data/blocs/group_admins_bloc.dart';
 import 'data/blocs/group_invite_contact_bloc.dart';
+import 'data/blocs/reset_password_bloc.dart';
+import 'data/blocs/verify_forgot_password_code_bloc.dart';
 import 'data/services/address/address_service.dart';
 
 class DependencyConfiguration {
@@ -102,11 +105,11 @@ class DependencyConfiguration {
             IDataManager dm = ctx.read<IDataManager>();
             await dm.clearAll();
             ToastDialog.error("Token expired, Please login again.");
-            Navigator.popUntil(ctx, (route) => false);
-            Navigator.push(
-              ctx,
-              MaterialPageRoute(builder: (context) => const LoginRoute()),
-            );
+            // Navigator.popUntil(ctx, (route) => false);
+            // Navigator.push(
+            //   ctx,
+            //   MaterialPageRoute(builder: (context) => const LoginRoute()),
+            // );
             return handler.reject(err);
           }
           return handler.reject(err);
@@ -195,6 +198,12 @@ class DependencyConfiguration {
           create: (ctx) => GroupAdminBloc(ctx.read(), ctx.read())),
       BlocProvider<AddUpdateGroupAdminBloc>(
           create: (ctx) => AddUpdateGroupAdminBloc(ctx.read())),
+      BlocProvider<ForgotPasswordBloc>(
+          create: (ctx) => ForgotPasswordBloc(ctx.read())),
+      BlocProvider<VerifyForgotPasswordCodeBloc>(
+          create: (ctx) => VerifyForgotPasswordCodeBloc(ctx.read())),
+      BlocProvider<ResetPasswordBloc>(
+          create: (ctx) => ResetPasswordBloc(ctx.read())),
     ];
   }
 }
