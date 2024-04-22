@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 
 import '../../../../data/blocs/verify_forgot_password_code_bloc.dart';
 import '../../../widgets/buttons.dart';
@@ -8,7 +10,6 @@ import '../../../widgets/dialogs.dart';
 import '../../../widgets/loading_container.dart';
 import '../../../widgets/size_config.dart';
 import '../../../widgets/spacer_size.dart';
-import '../../../widgets/text_input_decoration.dart';
 import 'forgot_reset_password_route.dart';
 
 class VerifyForgotPasswordCodeRoute extends StatefulWidget {
@@ -26,9 +27,17 @@ class _VerifyForgotPasswordCodeRouteState
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _codeController = TextEditingController();
   final LoadingController _loadingController = LoadingController();
+  String _code = "";
+
+  @override
+  void initState() {
+    CurrentRoute.setResetPwdCodeRoute(true);
+    super.initState();
+  }
 
   @override
   void dispose() {
+    CurrentRoute.setResetPwdCodeRoute(false);
     _codeController.dispose();
     _loadingController.dispose();
     super.dispose();
@@ -54,8 +63,11 @@ class _VerifyForgotPasswordCodeRouteState
                           userId: state.id,
                         )));
               }
-              if (state is VerifyForgotPasswordCodeUnableToVerifyState) {
+              if (state is InvalidCodeState) {
                 ToastDialog.error("Invalid code.");
+              }
+              if (state is TokenExpiredState) {
+                ToastDialog.error("Code expired.");
               }
             }
           },
@@ -106,18 +118,55 @@ class _VerifyForgotPasswordCodeRouteState
                                           fontStyle: FontStyle.italic),
                                     ),
                                     SpacerSize.at(1.5),
-                                    TextFormField(
-                                      keyboardType: TextInputType.emailAddress,
-                                      textInputAction: TextInputAction.done,
-                                      autocorrect: false,
-                                      decoration: LoginInputDecoration(
-                                          labelText: "Code"),
+                                    PinCodeTextField(
+                                      appContext: context,
+                                      autoDisposeControllers: false,
+                                      autoFocus: true,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
                                       validator: (value) {
+                                        if (value?.isEmpty ?? false) {
+                                          return '';
+                                        }
+                                        if (value!.length != 6) {
+                                          return '';
+                                        }
                                         return null;
                                       },
+                                      textStyle:
+                                          const TextStyle(color: Colors.black),
+                                      length: 6,
+                                      obscureText: false,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      animationType: AnimationType.scale,
+                                      pinTheme: PinTheme(
+                                        shape: PinCodeFieldShape.box,
+                                        borderRadius: BorderRadius.circular(5),
+                                      ),
+                                      keyboardType: TextInputType.number,
+                                      animationDuration:
+                                          const Duration(milliseconds: 300),
+                                      backgroundColor: Colors.transparent,
                                       controller: _codeController,
-                                      style: const LoginInputDecorationStyle(),
-                                      cursorColor: Colors.teal,
+                                      onCompleted: (v) {},
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _code = value;
+                                        });
+                                      },
+                                      beforeTextPaste: (text) {
+                                        try {
+                                          if (text != null &&
+                                              text.length == 6) {
+                                            _codeController.text = text;
+                                          }
+                                          return true;
+                                        } catch (e) {
+                                          return false;
+                                        }
+                                      },
                                     ),
                                     SpacerSize.at(1.5),
                                     const Text(
@@ -160,8 +209,7 @@ class _VerifyForgotPasswordCodeRouteState
                                             .read<
                                                 VerifyForgotPasswordCodeBloc>()
                                             .add(VerifyForgotPasswordCodeSubmit(
-                                                _codeController.text,
-                                                widget.token));
+                                                _code, widget.token));
                                       }),
                                 ],
                               )
@@ -174,5 +222,16 @@ class _VerifyForgotPasswordCodeRouteState
             ),
           )),
     );
+  }
+}
+
+class CurrentRoute {
+  static bool _resetPwdCodeRoute = false;
+  static setResetPwdCodeRoute(bool value) {
+    _resetPwdCodeRoute = value;
+  }
+
+  static bool isresetPwdCodeRoute() {
+    return _resetPwdCodeRoute;
   }
 }

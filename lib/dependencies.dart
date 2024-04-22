@@ -27,7 +27,6 @@ import 'package:rescu_organization_portal/data/blocs/spash_bloc.dart';
 import 'package:rescu_organization_portal/data/persists/data_manager.dart';
 import 'package:rescu_organization_portal/data/persists/token_store.dart';
 import 'package:rescu_organization_portal/env.dart';
-import 'package:rescu_organization_portal/ui/content/login/login_route.dart';
 import 'package:rescu_organization_portal/ui/widgets/dialogs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -42,6 +41,7 @@ import 'data/blocs/group_invite_contact_bloc.dart';
 import 'data/blocs/reset_password_bloc.dart';
 import 'data/blocs/verify_forgot_password_code_bloc.dart';
 import 'data/services/address/address_service.dart';
+import 'ui/content/login/forgotPassword/verify_forgot_password_route.dart';
 
 class DependencyConfiguration {
   DependencyConfiguration() {
@@ -104,7 +104,9 @@ class DependencyConfiguration {
           if (err.response?.statusCode == 401) {
             IDataManager dm = ctx.read<IDataManager>();
             await dm.clearAll();
-            ToastDialog.error("Token expired, Please login again.");
+            if (!CurrentRoute.isresetPwdCodeRoute()) {
+              ToastDialog.error("Token expired, Please login again.");
+            }
             // Navigator.popUntil(ctx, (route) => false);
             // Navigator.push(
             //   ctx,

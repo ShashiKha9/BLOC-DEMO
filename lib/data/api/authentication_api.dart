@@ -88,7 +88,7 @@ class AuthenticationApi extends BaseApi implements IAuthenticationApi {
   Future<ApiDataResponse<PasswordResetTokenDto>> verifyPasswordResetCode(
       String code, String accessToken) async {
     return await wrapDataCall(() async {
-      var result = await dio.post("/Passwords/VerifyResetCode",
+      var result = await dio.post("/Passwords/GroupPortal/VerifyResetCode",
           data: {'code': code},
           options: Options(headers: {'Authorization': 'Bearer $accessToken'}));
       return OkData(PasswordResetTokenDto.fromJson(result.data));

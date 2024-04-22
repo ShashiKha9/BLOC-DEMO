@@ -42,8 +42,9 @@ class VerifyForgotPasswordCodeSuccessState
 class VerifyForgotPasswordCodeNotConnectedState
     extends VerifyForgotPasswordCodeState {}
 
-class VerifyForgotPasswordCodeUnableToVerifyState
-    extends VerifyForgotPasswordCodeState {}
+class InvalidCodeState extends VerifyForgotPasswordCodeState {}
+
+class TokenExpiredState extends VerifyForgotPasswordCodeState {}
 
 class VerifyForgotPasswordCodeBloc
     extends Bloc<VerifyForgotPasswordCodeEvent, VerifyForgotPasswordCodeState> {
@@ -64,7 +65,11 @@ class VerifyForgotPasswordCodeBloc
             result.dto.token, result.dto.id);
       }
       if (result is BadData<PasswordResetTokenDto>) {
-        yield VerifyForgotPasswordCodeUnableToVerifyState();
+        if (result.statusCode == 401) {
+          yield TokenExpiredState();
+        } else {
+          yield InvalidCodeState();
+        }
       }
       yield VerifyForgotPasswordCodeInitialState();
       return;
