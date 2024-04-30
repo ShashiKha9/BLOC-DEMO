@@ -135,14 +135,15 @@ class CopyBranchIncidentTypeModalState extends BaseModalRouteState {
   List<AdaptiveItemAction> getActions() {
     return [
       AdaptiveItemAction("SAVE", const Icon(Icons.save), () async {
-        if ((_selectedIncidentTypes.length + existingIncidentTypeCount) > 4) {
-          ToastDialog.error(
-              "Total of existing incident types ($existingIncidentTypeCount) and selected incident types (${_selectedIncidentTypes.length}) cannot be more than 4.");
-          return;
+        // if ((_selectedIncidentTypes.length + existingIncidentTypeCount) > 4) {
+        //   ToastDialog.error(
+        //       "Total of existing incident types ($existingIncidentTypeCount) and selected incident types (${_selectedIncidentTypes.length}) cannot be more than 4.");
+        //   return;
+        // }
+        if (_selectedIncidentTypes.isNotEmpty) {
+          context.read<CopyBranchIncidentTypeBloc>().add(
+              SaveIncidentTypes(groupId, branchId, _selectedIncidentTypes));
         }
-        context
-            .read<CopyBranchIncidentTypeBloc>()
-            .add(SaveIncidentTypes(groupId, branchId, _selectedIncidentTypes));
       }),
       AdaptiveItemAction("CANCEL", const Icon(Icons.cancel), () async {
         Navigator.of(context).pop();
