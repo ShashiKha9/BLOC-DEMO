@@ -80,21 +80,20 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
             } else {
               _loadingController.hide();
               if (state is ClickedFabIconState) {
-                if (_totalIncidentCount >= 4) {
-                  ToastDialog.error(
-                      "You can add a maximum of 4 incident types.");
-                } else {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-                    return ModalRouteWidget(
-                        stateGenerator: () =>
-                            AddUpdateGroupIncidentTypeModelState(
-                                widget.groupId));
-                  })).then((_) {
-                    context
-                        .read<GroupIncidentTypeBloc>()
-                        .add(GetIncidentTypes("", _selectedBranchId));
-                  });
-                }
+                // if (_totalIncidentCount >= 4) {
+                //   ToastDialog.error(
+                //       "You can add a maximum of 4 incident types.");
+                // } else {
+                Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+                  return ModalRouteWidget(
+                      stateGenerator: () =>
+                          AddUpdateGroupIncidentTypeModelState(widget.groupId));
+                })).then((_) {
+                  context
+                      .read<GroupIncidentTypeBloc>()
+                      .add(GetIncidentTypes("", _selectedBranchId));
+                });
+                //}
               }
               if (state is GetGroupIncidentTypesSuccessState) {
                 _contacts.clear();
@@ -187,11 +186,11 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
                       child: AppButtonWithIcon(
                         icon: const Icon(Icons.copy),
                         onPressed: () async {
-                          if (_totalIncidentCount >= 4) {
-                            ToastDialog.error(
-                                "You can add a maximum of 4 incident types.");
-                            return;
-                          }
+                          // if (_totalIncidentCount >= 4) {
+                          //   ToastDialog.error(
+                          //       "You can add a maximum of 4 incident types.");
+                          //   return;
+                          // }
                           Navigator.of(context)
                               .push(MaterialPageRoute(builder: (ctx) {
                             return ModalRouteWidget(
