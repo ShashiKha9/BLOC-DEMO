@@ -93,6 +93,17 @@ class _GroupIncidentHistoryContentState
                               .add(CloseIncident(e.signalId));
                         });
                   }));
+                } else {
+                  contextualItems.add(AdaptiveItemButton(
+                      "Chat History", const Icon(Icons.chat_outlined),
+                      () async {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (ctx) {
+                      return ModalRouteWidget(
+                          stateGenerator: () =>
+                              ViewGroupIncidentDetailModalState(e.signalId));
+                    }));
+                  }));
                 }
 
                 return AdaptiveListItem(

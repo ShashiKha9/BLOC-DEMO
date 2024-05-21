@@ -1,10 +1,12 @@
 class ProjectConfiguration {
   final String baseUrl;
+  final String maukaUrl;
   final Environment environment;
   final String stripePublishableKey;
 
   ProjectConfiguration(
       {required this.baseUrl,
+      required this.maukaUrl,
       required this.environment,
       required this.stripePublishableKey});
 
