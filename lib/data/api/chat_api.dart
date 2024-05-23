@@ -1,36 +1,29 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:rescu_organization_portal/data/services/service_response.dart';
-import '../../env.dart';
 import '../models/chat_model.dart';
 import 'base_api.dart';
 
 abstract class IChatAPI {
-  Future<ApiDataResponse<SocketChatHistoryResponse>> getChatHistory(
+  Future<ApiDataResponse<String>> getChatHistory(
       String userToken, String channelID);
 
   Future<ServiceDataResponse<List<ChatMessageModel>>> parseChatMessages(
       String userToken, String channelID);
+
+  Future<ApiDataResponse<String>> downloadMedia(String path);
 }
 
 class ChatApi extends BaseApi implements IChatAPI {
-  final ProjectConfiguration _env;
-  late Dio _chatDio;
-
-  ChatApi(Dio dio, this._env) : super(dio) {
-    _chatDio = Dio(BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 300000,
-        sendTimeout: 300000,
-        baseUrl: _env.maukaUrl));
-  }
+  ChatApi(Dio dio) : super(dio);
 
   @override
-  Future<ApiDataResponse<SocketChatHistoryResponse>> getChatHistory(
+  Future<ApiDataResponse<String>> getChatHistory(
       String userToken, String channelID) async {
     return await wrapDataCall(() async {
-      _chatDio.options.headers['Authorization'] = 'Bearer $userToken';
-      var result = await _chatDio.get("/chat/" + channelID);
-      return OkData(SocketChatHistoryResponse.fromJson(result.data));
+      var result = await dio.get("/signals/$channelID/chatHistory");
+      return OkData(result.data);
     });
   }
 
@@ -38,30 +31,63 @@ class ChatApi extends BaseApi implements IChatAPI {
   Future<ServiceDataResponse<List<ChatMessageModel>>> parseChatMessages(
       String userToken, String channelID) async {
     try {
-      List<ChatMessageModel> chatMessagesModel = [];
+      var messages = <ChatMessageModel>[];
 
       var messageHistory = await getChatHistory(userToken, channelID);
-      if (messageHistory is OkData<SocketChatHistoryResponse>) {
-        messageHistory.dto.data?.forEach((message) {
-          var chatModel = ChatMessageModel(message.attributes?.author,
-              DateTime.tryParse(message.createdAt ?? ""), message.message);
+      if (messageHistory is OkData<String>) {
+        var jsonMessages = jsonDecode(messageHistory.dto);
 
-          var attributes = message.attributes;
-          if (attributes != null) {
-            chatModel.username = attributes.username;
-            chatModel.isLink = attributes.isLink?.toLowerCase() == "true";
-            chatModel.linkUrl = attributes.linkUrl;
-            chatModel.isMedia = attributes.isMedia?.toLowerCase() == "true";
-            chatModel.mediaUrl = attributes.mediaUrl;
+        jsonMessages.forEach((message) {
+          var chatModel = ChatMessageModel(
+              message["Author"],
+              DateTime.parse(message["Timestamp"] ?? DateTime.now()),
+              message["Body"]);
+
+          var properties = jsonDecode(message["Properties"]);
+          if (properties["Username"] != null) {
+            chatModel.username = properties["Username"];
           }
 
-          chatMessagesModel.add(chatModel);
+          if (properties["username"] != null) {
+            chatModel.username = properties["username"];
+          }
+
+          if (properties["IsLink"] != null) {
+            chatModel.isLink = properties["IsLink"];
+          }
+
+          if (properties["LinkUrl"] != null) {
+            chatModel.linkUrl = properties["LinkUrl"];
+          }
+
+          if (properties["IsMedia"] != null) {
+            chatModel.isMedia = properties["IsMedia"];
+          }
+
+          if (properties["MediaUrl"] != null) {
+            chatModel.mediaUrl = properties["MediaUrl"];
+          }
+
+          if (properties["IsClosed"] != null) {
+            chatModel.isClosed = properties["IsClosed"];
+          }
+
+          messages.add(chatModel);
         });
       }
-      return SuccessDataResponse(chatMessagesModel);
+
+      return SuccessDataResponse(messages);
     } catch (e) {
-      print(e);
-      return FailureDataResponse("Error getting messages for chat");
+      return FailureDataResponse("Error parsing messages for chat");
     }
+  }
+
+  @override
+  Future<ApiDataResponse<String>> downloadMedia(String path) async {
+    return await wrapDataCall(() async {
+      Response result =
+          await dio.get("chat/media", queryParameters: {"mediaPath": path});
+      return OkData(result.data);
+    });
   }
 }

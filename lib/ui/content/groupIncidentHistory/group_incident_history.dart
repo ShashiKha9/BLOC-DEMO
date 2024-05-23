@@ -13,6 +13,7 @@ import 'package:rescu_organization_portal/ui/widgets/common_widgets.dart';
 import 'package:rescu_organization_portal/ui/widgets/dialogs.dart';
 import 'package:rescu_organization_portal/ui/widgets/loading_container.dart';
 import 'package:rescu_organization_portal/ui/widgets/signal_icons.dart';
+import '../chat/chat_route.dart';
 
 class GroupIncidentHistoryContent extends StatefulWidget
     with AppBarBranchSelectionMixin {
@@ -93,15 +94,15 @@ class _GroupIncidentHistoryContentState
                               .add(CloseIncident(e.signalId));
                         });
                   }));
-                } else {
+                }
+
+                if (e.incidentType.toLowerCase() != "can") {
                   contextualItems.add(AdaptiveItemButton(
-                      "Chat History", const Icon(Icons.chat_outlined),
-                      () async {
+                      "View Chat", const Icon(Icons.chat_outlined), () async {
                     Navigator.of(context)
                         .push(MaterialPageRoute(builder: (ctx) {
                       return ModalRouteWidget(
-                          stateGenerator: () =>
-                              ViewGroupIncidentDetailModalState(e.signalId));
+                          stateGenerator: () => ChatRoute(e.signalId));
                     }));
                   }));
                 }
