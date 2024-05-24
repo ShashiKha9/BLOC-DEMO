@@ -139,6 +139,10 @@ class ChatRoute extends BaseModalRouteState {
                 });
               }
             }
+            if (state is ChatLoadMessagesErrorState) {
+              ToastDialog.error(state.message);
+              return;
+            }
           }
         },
         child: GestureDetector(

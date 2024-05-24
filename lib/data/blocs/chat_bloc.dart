@@ -48,7 +48,14 @@ class ChatLoadMessagesState extends ChatStates {
   List<Object> get props => [messages];
 }
 
-class ChatLoadMessagesErrorState extends ChatStates {}
+class ChatLoadMessagesErrorState extends ChatStates {
+  final String message;
+
+  ChatLoadMessagesErrorState(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
 
 class DownloadMediaSuccessState extends ChatStates {}
 
@@ -71,7 +78,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatStates> {
         return;
       }
 
-      yield ChatLoadMessagesErrorState();
+      yield ChatLoadMessagesErrorState("Cannot load chat history");
       return;
     }
 
