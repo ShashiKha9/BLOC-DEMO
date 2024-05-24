@@ -17,9 +17,8 @@ class ChatApi extends BaseApi implements IChatAPI {
   @override
   Future<ServiceDataResponse<List<ChatMessageModel>>> getChatHistory(
       String channelID) async {
-    var result = await dio.get("/signals/$channelID/chatHistory");
-
     try {
+      var result = await dio.get("/signals/$channelID/chatHistory");
       var messages = <ChatMessageModel>[];
       var jsonMessages = jsonDecode(result.data);
       jsonMessages.forEach((message) {
