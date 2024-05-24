@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:rescu_organization_portal/data/services/service_response.dart';
 import '../models/chat_model.dart';
@@ -42,10 +41,6 @@ class ChatApi extends BaseApi implements IChatAPI {
           var properties = jsonDecode(message["Properties"]);
           if (properties["Username"] != null) {
             chatModel.username = properties["Username"];
-          }
-
-          if (properties["username"] != null) {
-            chatModel.username = properties["username"];
           }
 
           if (properties["IsLink"] != null) {

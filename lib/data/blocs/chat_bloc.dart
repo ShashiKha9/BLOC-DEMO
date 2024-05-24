@@ -21,8 +21,6 @@ class GetChatHistory extends ChatEvent {
   List<Object?> get props => [incidentID];
 }
 
-class OpenAttachmentDialog extends ChatEvent {}
-
 class DownloadMedia extends ChatEvent {
   final String mediaPath;
 
@@ -40,17 +38,6 @@ abstract class ChatStates extends Equatable {
 class ChatInitialState extends ChatStates {}
 
 class ChatLoadingState extends ChatStates {}
-
-class ChatNotConnectedState extends ChatStates {}
-
-class ChatErrorState extends ChatStates {
-  final String errorMessage;
-
-  ChatErrorState(this.errorMessage);
-
-  @override
-  List<Object> get props => [errorMessage];
-}
 
 class ChatLoadMessagesState extends ChatStates {
   final List<ChatMessageModel> messages;
@@ -77,6 +64,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatStates> {
           is SuccessDataResponse<List<ChatMessageModel>>) {
         yield ChatLoadMessagesState(chatMessagesModelList.result);
         return;
+      } else {
+        return;
       }
     }
 
@@ -92,6 +81,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatStates> {
                 mode: LaunchMode.externalApplication);
                 yield DownloadMediaState();
           }
+          return;
+        } else {
           return;
         }
       }

@@ -75,9 +75,6 @@ class ChatRoute extends BaseModalRouteState {
 
   List<ChatMessageModel> _messages = [];
   final String? _identity = "";
-  String selectedMediaType = "";
-  bool socketReconnectionStateOn = false;
-  String userToken = "";
   final LoadingController _loadingController = LoadingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -90,6 +87,7 @@ class ChatRoute extends BaseModalRouteState {
 
   @override
   void dispose() {
+    _loadingController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
