@@ -5,9 +5,8 @@ import '../models/chat_model.dart';
 import 'base_api.dart';
 
 abstract class IChatAPI {
-  Future<ApiDataResponse<String>> getChatHistory(String channelID);
-
-  Future<ServiceDataResponse<List<ChatMessageModel>>> parseChatMessages(String channelID);
+  Future<ServiceDataResponse<List<ChatMessageModel>>> getChatHistory(
+      String channelID);
 
   Future<ApiDataResponse<String>> downloadMedia(String path);
 }
@@ -16,56 +15,46 @@ class ChatApi extends BaseApi implements IChatAPI {
   ChatApi(Dio dio) : super(dio);
 
   @override
-  Future<ApiDataResponse<String>> getChatHistory(String channelID) async {
-    return await wrapDataCall(() async {
-      var result = await dio.get("/signals/$channelID/chatHistory");
-      return OkData(result.data);
-    });
-  }
+  Future<ServiceDataResponse<List<ChatMessageModel>>> getChatHistory(
+      String channelID) async {
+    var result = await dio.get("/signals/$channelID/chatHistory");
 
-  @override
-  Future<ServiceDataResponse<List<ChatMessageModel>>> parseChatMessages(String channelID) async {
     try {
       var messages = <ChatMessageModel>[];
+      var jsonMessages = jsonDecode(result.data);
+      jsonMessages.forEach((message) {
+        var chatModel = ChatMessageModel(
+            message["Author"],
+            DateTime.parse(message["Timestamp"] ?? DateTime.now()),
+            message["Body"]);
 
-      var messageHistory = await getChatHistory(channelID);
-      if (messageHistory is OkData<String>) {
-        var jsonMessages = jsonDecode(messageHistory.dto);
+        var properties = jsonDecode(message["Properties"]);
+        if (properties["Username"] != null) {
+          chatModel.username = properties["Username"];
+        }
 
-        jsonMessages.forEach((message) {
-          var chatModel = ChatMessageModel(
-              message["Author"],
-              DateTime.parse(message["Timestamp"] ?? DateTime.now()),
-              message["Body"]);
+        if (properties["IsLink"] != null) {
+          chatModel.isLink = properties["IsLink"];
+        }
 
-          var properties = jsonDecode(message["Properties"]);
-          if (properties["Username"] != null) {
-            chatModel.username = properties["Username"];
-          }
+        if (properties["LinkUrl"] != null) {
+          chatModel.linkUrl = properties["LinkUrl"];
+        }
 
-          if (properties["IsLink"] != null) {
-            chatModel.isLink = properties["IsLink"];
-          }
+        if (properties["IsMedia"] != null) {
+          chatModel.isMedia = properties["IsMedia"];
+        }
 
-          if (properties["LinkUrl"] != null) {
-            chatModel.linkUrl = properties["LinkUrl"];
-          }
+        if (properties["MediaUrl"] != null) {
+          chatModel.mediaUrl = properties["MediaUrl"];
+        }
 
-          if (properties["IsMedia"] != null) {
-            chatModel.isMedia = properties["IsMedia"];
-          }
+        if (properties["IsClosed"] != null) {
+          chatModel.isClosed = properties["IsClosed"];
+        }
 
-          if (properties["MediaUrl"] != null) {
-            chatModel.mediaUrl = properties["MediaUrl"];
-          }
-
-          if (properties["IsClosed"] != null) {
-            chatModel.isClosed = properties["IsClosed"];
-          }
-
-          messages.add(chatModel);
-        });
-      }
+        messages.add(chatModel);
+      });
 
       return SuccessDataResponse(messages);
     } catch (e) {

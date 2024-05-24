@@ -48,7 +48,11 @@ class ChatLoadMessagesState extends ChatStates {
   List<Object> get props => [messages];
 }
 
-class DownloadMediaState extends ChatStates {}
+class ChatLoadMessagesErrorState extends ChatStates {}
+
+class DownloadMediaSuccessState extends ChatStates {}
+
+class DownloadMediaErrorState extends ChatStates {}
 
 class ChatBloc extends Bloc<ChatEvent, ChatStates> {
   final IChatAPI _chatAPI;
@@ -59,33 +63,31 @@ class ChatBloc extends Bloc<ChatEvent, ChatStates> {
     if (event is GetChatHistory) {
       yield ChatLoadingState();
 
-      var chatMessagesModelList = await _chatAPI.parseChatMessages(event.incidentID);
+      var chatMessagesModelList =
+          await _chatAPI.getChatHistory(event.incidentID);
       if (chatMessagesModelList
           is SuccessDataResponse<List<ChatMessageModel>>) {
         yield ChatLoadMessagesState(chatMessagesModelList.result);
         return;
-      } else {
-        return;
       }
+
+      yield ChatLoadMessagesErrorState();
+      return;
     }
 
     if (event is DownloadMedia) {
       yield ChatLoadingState();
       var mediaRes = await _chatAPI.downloadMedia(event.mediaPath);
-      if (mediaRes is BadData<String>) {
+
+      if (mediaRes is OkData<String>) {
+        await launchUrl(Uri.parse(mediaRes.dto),
+            mode: LaunchMode.externalApplication);
+        yield DownloadMediaSuccessState();
         return;
-      } else {
-        if (mediaRes is OkData<String>) {
-          if (await canLaunchUrl(Uri.parse(mediaRes.dto))) {
-            await launchUrl(Uri.parse(mediaRes.dto),
-                mode: LaunchMode.externalApplication);
-                yield DownloadMediaState();
-          }
-          return;
-        } else {
-          return;
-        }
       }
+
+      yield DownloadMediaErrorState();
+      return;
     }
   }
 }
