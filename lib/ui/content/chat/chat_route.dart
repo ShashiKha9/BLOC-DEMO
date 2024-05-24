@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:rescu_organization_portal/ui/adaptive_items.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../data/blocs/chat_bloc.dart';
-import '../../../data/constants/messages.dart';
 import '../../../data/models/chat_model.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/dialogs.dart';
@@ -175,38 +175,6 @@ class ChatRoute extends BaseModalRouteState {
     );
   }
 
-  // void _onImageButtonPressed(ImageSource source, String type) async {
-  //   setState(() {
-  //     _buttonPressed = true;
-  //   });
-  //   final ImagePicker _picker = ImagePicker();
-  //   String bodyTxt = "";
-  //   try {
-  //     XFile? pickedFile;
-  //     if (type == "Image") {
-  //       selectedMediaType = "image";
-  //       pickedFile = await _picker.pickImage(
-  //           source: source, imageQuality: 50, requestFullMetadata: false);
-  //       bodyTxt = AppLocalizations.of(context)?.downloadImage ?? "";
-  //     } else if (type == "Video") {
-  //       selectedMediaType = "video";
-  //       pickedFile = await _picker.pickVideo(source: source);
-  //       bodyTxt = AppLocalizations.of(context)?.downloadVideo ?? "";
-  //     }
-
-  //     if (!mounted) return;
-  //     setState(() {
-  //       _buttonPressed = false;
-  //     });
-  //     if (pickedFile == null) return;
-  //     var file = File(pickedFile.path);
-  //   } catch (e) {
-  //     setState(() {
-  //       _buttonPressed = false;
-  //     });
-  //   }
-  // }
-
   Widget _buildMessage(ChatMessageModel message, int index) {
     return ((message.author ?? "") == "system" ||
             (message.username ?? "") == "system")
@@ -287,10 +255,12 @@ class ChatRoute extends BaseModalRouteState {
             message.isLink ?? false
                 ? InkWell(
                     onTap: () async {
-                      // if (message.linkUrl != null &&
-                      //     await canLaunchUrl(Uri.parse(message.linkUrl ?? "")))
-                      //   await launchUrl(Uri.parse(message.linkUrl ?? ""),
-                      //       mode: LaunchMode.externalApplication);
+                      if (message.linkUrl != null &&
+                          await canLaunchUrl(
+                              Uri.parse(message.linkUrl ?? ""))) {
+                        await launchUrl(Uri.parse(message.linkUrl ?? ""),
+                            mode: LaunchMode.externalApplication);
+                      }
                     },
                     child: Text(
                       message.messageBody ?? "",
@@ -408,10 +378,4 @@ String _getChatHeaderText(DateTime dateToCompare) {
     return "Yesterday at ${DateFormat.jm().format(dateToCompare.toLocal())}";
   }
   return DateFormat.MMMEd().format(dateToCompare.toLocal());
-}
-
-class ChatRouteArgs {
-  final String? channelId;
-  final bool notificationRedirected;
-  ChatRouteArgs(this.channelId, {this.notificationRedirected = false});
 }

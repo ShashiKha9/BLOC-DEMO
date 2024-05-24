@@ -6,11 +6,9 @@ import '../models/chat_model.dart';
 import 'base_api.dart';
 
 abstract class IChatAPI {
-  Future<ApiDataResponse<String>> getChatHistory(
-      String userToken, String channelID);
+  Future<ApiDataResponse<String>> getChatHistory(String channelID);
 
-  Future<ServiceDataResponse<List<ChatMessageModel>>> parseChatMessages(
-      String userToken, String channelID);
+  Future<ServiceDataResponse<List<ChatMessageModel>>> parseChatMessages(String channelID);
 
   Future<ApiDataResponse<String>> downloadMedia(String path);
 }
@@ -19,8 +17,7 @@ class ChatApi extends BaseApi implements IChatAPI {
   ChatApi(Dio dio) : super(dio);
 
   @override
-  Future<ApiDataResponse<String>> getChatHistory(
-      String userToken, String channelID) async {
+  Future<ApiDataResponse<String>> getChatHistory(String channelID) async {
     return await wrapDataCall(() async {
       var result = await dio.get("/signals/$channelID/chatHistory");
       return OkData(result.data);
@@ -28,12 +25,11 @@ class ChatApi extends BaseApi implements IChatAPI {
   }
 
   @override
-  Future<ServiceDataResponse<List<ChatMessageModel>>> parseChatMessages(
-      String userToken, String channelID) async {
+  Future<ServiceDataResponse<List<ChatMessageModel>>> parseChatMessages(String channelID) async {
     try {
       var messages = <ChatMessageModel>[];
 
-      var messageHistory = await getChatHistory(userToken, channelID);
+      var messageHistory = await getChatHistory(channelID);
       if (messageHistory is OkData<String>) {
         var jsonMessages = jsonDecode(messageHistory.dto);
 
