@@ -39,7 +39,6 @@ class AddressService extends IAddressService {
   @override
   Future<ServiceDataResponse<AddressServiceDetail>> get(String id) async {
     List<AddressComponent> addressComponents = [];
-
     try {
       var response = await dio.get("/google/places/$id");
       var data = jsonDecode(response.data);
@@ -51,7 +50,7 @@ class AddressService extends IAddressService {
       double lat = data['result']['geometry']['location']['lat'];
       double long = data['result']['geometry']['location']['lng'];
       if (addressComponents.isNotEmpty) {
-        String streetNumber, route, city, county, state, zip;
+        String streetNumber, route, city, county, country, state, zip;
         try {
           streetNumber = addressComponents
               .firstWhere((ac) => ac.types.contains("street_number"))
@@ -82,6 +81,13 @@ class AddressService extends IAddressService {
           county = "";
         }
         try {
+          country = addressComponents
+              .firstWhere((ac) => ac.types.contains("country"))
+              .shortName;
+        } catch (e) {
+          country = "";
+        }
+        try {
           state = addressComponents
               .firstWhere(
                   (ac) => ac.types.contains("administrative_area_level_1"))
@@ -98,7 +104,7 @@ class AddressService extends IAddressService {
         }
 
         return SuccessDataResponse(AddressServiceDetail(
-            "$streetNumber $route", null, city, state, zip, county,
+            "$streetNumber $route", null, city, country, state, zip, county,
             latitude: lat, longitude: long));
       }
       return FailureDataResponse<AddressServiceDetail>(

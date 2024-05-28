@@ -3,6 +3,7 @@ class GroupAddressDto {
   late String name;
   late String address1;
   late String? address2;
+  late String country;
   late String state;
   late String city;
   late String zipCode;
@@ -23,6 +24,7 @@ class GroupAddressDto {
       this.id,
       required this.isDefault,
       required this.name,
+      required this.country,
       required this.state,
       required this.zipCode,
       this.lat,
@@ -35,6 +37,7 @@ class GroupAddressDto {
     name = json['AddressName'];
     address1 = json['Address1'];
     address2 = json['Address2'];
+    country = json['Country'];
     state = json['State'];
     city = json['City'];
     zipCode = json['ZipCode'];
@@ -53,6 +56,7 @@ class GroupAddressDto {
     data['AddressName'] = name;
     data['Address1'] = address1;
     data['Address2'] = address2;
+    data['Country'] = country;
     data['State'] = state;
     data['City'] = city;
     data['ZipCode'] = zipCode;

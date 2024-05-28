@@ -36,6 +36,7 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
   final TextEditingController _crossStreetController = TextEditingController();
 
   String? _selectedState;
+  String? _selectedCountry;
   final dropdownState = GlobalKey<FormFieldState>();
   double? _lat;
   double? _long;
@@ -57,6 +58,7 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
       _countyController.text = address!.county ?? "";
       _crossStreetController.text = address!.crossStreet ?? "";
       _selectedState = address!.state;
+      _selectedCountry = address!.country;
     }
     context.read<AddUpdateGroupAddressBloc>().add(GetBranches(groupId));
   }
@@ -185,6 +187,7 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
                           _address2Controller.text =
                               detail.result.street2 ?? "";
                           _cityController.text = detail.result.city ?? "";
+                          _selectedCountry = detail.result.country;
                           _selectedState = detail.result.state;
                           _zipCodeController.text = detail.result.zipCode ?? "";
                           _countyController.text = detail.result.county ?? "";
@@ -272,13 +275,40 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
                   controller: _countyController,
                 ),
                 SpacerSize.at(1.5),
+                DropdownButtonFormField<String>(
+                    decoration:
+                        TextInputDecoration(labelText: "Select Country"),
+                    hint: const Text("Select Country"),
+                    value: _selectedCountry,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedCountry = value;
+                        _selectedState = null;
+                      });
+                    },
+                    validator: (value) {
+                      return null;
+                    },
+                    items: const [
+                      DropdownMenuItem<String>(
+                        value: "US",
+                        child: Text("USA"),
+                      ),
+                      DropdownMenuItem<String>(
+                        value: "CA",
+                        child: Text("Canada"),
+                      )
+                    ]),
+                SpacerSize.at(1.5),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: FutureBuilder(
-                        future: DefaultAssetBundle.of(this.context)
-                            .loadString('assets/content/states.json'),
+                        future: DefaultAssetBundle.of(this.context).loadString(
+                            _selectedCountry == "US"
+                                ? 'assets/content/usa_states.json'
+                                : 'assets/content/canadian_provinces.json'),
                         builder: (ctx, future) {
                           if (future.connectionState != ConnectionState.done) {
                             return const Center(
@@ -376,6 +406,7 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
             city: _cityController.text,
             isDefault: address?.isDefault ?? false,
             name: _nicknameController.text,
+            country: _selectedCountry!,
             state: _selectedState!,
             zipCode: _zipCodeController.text,
             address2: _address2Controller.text,
