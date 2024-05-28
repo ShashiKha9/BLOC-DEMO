@@ -101,29 +101,35 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
                   List<AdaptiveContextualItem> contextualItems = [];
                   contextualItems.add(AdaptiveItemButton(
                       "Edit", const Icon(Icons.edit), () async {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (ctx) {
-                      return ModalRouteWidget(
-                          stateGenerator: () =>
-                              AddUpdateGroupIncidentTypeModelState(
-                                  widget.groupId,
-                                  incidentType: e));
-                    })).then((_) {
-                      context
-                          .read<GroupIncidentTypeBloc>()
-                          .add(GetIncidentTypes("", _selectedBranchId));
-                    });
+                    e.specialDispatch == false
+                        ? Navigator.of(context)
+                            .push(MaterialPageRoute(builder: (ctx) {
+                            return ModalRouteWidget(
+                                stateGenerator: () =>
+                                    AddUpdateGroupIncidentTypeModelState(
+                                        widget.groupId,
+                                        incidentType: e));
+                          })).then((_) {
+                            context
+                                .read<GroupIncidentTypeBloc>()
+                                .add(GetIncidentTypes("", _selectedBranchId));
+                          })
+                        : ToastDialog.warning(
+                            "This is a Special Dispatch. Special Dispatche's can't be edited.");
                   }));
                   contextualItems.add(AdaptiveItemButton(
                       "Delete", const Icon(Icons.delete), () async {
-                    showConfirmationDialog(
-                        context: context,
-                        body: "Are you sure you want to this record?",
-                        onPressedOk: () {
-                          context
-                              .read<GroupIncidentTypeBloc>()
-                              .add(DeleteIncidentType(widget.groupId, e.id!));
-                        });
+                    e.specialDispatch == false
+                        ? showConfirmationDialog(
+                            context: context,
+                            body:
+                                "Are you sure you want to delete this record?",
+                            onPressedOk: () {
+                              context.read<GroupIncidentTypeBloc>().add(
+                                  DeleteIncidentType(widget.groupId, e.id!));
+                            })
+                        : ToastDialog.warning(
+                            "This is a Special Dispatch. Special Dispatche's can't be deleted.");
                   }));
                   return AdaptiveListItem(
                       "Name: ${e.name}",

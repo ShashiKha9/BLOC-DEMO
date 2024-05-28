@@ -5,6 +5,7 @@ class GroupIncidentTypeModel {
   late String name;
   late String description;
   late String groupId;
+  late bool? specialDispatch;
   late String? iconData;
   late String? branchId;
   late List<String>? branches;
@@ -15,6 +16,7 @@ class GroupIncidentTypeModel {
       required this.name,
       required this.description,
       required this.groupId,
+      this.specialDispatch,
       this.iconData,
       this.branchId,
       this.branches,
@@ -24,6 +26,7 @@ class GroupIncidentTypeModel {
     id = dto.id;
     name = dto.name;
     groupId = dto.groupId;
+    specialDispatch = dto.specialDispatch;
     description = dto.description;
     iconData = dto.iconData;
     branchId = dto.branchId;
@@ -35,6 +38,7 @@ class GroupIncidentTypeModel {
         id: id,
         name: name,
         groupId: groupId,
+        specialDispatch: specialDispatch,
         description: description,
         iconData: iconData,
         branches: branches,
