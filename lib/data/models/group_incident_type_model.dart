@@ -5,7 +5,7 @@ class GroupIncidentTypeModel {
   late String name;
   late String description;
   late String groupId;
-  late bool? specialDispatch;
+  late bool specialDispatch;
   late String? iconData;
   late String? branchId;
   late List<String>? branches;
@@ -16,7 +16,7 @@ class GroupIncidentTypeModel {
       required this.name,
       required this.description,
       required this.groupId,
-      this.specialDispatch,
+      required this.specialDispatch,
       this.iconData,
       this.branchId,
       this.branches,

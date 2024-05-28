@@ -87,7 +87,8 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
                 Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
                   return ModalRouteWidget(
                       stateGenerator: () =>
-                          AddUpdateGroupIncidentTypeModelState(widget.groupId));
+                          AddUpdateGroupIncidentTypeModelState(
+                              widget.groupId, false));
                 })).then((_) {
                   context
                       .read<GroupIncidentTypeBloc>()
@@ -107,7 +108,7 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
                             return ModalRouteWidget(
                                 stateGenerator: () =>
                                     AddUpdateGroupIncidentTypeModelState(
-                                        widget.groupId,
+                                        widget.groupId, e.specialDispatch,
                                         incidentType: e));
                           })).then((_) {
                             context

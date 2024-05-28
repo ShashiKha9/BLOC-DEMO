@@ -19,9 +19,10 @@ import 'package:rescu_organization_portal/ui/widgets/text_input_decoration.dart'
 
 class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
   final String groupId;
+  final bool isSpecialDispatch;
   final GroupIncidentTypeModel? incidentType;
 
-  AddUpdateGroupIncidentTypeModelState(this.groupId, {this.incidentType});
+  AddUpdateGroupIncidentTypeModelState(this.groupId, this.isSpecialDispatch, {this.incidentType});
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _nameController = TextEditingController();
@@ -272,6 +273,7 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
         FocusScope.of(context).unfocus();
         var addIncidentType = GroupIncidentTypeModel(
             groupId: groupId,
+            specialDispatch: isSpecialDispatch,
             name: _nameController.text,
             color: "#${_dialogPickerColor.hex}",
             description: _descriptionController.text,
