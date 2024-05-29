@@ -116,7 +116,7 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
                                 .add(GetIncidentTypes("", _selectedBranchId));
                           })
                         : ToastDialog.warning(
-                            "This is a Special Dispatch. Special Dispatche's can't be edited.");
+                            "This is a default Incident type and cannot be altered.");
                   }));
                   contextualItems.add(AdaptiveItemButton(
                       "Delete", const Icon(Icons.delete), () async {
@@ -130,7 +130,7 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
                                   DeleteIncidentType(widget.groupId, e.id!));
                             })
                         : ToastDialog.warning(
-                            "This is a Special Dispatch. Special Dispatche's can't be deleted.");
+                            "This is a default Incident type and cannot be altered.");
                   }));
                   return AdaptiveListItem(
                       "Name: ${e.name}",

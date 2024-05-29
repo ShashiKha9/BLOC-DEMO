@@ -284,6 +284,7 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
                       setState(() {
                         _selectedCountry = value;
                         _selectedState = null;
+                        _zipCodeController.text = "";
                       });
                     },
                     validator: (value) {
@@ -356,16 +357,31 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
                           if (value?.isEmpty ?? false) {
                             return 'Please enter your Zip';
                           }
-                          if (value!.length != MAX_LENGTH_ZIP_CODE) {
-                            return 'Please enter valid Zip';
+                          if (_selectedCountry == "US") {
+                            if (value!.length != MAX_LENGTH_ZIP_CODE_US) {
+                              return 'Please enter valid Zip';
+                            }
+                          } else {
+                            if (value!.length > MAX_LENGTH_ZIP_CODE_CANADA ||
+                                value.length < 6) {
+                              return 'Please enter valid Zip';
+                            }
                           }
+
                           return null;
                         },
-                        maxLength: MAX_LENGTH_ZIP_CODE,
+                        maxLength: _selectedCountry == "US"
+                            ? MAX_LENGTH_ZIP_CODE_US
+                            : MAX_LENGTH_ZIP_CODE_CANADA,
                         autocorrect: false,
-                        keyboardType: TextInputType.number,
+                        keyboardType: _selectedCountry == "US"
+                            ? TextInputType.number
+                            : TextInputType.streetAddress,
                         inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
+                          _selectedCountry == "US"
+                              ? FilteringTextInputFormatter.digitsOnly
+                              : FilteringTextInputFormatter.allow(
+                                  RegExp(r'[a-zA-Z0-9 ]'))
                         ],
                       ),
                     ),
@@ -449,7 +465,9 @@ const int MAX_LENGTH_ADDRESS_1 = 50;
 // ignore: constant_identifier_names
 const int MIN_LENGTH_PERMIT_NEEDED = 3;
 // ignore: constant_identifier_names
-const int MAX_LENGTH_ZIP_CODE = 5;
+const int MAX_LENGTH_ZIP_CODE_US = 5;
+// ignore: constant_identifier_names
+const int MAX_LENGTH_ZIP_CODE_CANADA = 7;
 // ignore: constant_identifier_names
 const int MAX_LENGTH_PERMIT = 30;
 // ignore: constant_identifier_names
