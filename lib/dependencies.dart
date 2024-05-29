@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:rescu_organization_portal/app.dart';
 import 'package:rescu_organization_portal/data/api/authentication_api.dart';
+import 'package:rescu_organization_portal/data/api/chat_api.dart';
 import 'package:rescu_organization_portal/data/api/group_branch_api.dart';
 import 'package:rescu_organization_portal/data/api/group_domain_api.dart';
 import 'package:rescu_organization_portal/data/api/group_incident_type_api.dart';
@@ -11,6 +12,7 @@ import 'package:rescu_organization_portal/data/api/group_incident_type_question_
 import 'package:rescu_organization_portal/data/api/group_report_api.dart';
 import 'package:rescu_organization_portal/data/api/group_user_api.dart';
 import 'package:rescu_organization_portal/data/blocs/change_passwod_bloc.dart';
+import 'package:rescu_organization_portal/data/blocs/chat_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/copy_branch_address_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/copy_branch_incident_type_bloc.dart';
 import 'package:rescu_organization_portal/data/blocs/copy_branch_question_bloc.dart';
@@ -137,7 +139,8 @@ class DependencyConfiguration {
       Provider<IGroupBranchApi>(create: (ctx) => GroupBranchApi(ctx.read())),
       Provider<IGroupReportApi>(create: (ctx) => GroupReportApi(ctx.read())),
       Provider<IManageGroupContactsApi>(
-          create: (ctx) => ManageGroupContactsApi(ctx.read()))
+          create: (ctx) => ManageGroupContactsApi(ctx.read())),
+      Provider<IChatAPI>(create: (ctx) => ChatApi(ctx.read())),
     ];
   }
 
@@ -206,6 +209,7 @@ class DependencyConfiguration {
           create: (ctx) => VerifyForgotPasswordCodeBloc(ctx.read())),
       BlocProvider<ResetPasswordBloc>(
           create: (ctx) => ResetPasswordBloc(ctx.read())),
+      BlocProvider<ChatBloc>(create: (ctx) => ChatBloc(ctx.read())),
     ];
   }
 }
