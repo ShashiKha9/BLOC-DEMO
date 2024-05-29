@@ -6,6 +6,7 @@ class GroupIncidentTypeDto {
   late bool specialDispatch;
   late String? iconData;
   late String? branchId;
+  late String? dispatchCode;
   late List<String>? branches;
   late String color;
 
@@ -17,6 +18,7 @@ class GroupIncidentTypeDto {
       required this.specialDispatch,
       this.iconData,
       this.branchId,
+      this.dispatchCode,
       this.branches,
       required this.color});
 
@@ -28,6 +30,7 @@ class GroupIncidentTypeDto {
     description = json["Description"];
     iconData = json["IconData"];
     branchId = json["BranchId"];
+    dispatchCode = json["DispatchCode"];
     color = json["Color"];
   }
 
@@ -41,6 +44,7 @@ class GroupIncidentTypeDto {
     data["IconData"] = iconData;
     data["BranchIds"] = branches;
     data["BranchId"] = branchId;
+    data["DispatchCode"] = dispatchCode;
     data["Color"] = color;
     return data;
   }

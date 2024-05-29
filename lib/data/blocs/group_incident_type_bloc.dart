@@ -45,6 +45,16 @@ class UpdateIncidentType extends GroupIncidentTypeEvent {
   List<Object?> get props => [groupId, incidentTypeId, model];
 }
 
+class AddDefaultIncidentType extends GroupIncidentTypeEvent {
+  final String groupId;
+  final String branchId;
+
+  AddDefaultIncidentType(this.groupId, this.branchId);
+
+  @override
+  List<Object?> get props => [groupId, branchId];
+}
+
 class DeleteIncidentType extends GroupIncidentTypeEvent {
   final String id;
   final String incidentId;
@@ -114,6 +124,15 @@ class AddUpdateGroupIncidentTypeFailedState extends GroupIncidentTypeState {
   List<Object?> get props => [message];
 }
 
+class AddUpdateDefaultGroupIncidentTypeFailedState extends GroupIncidentTypeState {
+  final String? message;
+
+  AddUpdateDefaultGroupIncidentTypeFailedState({this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
 class GetGroupIncidentTypesNotFoundState extends GroupIncidentTypeState {}
 
 class GetGroupIncidentTypesSuccessState extends GroupIncidentTypeState {
@@ -128,6 +147,8 @@ class GetGroupIncidentTypesSuccessState extends GroupIncidentTypeState {
 class AddGroupIncidentTypeSuccessState extends GroupIncidentTypeState {}
 
 class UpdateGroupIncidentTypeSuccessState extends GroupIncidentTypeState {}
+
+class AddDefaultGroupIncidentTypeSuccessState extends GroupIncidentTypeState {}
 
 class DeleteGroupIncidentTypeSuccessState extends GroupIncidentTypeState {}
 
@@ -247,6 +268,22 @@ class GroupIncidentTypeBloc
         return;
       } else {
         yield AddUpdateGroupIncidentTypeFailedState();
+        return;
+      }
+    }
+
+    if (event is AddDefaultIncidentType) {
+      yield GroupIncidentTypeLoadingState();
+
+      var result = await _api.addDefaultIncident(event.groupId, event.branchId);
+      if (result is Ok) {
+        yield AddDefaultGroupIncidentTypeSuccessState();
+        return;
+      } else if (result is Bad) {
+        yield AddUpdateDefaultGroupIncidentTypeFailedState(message: result.message);
+        return;
+      } else {
+        yield AddUpdateDefaultGroupIncidentTypeFailedState();
         return;
       }
     }

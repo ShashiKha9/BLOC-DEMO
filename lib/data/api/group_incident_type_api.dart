@@ -9,6 +9,7 @@ abstract class IGroupIncidentTypeApi {
   Future<ApiResponse> update(
       String id, String incidentId, GroupIncidentTypeDto dto);
   Future<ApiResponse> delete(String id, String incidentId);
+  Future<ApiResponse> addDefaultIncident(String groupId, String branchId);
 }
 
 class GroupIncidentTypeApi extends BaseApi implements IGroupIncidentTypeApi {
@@ -47,6 +48,15 @@ class GroupIncidentTypeApi extends BaseApi implements IGroupIncidentTypeApi {
   Future<ApiResponse> delete(String id, String incidentId) async {
     return await wrapCall(() async {
       await dio.delete("groups/$id/incidenttypes/$incidentId");
+      return Ok();
+    });
+  }
+
+  @override
+  Future<ApiResponse> addDefaultIncident(
+      String groupId, String branchId) async {
+    return await wrapCall(() async {
+      await dio.post("groups/$groupId/branches/$branchId/incidenttypes/police");
       return Ok();
     });
   }

@@ -8,6 +8,7 @@ class GroupIncidentTypeModel {
   late bool specialDispatch;
   late String? iconData;
   late String? branchId;
+  late String? dispatchCode;
   late List<String>? branches;
   late String color;
 
@@ -19,6 +20,7 @@ class GroupIncidentTypeModel {
       required this.specialDispatch,
       this.iconData,
       this.branchId,
+      this.dispatchCode,
       this.branches,
       required this.color});
 
@@ -30,6 +32,7 @@ class GroupIncidentTypeModel {
     description = dto.description;
     iconData = dto.iconData;
     branchId = dto.branchId;
+    dispatchCode = dto.dispatchCode;
     color = dto.color;
   }
 
@@ -43,6 +46,7 @@ class GroupIncidentTypeModel {
         iconData: iconData,
         branches: branches,
         branchId: branchId,
+        dispatchCode: dispatchCode,
         color: color);
   }
 }

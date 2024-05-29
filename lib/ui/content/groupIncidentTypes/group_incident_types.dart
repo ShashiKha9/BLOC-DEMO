@@ -12,6 +12,7 @@ import '../../../data/constants/messages.dart';
 import '../../adaptive_items.dart';
 import '../../adaptive_navigation.dart';
 import '../../widgets/common_widgets.dart';
+import '../../widgets/custom_colors.dart';
 import '../../widgets/dialogs.dart';
 import '../../widgets/loading_container.dart';
 
@@ -51,6 +52,8 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
   String _searchValue = "";
   final List<AdaptiveListItem> _contacts = [];
   int _totalIncidentCount = 0;
+  bool _isPoliceDispatchAdded = true;
+  bool _isDefaultIncidentChecked = false;
 
   @override
   void initState() {
@@ -98,11 +101,14 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
               }
               if (state is GetGroupIncidentTypesSuccessState) {
                 _contacts.clear();
+                _isPoliceDispatchAdded = state.model.any((e) =>
+                    e.dispatchCode?.toLowerCase() == "pd" &&
+                    e.specialDispatch == true);
                 _contacts.addAll(state.model.map((e) {
                   List<AdaptiveContextualItem> contextualItems = [];
                   contextualItems.add(AdaptiveItemButton(
                       "Edit", const Icon(Icons.edit), () async {
-                    e.specialDispatch == false
+                    !e.specialDispatch
                         ? Navigator.of(context)
                             .push(MaterialPageRoute(builder: (ctx) {
                             return ModalRouteWidget(
@@ -120,7 +126,7 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
                   }));
                   contextualItems.add(AdaptiveItemButton(
                       "Delete", const Icon(Icons.delete), () async {
-                    e.specialDispatch == false
+                    !e.specialDispatch
                         ? showConfirmationDialog(
                             context: context,
                             body:
@@ -146,6 +152,10 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
               if (state is GroupIncidentTypeFailedState) {
                 ToastDialog.error(MessagesConst.internalServerError);
               }
+              if (state is AddUpdateDefaultGroupIncidentTypeFailedState) {
+                ToastDialog.error(
+                    state.message ?? MessagesConst.internalServerError);
+              }
               if (state is GetGroupIncidentTypesNotFoundState) {
                 _contacts.clear();
                 ToastDialog.warning("No records found");
@@ -153,6 +163,14 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
               }
               if (state is DeleteGroupIncidentTypeSuccessState) {
                 ToastDialog.success("Record deleted successfully");
+                context
+                    .read<GroupIncidentTypeBloc>()
+                    .add(GetIncidentTypes(_searchValue, _selectedBranchId));
+                context
+                    .read<GroupIncidentTypeBloc>()
+                    .add(GetIncidentTypesTotalCount(_selectedBranchId));
+              }
+              if (state is AddDefaultGroupIncidentTypeSuccessState) {
                 context
                     .read<GroupIncidentTypeBloc>()
                     .add(GetIncidentTypes(_searchValue, _selectedBranchId));
@@ -190,32 +208,123 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
                   alignment: Alignment.centerRight,
                   child: Padding(
                       padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                      child: AppButtonWithIcon(
-                        icon: const Icon(Icons.copy),
-                        onPressed: () async {
-                          // if (_totalIncidentCount >= 4) {
-                          //   ToastDialog.error(
-                          //       "You can add a maximum of 4 incident types.");
-                          //   return;
-                          // }
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (ctx) {
-                            return ModalRouteWidget(
-                                stateGenerator: () =>
-                                    CopyBranchIncidentTypeModalState(
-                                        groupId: widget.groupId,
-                                        branchId: _selectedBranchId!,
-                                        existingIncidentTypeCount:
-                                            _totalIncidentCount));
-                          })).then((_) {
-                            // Inform state to refresh the list
-                            context
-                                .read<GroupIncidentTypeBloc>()
-                                .add(RefreshIncidentTypes());
-                          });
-                        },
-                        buttonText: "Copy From Branch",
-                      )),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            !_isPoliceDispatchAdded
+                                ? AppButtonWithIcon(
+                                    icon: const Icon(Icons.local_police_rounded),
+                                    onPressed: () async {
+                                      showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text(
+                                                  'DEFAULT INCIDENT'),
+                                              content: Row(
+                                                children: [
+                                                  StatefulBuilder(
+                                                    builder:
+                                                        (context, setState) {
+                                                      return Container(
+                                                        decoration: BoxDecoration(
+                                                            color: Colors.grey
+                                                                .withAlpha(125),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        5)),
+                                                        child: Checkbox(
+                                                          activeColor: AppColor
+                                                              .baseBackground,
+                                                          value:
+                                                              _isDefaultIncidentChecked,
+                                                          onChanged:
+                                                              (bool? value) {
+                                                            if (value != null) {
+                                                              setState(() {
+                                                                _isDefaultIncidentChecked =
+                                                                    value;
+                                                              });
+                                                            }
+                                                          },
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                  const SizedBox(width: 12),
+                                                  const Icon(
+                                                      Icons
+                                                          .local_police_rounded,
+                                                      color: Colors.black),
+                                                  const SizedBox(width: 8),
+                                                  const Text('Police'),
+                                                ],
+                                              ),
+                                              actions: <Widget>[
+                                                TextButton(
+                                                  child: const Text('ADD'),
+                                                  onPressed: () {
+                                                    if (_isDefaultIncidentChecked) {
+                                                      context
+                                                          .read<
+                                                              GroupIncidentTypeBloc>()
+                                                          .add(AddDefaultIncidentType(
+                                                              widget.groupId,
+                                                              _selectedBranchId!));
+                                                      _isDefaultIncidentChecked =
+                                                          false;
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    } else {
+                                                      ToastDialog.warning(
+                                                          "Please select the incident");
+                                                    }
+                                                  },
+                                                ),
+                                                TextButton(
+                                                  child: const Text('CANCEL'),
+                                                  onPressed: () {
+                                                    _isDefaultIncidentChecked =
+                                                        false;
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                )
+                                              ],
+                                            );
+                                          });
+                                    },
+                                    buttonText: "Add Default Incident Type",
+                                  )
+                                : const SizedBox(width: 16),
+                            const SizedBox(width: 16),
+                            AppButtonWithIcon(
+                              icon: const Icon(Icons.copy),
+                              onPressed: () async {
+                                // if (_totalIncidentCount >= 4) {
+                                //   ToastDialog.error(
+                                //       "You can add a maximum of 4 incident types.");
+                                //   return;
+                                // }
+                                Navigator.of(context)
+                                    .push(MaterialPageRoute(builder: (ctx) {
+                                  return ModalRouteWidget(
+                                      stateGenerator: () =>
+                                          CopyBranchIncidentTypeModalState(
+                                              groupId: widget.groupId,
+                                              branchId: _selectedBranchId!,
+                                              existingIncidentTypeCount:
+                                                  _totalIncidentCount));
+                                })).then((_) {
+                                  // Inform state to refresh the list
+                                  context
+                                      .read<GroupIncidentTypeBloc>()
+                                      .add(RefreshIncidentTypes());
+                                });
+                              },
+                              buttonText: "Copy From Branch",
+                            ),
+                          ])),
                 ),
                 Expanded(
                     child: SearchableList(
