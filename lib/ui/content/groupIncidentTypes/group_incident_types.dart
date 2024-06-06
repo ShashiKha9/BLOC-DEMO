@@ -126,17 +126,14 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
                   }));
                   contextualItems.add(AdaptiveItemButton(
                       "Delete", const Icon(Icons.delete), () async {
-                    !e.specialDispatch
-                        ? showConfirmationDialog(
-                            context: context,
-                            body:
-                                "Are you sure you want to delete this record?",
-                            onPressedOk: () {
-                              context.read<GroupIncidentTypeBloc>().add(
-                                  DeleteIncidentType(widget.groupId, e.id!));
-                            })
-                        : ToastDialog.warning(
-                            "This is a default Incident type and cannot be altered.");
+                    showConfirmationDialog(
+                        context: context,
+                        body: "Are you sure you want to delete this record?",
+                        onPressedOk: () {
+                          context
+                              .read<GroupIncidentTypeBloc>()
+                              .add(DeleteIncidentType(widget.groupId, e.id!));
+                        });
                   }));
                   return AdaptiveListItem(
                       "Name: ${e.name}",
