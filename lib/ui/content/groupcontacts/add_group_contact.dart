@@ -104,6 +104,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                       id: 'all',
                       name: 'All',
                       groupId: _incidentList.first.groupId,
+                      specialDispatch: _incidentList.first.specialDispatch,
                       description: "",
                       branchId: 'all',
                       color: ""));

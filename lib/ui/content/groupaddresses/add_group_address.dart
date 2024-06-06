@@ -36,6 +36,7 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
   final TextEditingController _crossStreetController = TextEditingController();
 
   String? _selectedState;
+  String? _selectedCountry;
   final dropdownState = GlobalKey<FormFieldState>();
   double? _lat;
   double? _long;
@@ -57,6 +58,7 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
       _countyController.text = address!.county ?? "";
       _crossStreetController.text = address!.crossStreet ?? "";
       _selectedState = address!.state;
+      _selectedCountry = address!.country;
     }
     context.read<AddUpdateGroupAddressBloc>().add(GetBranches(groupId));
   }
@@ -185,6 +187,7 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
                           _address2Controller.text =
                               detail.result.street2 ?? "";
                           _cityController.text = detail.result.city ?? "";
+                          _selectedCountry = detail.result.country;
                           _selectedState = detail.result.state;
                           _zipCodeController.text = detail.result.zipCode ?? "";
                           _countyController.text = detail.result.county ?? "";
@@ -272,13 +275,41 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
                   controller: _countyController,
                 ),
                 SpacerSize.at(1.5),
+                DropdownButtonFormField<String>(
+                    decoration:
+                        TextInputDecoration(labelText: "Select Country"),
+                    hint: const Text("Select Country"),
+                    value: _selectedCountry,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedCountry = value;
+                        _selectedState = null;
+                        _zipCodeController.text = "";
+                      });
+                    },
+                    validator: (value) {
+                      return null;
+                    },
+                    items: const [
+                      DropdownMenuItem<String>(
+                        value: "US",
+                        child: Text("USA"),
+                      ),
+                      DropdownMenuItem<String>(
+                        value: "CA",
+                        child: Text("Canada"),
+                      )
+                    ]),
+                SpacerSize.at(1.5),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: FutureBuilder(
-                        future: DefaultAssetBundle.of(this.context)
-                            .loadString('assets/content/states.json'),
+                        future: DefaultAssetBundle.of(this.context).loadString(
+                            _selectedCountry == "US"
+                                ? 'assets/content/usa_states.json'
+                                : 'assets/content/canadian_provinces.json'),
                         builder: (ctx, future) {
                           if (future.connectionState != ConnectionState.done) {
                             return const Center(
@@ -326,16 +357,31 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
                           if (value?.isEmpty ?? false) {
                             return 'Please enter your Zip';
                           }
-                          if (value!.length != MAX_LENGTH_ZIP_CODE) {
-                            return 'Please enter valid Zip';
+                          if (_selectedCountry == "US") {
+                            if (value!.length != MAX_LENGTH_ZIP_CODE_US) {
+                              return 'Please enter valid Zip';
+                            }
+                          } else {
+                            if (value!.length > MAX_LENGTH_ZIP_CODE_CANADA ||
+                                value.length < 6) {
+                              return 'Please enter valid Zip';
+                            }
                           }
+
                           return null;
                         },
-                        maxLength: MAX_LENGTH_ZIP_CODE,
+                        maxLength: _selectedCountry == "US"
+                            ? MAX_LENGTH_ZIP_CODE_US
+                            : MAX_LENGTH_ZIP_CODE_CANADA,
                         autocorrect: false,
-                        keyboardType: TextInputType.number,
+                        keyboardType: _selectedCountry == "US"
+                            ? TextInputType.number
+                            : TextInputType.streetAddress,
                         inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
+                          _selectedCountry == "US"
+                              ? FilteringTextInputFormatter.digitsOnly
+                              : FilteringTextInputFormatter.allow(
+                                  RegExp(r'[a-zA-Z0-9 ]'))
                         ],
                       ),
                     ),
@@ -376,6 +422,7 @@ class AddUpdateGroupAddressModelState extends BaseModalRouteState {
             city: _cityController.text,
             isDefault: address?.isDefault ?? false,
             name: _nicknameController.text,
+            country: _selectedCountry!,
             state: _selectedState!,
             zipCode: _zipCodeController.text,
             address2: _address2Controller.text,
@@ -418,7 +465,9 @@ const int MAX_LENGTH_ADDRESS_1 = 50;
 // ignore: constant_identifier_names
 const int MIN_LENGTH_PERMIT_NEEDED = 3;
 // ignore: constant_identifier_names
-const int MAX_LENGTH_ZIP_CODE = 5;
+const int MAX_LENGTH_ZIP_CODE_US = 5;
+// ignore: constant_identifier_names
+const int MAX_LENGTH_ZIP_CODE_CANADA = 7;
 // ignore: constant_identifier_names
 const int MAX_LENGTH_PERMIT = 30;
 // ignore: constant_identifier_names

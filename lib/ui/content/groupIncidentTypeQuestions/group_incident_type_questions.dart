@@ -64,7 +64,7 @@ class _GroupIncidentTypeQuestionContentState
   String _searchValue = "";
   final List<AdaptiveListItem> _contacts = [];
   final List<GroupIncidentTypeDto> _incidents = [
-    GroupIncidentTypeDto(id: "", name: "ALL", description: "", groupId: "", color: "")
+    GroupIncidentTypeDto(id: "", name: "ALL", description: "", groupId: "", specialDispatch: false, color: "")
   ];
   final List<GroupIncidentTypeQuestionDto> _questions = [];
 
@@ -326,7 +326,7 @@ class _GroupIncidentTypeQuestionContentState
   _loadIncidentTypesForBranches() async {
     _incidents.clear();
     _incidents.add(GroupIncidentTypeDto(
-        id: "", name: "ALL", description: "", groupId: "", color: ""));
+        id: "", name: "ALL", description: "", groupId: "", specialDispatch: false, color: ""));
     _loadingController.show();
     var result =
         await context.read<IGroupIncidentTypeApi>().get("", _selectedBranchId);
