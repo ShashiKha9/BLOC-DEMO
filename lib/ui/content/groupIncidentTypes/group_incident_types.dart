@@ -51,7 +51,7 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
   final LoadingController _loadingController = LoadingController();
   String _searchValue = "";
   final List<AdaptiveListItem> _contacts = [];
-  int _totalIncidentCount = 0;
+  // int _totalIncidentCount = 0;
   bool _isPoliceDispatchAdded = true;
   bool _isDefaultIncidentChecked = false;
 
@@ -163,38 +163,38 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
                 context
                     .read<GroupIncidentTypeBloc>()
                     .add(GetIncidentTypes(_searchValue, _selectedBranchId));
-                context
-                    .read<GroupIncidentTypeBloc>()
-                    .add(GetIncidentTypesTotalCount(_selectedBranchId));
+                // context
+                //     .read<GroupIncidentTypeBloc>()
+                //     .add(GetIncidentTypesTotalCount(_selectedBranchId));
               }
               if (state is AddDefaultGroupIncidentTypeSuccessState) {
                 context
                     .read<GroupIncidentTypeBloc>()
                     .add(GetIncidentTypes(_searchValue, _selectedBranchId));
-                context
-                    .read<GroupIncidentTypeBloc>()
-                    .add(GetIncidentTypesTotalCount(_selectedBranchId));
+                // context
+                //     .read<GroupIncidentTypeBloc>()
+                //     .add(GetIncidentTypesTotalCount(_selectedBranchId));
               }
               if (state is BranchChangedState) {
                 _selectedBranchId = state.branchId;
                 context
                     .read<GroupIncidentTypeBloc>()
                     .add(GetIncidentTypes(_searchValue, _selectedBranchId));
-                context
-                    .read<GroupIncidentTypeBloc>()
-                    .add(GetIncidentTypesTotalCount(_selectedBranchId));
+                // context
+                //     .read<GroupIncidentTypeBloc>()
+                //     .add(GetIncidentTypesTotalCount(_selectedBranchId));
               }
               if (state is RefreshIncidentTypesState) {
                 context
                     .read<GroupIncidentTypeBloc>()
                     .add(GetIncidentTypes(_searchValue, _selectedBranchId));
-                context
-                    .read<GroupIncidentTypeBloc>()
-                    .add(GetIncidentTypesTotalCount(_selectedBranchId));
+                // context
+                //     .read<GroupIncidentTypeBloc>()
+                //     .add(GetIncidentTypesTotalCount(_selectedBranchId));
               }
-              if (state is IncidentTypeCountLoaded) {
-                _totalIncidentCount = state.count;
-              }
+              // if (state is IncidentTypeCountLoaded) {
+              //   _totalIncidentCount = state.count;
+              // }
             }
           },
           child: Column(
@@ -309,9 +309,7 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
                                       stateGenerator: () =>
                                           CopyBranchIncidentTypeModalState(
                                               groupId: widget.groupId,
-                                              branchId: _selectedBranchId!,
-                                              existingIncidentTypeCount:
-                                                  _totalIncidentCount));
+                                              branchId: _selectedBranchId!));
                                 })).then((_) {
                                   // Inform state to refresh the list
                                   context
