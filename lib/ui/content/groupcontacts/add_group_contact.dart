@@ -209,7 +209,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                   }),
               SpacerSize.at(1.5),
               TextFormField(
-                decoration: TextInputDecoration(labelText: "Designation"),
+                decoration: TextInputDecoration(labelText: "Job Title", hintText: "Administrator, Employee, etc."),
                 controller: _designationController,
               ),
               _emailController.text.isNotEmpty
