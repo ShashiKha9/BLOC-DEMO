@@ -8,6 +8,7 @@ class ChatMessageModel {
   bool? isLink;
   String? linkUrl;
   bool? isClosed;
+  String? messageSource;
 
   ChatMessageModel(this.author, this.dateCreated, this.messageBody,
       {this.username,
@@ -15,5 +16,6 @@ class ChatMessageModel {
       this.linkUrl,
       this.isMedia,
       this.mediaUrl,
-      this.isClosed});
+      this.isClosed,
+      this.messageSource});
 }

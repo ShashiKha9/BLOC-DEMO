@@ -52,6 +52,10 @@ class ChatApi extends BaseApi implements IChatAPI {
           chatModel.isClosed = properties["IsClosed"];
         }
 
+        if (properties["MessageSource"] != null) {
+          chatModel.messageSource = properties["MessageSource"];
+        }
+
         messages.add(chatModel);
       });
 

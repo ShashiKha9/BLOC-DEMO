@@ -248,7 +248,9 @@ class ChatRoute extends BaseModalRouteState {
               child: Text(
                 currentUserIsAuthor
                     ? "You"
-                    : (message.author ?? message.username ?? "Rescu"),
+                    : (message.messageSource == "RITA"
+                        ? "RITA"
+                        : (message.username ?? message.author!)),
                 style: const TextStyle(
                     color: Colors.blueGrey, fontWeight: FontWeight.w500),
                 textAlign: TextAlign.start,
