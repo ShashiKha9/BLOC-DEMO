@@ -141,7 +141,7 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
                 // }));
                 return AdaptiveListItem(
                     "Name: ${e.firstName} ${e.lastName}",
-                    "Contact Number: ${e.phoneNumber}\nEmail: ${e.email ?? ""}\nDesignation: ${e.designation ?? ""}",
+                    "Contact Number: ${e.phoneNumber}\nEmail: ${e.email ?? ""}\nJob Title: ${e.designation ?? ""}",
                     const Icon(Icons.person),
                     contextualItems,
                     onPressed: () {});
