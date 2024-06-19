@@ -69,10 +69,10 @@ class CopyBranchIncidentTypeModalState extends BaseModalRouteState {
                 _incidentTypeList.clear();
                 _selectedIncidentTypes.clear();
                 setState(() {
-                  _incidentTypeList = state.incidentTypes;
-                  _incidentTypeList.removeWhere((element) =>
-                      element.dispatchCode == specialIncidentDispatchCode &&
-                      element.specialDispatch == true);
+                  _incidentTypeList = state.incidentTypes
+                      .where((element) =>
+                          element.dispatchCode != specialIncidentDispatchCode)
+                      .toList();
                 });
               }
               if (state is SaveIncidentTypesSuccessState) {
