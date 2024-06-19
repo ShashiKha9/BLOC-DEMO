@@ -99,8 +99,8 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
           if (state is GetIncidentTypesSuccessState) {
             setState(() {
               _incidentTypes = state.incidentTypes
-                  .where((element) =>
-                      element.dispatchCode != specialIncidentDispatchCode)
+                  .where((element) => !specialIncidentDispatchCode
+                      .contains(element.dispatchCode))
                   .toList();
             });
           }
@@ -112,8 +112,8 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
                     (element) => element.id == questionDto!.branchId);
                 _filteredIncidentTypes = _incidentTypes
                     .where((element) => element.branchId == _selectedBranch!.id)
-                    .where((element) =>
-                        element.dispatchCode != specialIncidentDispatchCode)
+                    .where((element) => !specialIncidentDispatchCode
+                        .contains(element.dispatchCode))
                     .toList();
               }
             });
