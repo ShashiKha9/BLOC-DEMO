@@ -12,6 +12,8 @@ import 'package:rescu_organization_portal/ui/widgets/loading_container.dart';
 import 'package:rescu_organization_portal/ui/widgets/spacer_size.dart';
 import 'package:rescu_organization_portal/ui/widgets/text_input_decoration.dart';
 
+import '../../../constants.dart';
+
 class CopyBranchQuestionsModalState extends BaseModalRouteState {
   final String groupId;
   final String branchId;
@@ -81,7 +83,9 @@ class CopyBranchQuestionsModalState extends BaseModalRouteState {
 
               if (state is IncidentTypeLoadedState) {
                 _incidentTypes.clear();
-                _incidentTypes.addAll(state.incidentTypes);
+                _incidentTypes.addAll(state.incidentTypes.where((element) =>
+                    !specialIncidentDispatchCodes
+                        .contains(element.dispatchCode)));
                 if (_incidentTypes.isNotEmpty) {
                   _selectedIncidentTypeId = _incidentTypes.first.id;
                 }

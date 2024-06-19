@@ -8,6 +8,7 @@ import 'package:rescu_organization_portal/ui/content/groupIncidentTypeQuestions/
 import 'package:rescu_organization_portal/ui/content/groupIncidentTypeQuestions/view_question.dart';
 import 'package:rescu_organization_portal/ui/widgets/buttons.dart';
 
+import '../../../constants.dart';
 import '../../../data/api/base_api.dart';
 import '../../../data/api/group_incident_type_api.dart';
 import '../../../data/constants/messages.dart';
@@ -64,7 +65,13 @@ class _GroupIncidentTypeQuestionContentState
   String _searchValue = "";
   final List<AdaptiveListItem> _contacts = [];
   final List<GroupIncidentTypeDto> _incidents = [
-    GroupIncidentTypeDto(id: "", name: "ALL", description: "", groupId: "", specialDispatch: false, color: "")
+    GroupIncidentTypeDto(
+        id: "",
+        name: "ALL",
+        description: "",
+        groupId: "",
+        specialDispatch: false,
+        color: "")
   ];
   final List<GroupIncidentTypeQuestionDto> _questions = [];
 
@@ -229,7 +236,7 @@ class _GroupIncidentTypeQuestionContentState
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(12,12,12,0),
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -326,12 +333,18 @@ class _GroupIncidentTypeQuestionContentState
   _loadIncidentTypesForBranches() async {
     _incidents.clear();
     _incidents.add(GroupIncidentTypeDto(
-        id: "", name: "ALL", description: "", groupId: "", specialDispatch: false, color: ""));
+        id: "",
+        name: "ALL",
+        description: "",
+        groupId: "",
+        specialDispatch: false,
+        color: ""));
     _loadingController.show();
     var result =
         await context.read<IGroupIncidentTypeApi>().get("", _selectedBranchId);
     if (result is OkData<List<GroupIncidentTypeDto>>) {
-      _incidents.addAll(result.dto);
+      _incidents.addAll(result.dto.where((element) =>
+          !specialIncidentDispatchCodes.contains(element.dispatchCode)));
     }
     _loadingController.hide();
     setState(() {});
