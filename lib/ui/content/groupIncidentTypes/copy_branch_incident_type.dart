@@ -10,6 +10,8 @@ import 'package:rescu_organization_portal/ui/widgets/dialogs.dart';
 import 'package:rescu_organization_portal/ui/widgets/loading_container.dart';
 import 'package:rescu_organization_portal/ui/widgets/text_input_decoration.dart';
 
+import '../../../constants.dart';
+
 class CopyBranchIncidentTypeModalState extends BaseModalRouteState {
   final String groupId;
   final String branchId;
@@ -69,7 +71,7 @@ class CopyBranchIncidentTypeModalState extends BaseModalRouteState {
                 setState(() {
                   _incidentTypeList = state.incidentTypes;
                   _incidentTypeList.removeWhere((element) =>
-                      element.dispatchCode?.toLowerCase() == "pd" &&
+                      element.dispatchCode == specialIncidentDispatchCode &&
                       element.specialDispatch == true);
                 });
               }

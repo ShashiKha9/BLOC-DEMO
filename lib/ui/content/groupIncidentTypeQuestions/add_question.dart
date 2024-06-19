@@ -13,6 +13,8 @@ import 'package:rescu_organization_portal/ui/widgets/dialogs.dart';
 import 'package:rescu_organization_portal/ui/widgets/spacer_size.dart';
 import 'package:rescu_organization_portal/ui/widgets/text_input_decoration.dart';
 
+import '../../../constants.dart';
+
 class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
   final String groupId;
   final GroupIncidentTypeQuestionDto? rootQuestion;
@@ -96,7 +98,10 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
           }
           if (state is GetIncidentTypesSuccessState) {
             setState(() {
-              _incidentTypes = state.incidentTypes;
+              _incidentTypes = state.incidentTypes
+                  .where((element) =>
+                      element.dispatchCode != specialIncidentDispatchCode)
+                  .toList();
             });
           }
           if (state is GetBranchesSuccessState) {
@@ -107,6 +112,8 @@ class AddUpdateGroupIncidentTypeQuestionModelState extends BaseModalRouteState {
                     (element) => element.id == questionDto!.branchId);
                 _filteredIncidentTypes = _incidentTypes
                     .where((element) => element.branchId == _selectedBranch!.id)
+                    .where((element) =>
+                        element.dispatchCode != specialIncidentDispatchCode)
                     .toList();
               }
             });

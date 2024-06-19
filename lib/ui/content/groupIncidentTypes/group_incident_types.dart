@@ -8,6 +8,7 @@ import 'package:rescu_organization_portal/ui/content/groupIncidentTypes/add_grou
 import 'package:rescu_organization_portal/ui/content/groupIncidentTypes/copy_branch_incident_type.dart';
 import 'package:rescu_organization_portal/ui/widgets/buttons.dart';
 
+import '../../../constants.dart';
 import '../../../data/constants/messages.dart';
 import '../../adaptive_items.dart';
 import '../../adaptive_navigation.dart';
@@ -102,7 +103,7 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
               if (state is GetGroupIncidentTypesSuccessState) {
                 _contacts.clear();
                 _isPoliceDispatchAdded = state.model.any((e) =>
-                    e.dispatchCode?.toLowerCase() == "pd" &&
+                    e.dispatchCode == specialIncidentDispatchCode &&
                     e.specialDispatch == true);
                 _contacts.addAll(state.model.map((e) {
                   List<AdaptiveContextualItem> contextualItems = [];
