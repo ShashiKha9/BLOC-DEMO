@@ -84,7 +84,7 @@ class CopyBranchQuestionsModalState extends BaseModalRouteState {
               if (state is IncidentTypeLoadedState) {
                 _incidentTypes.clear();
                 _incidentTypes.addAll(state.incidentTypes.where((element) =>
-                    !specialIncidentDispatchCode
+                    !specialIncidentDispatchCodes
                         .contains(element.dispatchCode)));
                 if (_incidentTypes.isNotEmpty) {
                   _selectedIncidentTypeId = _incidentTypes.first.id;

@@ -103,7 +103,7 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
               if (state is GetGroupIncidentTypesSuccessState) {
                 _contacts.clear();
                 _isPoliceDispatchAdded = state.model.any((element) =>
-                    !specialIncidentDispatchCode
+                    !specialIncidentDispatchCodes
                         .contains(element.dispatchCode));
                 _contacts.addAll(state.model.map((e) {
                   List<AdaptiveContextualItem> contextualItems = [];

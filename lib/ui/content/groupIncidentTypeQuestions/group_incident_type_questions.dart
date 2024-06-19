@@ -344,7 +344,7 @@ class _GroupIncidentTypeQuestionContentState
         await context.read<IGroupIncidentTypeApi>().get("", _selectedBranchId);
     if (result is OkData<List<GroupIncidentTypeDto>>) {
       _incidents.addAll(result.dto.where((element) =>
-          !specialIncidentDispatchCode.contains(element.dispatchCode)));
+          !specialIncidentDispatchCodes.contains(element.dispatchCode)));
     }
     _loadingController.hide();
     setState(() {});
