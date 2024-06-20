@@ -8,11 +8,14 @@ import 'package:rescu_organization_portal/data/dto/group_invite_contact_dto.dart
 import 'package:rescu_organization_portal/ui/adaptive_items.dart';
 
 import '../../../data/blocs/group_admins_bloc.dart';
+import '../../../data/dto/group_branch_dto.dart';
 import '../../../data/helpers/phone_number_validator.dart';
+import '../../../data/models/group_incident_type_model.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/dialogs.dart';
 import '../../widgets/spacer_size.dart';
 import '../../widgets/text_input_decoration.dart';
+import '../groupcontacts/add_group_contact.dart';
 
 class AddUpdateGroupAdminModelState extends BaseModalRouteState {
   final String groupId;
@@ -27,6 +30,11 @@ class AddUpdateGroupAdminModelState extends BaseModalRouteState {
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   bool _validMobileNumber = false;
+  List<GroupIncidentTypeModel> _incidentList = [];
+  List<GroupIncidentTypeModel> _preSelectedIncidents = [];
+  final List<GroupIncidentTypeModel> _selectedIncidents = [];
+  List<GroupBranchDto> _branches = [];
+  List<GroupBranchDto> _selectedBranches = [];
 
   @override
   void initState() {
@@ -38,6 +46,8 @@ class AddUpdateGroupAdminModelState extends BaseModalRouteState {
       _emailController.text = contact!.email ?? "";
       _validateContactNumber(contact!.phoneNumber);
     }
+    context.read<AddUpdateGroupAdminBloc>().add(GetIncidentTypes(""));
+    context.read<AddUpdateGroupAdminBloc>().add(GetBranches(groupId));
   }
 
   _validateContactNumber(String number) async {
@@ -74,6 +84,54 @@ class AddUpdateGroupAdminModelState extends BaseModalRouteState {
           if (state is AdminUpdatedSuccessState) {
             ToastDialog.success("Admin updated successfully");
             Navigator.of(context).pop();
+          }
+          if (state is GetIncidentTypeSuccessState) {
+            setState(() {
+              _incidentList = state.model;
+              _incidentList.insert(
+                  0,
+                  GroupIncidentTypeModel(
+                      id: 'all',
+                      name: 'All',
+                      groupId: _incidentList.first.groupId,
+                      specialDispatch: _incidentList.first.specialDispatch,
+                      description: "",
+                      branchId: 'all',
+                      color: ""));
+              if (contact != null &&
+                  contact!.incidentTypeList != null &&
+                  contact!.incidentTypeList!.isNotEmpty) {
+                _preSelectedIncidents = _incidentList
+                    .where((e) => contact!.incidentTypeList!.contains(e.id))
+                    .toList();
+                _selectedIncidents.clear();
+                _selectedIncidents.addAll(_preSelectedIncidents);
+              }
+              else{
+                _preSelectedIncidents = _incidentList;
+                _selectedIncidents.clear();
+                _selectedIncidents.addAll(_preSelectedIncidents);
+              }
+            });
+          }
+          if (state is GetBranchesSuccessState) {
+            setState(() {
+              _branches = state.branches;
+              var activeBranches =
+                  state.branches.where((e) => e.active).toList();
+              if (contact != null && contact!.branchIds != null) {
+                _selectedBranches = _branches
+                    .where((e) => contact!.branchIds!.contains(e.id))
+                    .toList();
+              }
+              else{
+                _selectedBranches = activeBranches;
+              }
+              activeBranches.addAll(_selectedBranches
+                  .where((element) => !element.active)
+                  .toList());
+              _branches = activeBranches;
+            });
           }
         }
       },
@@ -162,7 +220,71 @@ class AddUpdateGroupAdminModelState extends BaseModalRouteState {
                       "This Email should be used to log into Group Portal & Rescu Ops. User will receive the credentials on the email.",
                       style:
                           TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
-                    )
+                    ),
+              SpacerSize.at(1.5),
+              const Text("Assign branches to user"),
+              SpacerSize.at(1),
+              Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: _branches
+                      .map((e) => Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              InkWell(
+                                onTap: () => {
+                                  setState(() {
+                                    if (_selectedBranches.contains(e)) {
+                                      _selectedBranches.remove(e);
+                                      _selectedIncidents.removeWhere(
+                                          (element) =>
+                                              element.branchId == e.id);
+                                    } else {
+                                      _selectedBranches.add(e);
+                                    }
+                                  })
+                                },
+                                child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      _selectedBranches.contains(e)
+                                          ? const Icon(Icons.check_box)
+                                          : const Icon(
+                                              Icons.check_box_outline_blank),
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text(e.name)
+                                    ]),
+                              ),
+                              SpacerSize.at(1.5),
+                              if (_selectedBranches.contains(e))
+                                IncidentTypeSelection(
+                                  selectedIncidents: _preSelectedIncidents
+                                      .where(
+                                          (element) => element.branchId == e.id)
+                                      .toList(),
+                                  incidentTypes: _incidentList
+                                      .where((element) =>
+                                          element.id == 'all' ||
+                                          element.branchId == e.id)
+                                      .toList(),
+                                  onSelectionChange:
+                                      (List<GroupIncidentTypeModel>
+                                          selectedIncidents) {
+                                    _selectedIncidents.removeWhere(
+                                        (element) => element.branchId == e.id);
+                                    _selectedIncidents
+                                        .addAll(selectedIncidents);
+                                  },
+                                ),
+                              SpacerSize.at(1.5),
+                            ],
+                          ))
+                      .toList())
             ],
           ),
         ),
@@ -189,8 +311,10 @@ class AddUpdateGroupAdminModelState extends BaseModalRouteState {
             loginWith: "Email",
             id: contact?.id,
             canCloseChat: true,
-            incidentTypeList: [],
-            branchIds: []);
+            incidentTypeList: [
+              ...{..._selectedIncidents.map((e) => e.id!).toList()}
+            ],
+            branchIds: _selectedBranches.map((e) => e.id!).toList());
         if (contact != null && contact!.id != null) {
           context
               .read<AddUpdateGroupAdminBloc>()

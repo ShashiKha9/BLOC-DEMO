@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rescu_organization_portal/data/constants/fleet_user_roles.dart';
 import 'package:rescu_organization_portal/ui/adaptive_items.dart';
 import '../../../data/blocs/group_manage_contacts_bloc.dart';
 import '../../../data/dto/group_manage_contacts_dto.dart';
@@ -13,12 +14,13 @@ class ManageGroupContactsContent extends BaseModalRouteState {
   final LoadingController _loadingController = LoadingController();
   final Map<int, bool> _checkboxState = {};
   final String _groupId;
+  final String role;
   String? _selectedFilter;
   String? _selectedBranchId;
   double? dataRowHeight;
   int maxIncidents = 0;
 
-  ManageGroupContactsContent(this._groupId);
+  ManageGroupContactsContent(this._groupId, this.role);
   List<GroupManageContactBranchDto> tableData = [];
   List<ContactBranch> branchData = [];
 
@@ -26,9 +28,8 @@ class ManageGroupContactsContent extends BaseModalRouteState {
   void initState() {
     super.initState();
 
-    context
-        .read<GroupManageContactsBloc>()
-        .add(GetManageContacts(_groupId, _selectedFilter, _selectedBranchId));
+    context.read<GroupManageContactsBloc>().add(
+        GetManageContacts(_groupId, _selectedFilter, _selectedBranchId, role));
   }
 
   @override
@@ -54,7 +55,7 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                 _loadingController.hide();
                 ToastDialog.success("Record updated successfully");
                 context.read<GroupManageContactsBloc>().add(GetManageContacts(
-                    _groupId, _selectedFilter, _selectedBranchId));
+                    _groupId, _selectedFilter, _selectedBranchId, role));
               } else if (state is UpdateManageContactsErrorState) {
                 _loadingController.hide();
               } else {
@@ -137,7 +138,7 @@ class ManageGroupContactsContent extends BaseModalRouteState {
                           onPressed: () async {
                             context.read<GroupManageContactsBloc>().add(
                                 GetManageContacts(_groupId, _selectedFilter,
-                                    _selectedBranchId));
+                                    _selectedBranchId, role));
                           },
                           buttonText: "Search",
                         ),
@@ -363,6 +364,8 @@ class ManageGroupContactsContent extends BaseModalRouteState {
 
   @override
   String getTitle() {
-    return "Manage Contacts";
+    if (role == FleetUserRoles.admin) return "Manage Admins";
+    if (role == FleetUserRoles.contact) return "Manage Contacts";
+    return "";
   }
 }

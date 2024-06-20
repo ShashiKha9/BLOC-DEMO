@@ -2,10 +2,15 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../api/base_api.dart';
+import '../api/group_branch_api.dart';
+import '../api/group_incident_type_api.dart';
 import '../api/group_info_api.dart';
 import '../api/group_invite_contact_api.dart';
+import '../dto/group_branch_dto.dart';
+import '../dto/group_incident_type_dto.dart';
 import '../dto/group_info_dto.dart';
 import '../dto/group_invite_contact_dto.dart';
+import '../models/group_incident_type_model.dart';
 
 abstract class GroupAdminsEvent extends Equatable {
   @override
@@ -56,6 +61,24 @@ class UpdateGroupAdmin extends GroupAdminsEvent {
   List<Object> get props => [groupId, inviteId, contact];
 }
 
+class GetIncidentTypes extends GroupAdminsEvent {
+  final String? filter;
+
+  GetIncidentTypes(this.filter);
+
+  @override
+  List<Object?> get props => [filter];
+}
+
+class GetBranches extends GroupAdminsEvent {
+  final String groupId;
+
+  GetBranches(this.groupId);
+
+  @override
+  List<Object?> get props => [groupId];
+}
+
 abstract class GroupAdminsState extends Equatable {
   @override
   List<Object?> get props => [];
@@ -101,6 +124,24 @@ class RefreshAdminListState extends GroupAdminsState {}
 class AdminAddedSuccessState extends GroupAdminsState {}
 
 class AdminUpdatedSuccessState extends GroupAdminsState {}
+
+class GetIncidentTypeSuccessState extends GroupAdminsState {
+  final List<GroupIncidentTypeModel> model;
+
+  GetIncidentTypeSuccessState(this.model);
+
+  @override
+  List<Object?> get props => [model];
+}
+
+class GetBranchesSuccessState extends GroupAdminsState {
+  final List<GroupBranchDto> branches;
+
+  GetBranchesSuccessState(this.branches);
+
+  @override
+  List<Object?> get props => [branches];
+}
 
 class GroupAdminBloc extends Bloc<GroupAdminsEvent, GroupAdminsState> {
   final IGroupInfoApi _groupInfoApi;
@@ -171,8 +212,10 @@ class GroupAdminBloc extends Bloc<GroupAdminsEvent, GroupAdminsState> {
 class AddUpdateGroupAdminBloc
     extends Bloc<GroupAdminsEvent, GroupAdminsState> {
   final IGroupInviteContactsApi _contactsApi;
+  final IGroupIncidentTypeApi _incidentTypeApi;
+  final IGroupBranchApi _groupBranchApi;
   AddUpdateGroupAdminBloc(
-      this._contactsApi)
+      this._contactsApi, this._incidentTypeApi, this._groupBranchApi)
       : super(GroupAdminsInitialState());
 
   @override
@@ -210,6 +253,31 @@ class AddUpdateGroupAdminBloc
       } else {
         yield GroupAdminsErrorState();
         return;
+      }
+    }
+    if (event is GetIncidentTypes) {
+      yield GroupAdminsLoadingState();
+
+      var result = await _incidentTypeApi.get(event.filter ?? "", null);
+      if (result is OkData<List<GroupIncidentTypeDto>>) {
+        yield GetIncidentTypeSuccessState(
+            result.dto.map((e) => GroupIncidentTypeModel.fromDto(e)).toList());
+      } else if (result is BadData<List<GroupIncidentTypeDto>>) {
+        yield GroupAdminsErrorState(error: result.message);
+      } else {
+        yield GroupAdminsErrorState();
+      }
+    }
+    if (event is GetBranches) {
+      yield GroupAdminsLoadingState();
+
+      var result = await _groupBranchApi.getGroupBranches(event.groupId, "");
+      if (result is OkData<List<GroupBranchDto>>) {
+        yield GetBranchesSuccessState(result.dto);
+      } else if (result is BadData<List<GroupBranchDto>>) {
+        yield GroupAdminsErrorState(error: result.message);
+      } else {
+        yield GroupAdminsErrorState();
       }
     }
   }
