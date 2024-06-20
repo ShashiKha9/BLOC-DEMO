@@ -155,6 +155,7 @@ class _GroupIncidentTypesContentState extends State<GroupIncidentTypesContent> {
                     state.message ?? MessagesConst.internalServerError);
               }
               if (state is GetGroupIncidentTypesNotFoundState) {
+                _isPoliceDispatchAdded = false;
                 _contacts.clear();
                 ToastDialog.warning("No records found");
                 setState(() {});
