@@ -106,8 +106,7 @@ class AddUpdateGroupAdminModelState extends BaseModalRouteState {
                     .toList();
                 _selectedIncidents.clear();
                 _selectedIncidents.addAll(_preSelectedIncidents);
-              }
-              else{
+              } else {
                 _preSelectedIncidents = _incidentList;
                 _selectedIncidents.clear();
                 _selectedIncidents.addAll(_preSelectedIncidents);
@@ -123,8 +122,7 @@ class AddUpdateGroupAdminModelState extends BaseModalRouteState {
                 _selectedBranches = _branches
                     .where((e) => contact!.branchIds!.contains(e.id))
                     .toList();
-              }
-              else{
+              } else {
                 _selectedBranches = activeBranches;
               }
               activeBranches.addAll(_selectedBranches
@@ -312,7 +310,12 @@ class AddUpdateGroupAdminModelState extends BaseModalRouteState {
             id: contact?.id,
             canCloseChat: true,
             incidentTypeList: [
-              ...{..._selectedIncidents.map((e) => e.id!).toList()}
+              ...{
+                ..._selectedIncidents
+                    .where((e) => e.id != 'all')
+                    .map((e) => e.id!)
+                    .toList()
+              }
             ],
             branchIds: _selectedBranches.map((e) => e.id!).toList());
         if (contact != null && contact!.id != null) {
