@@ -31,7 +31,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
   final TextEditingController _designationController = TextEditingController();
   bool _validMobileNumber = false;
   late List<GroupIncidentTypeModel> _incidentList = [];
-  late List<GroupIncidentTypeModel> _preSelectedIncidents = [];
+  //late List<GroupIncidentTypeModel> _preSelectedIncidents = [];
   final List<GroupIncidentTypeModel> _selectedIncidents = [];
   List<GroupBranchDto> _branches = [];
   List<GroupBranchDto> _selectedBranches = [];
@@ -111,11 +111,13 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
               if (contact != null &&
                   contact!.incidentTypeList != null &&
                   contact!.incidentTypeList!.isNotEmpty) {
-                _preSelectedIncidents = _incidentList
-                    .where((e) => contact!.incidentTypeList!.contains(e.id))
-                    .toList();
+                // _preSelectedIncidents = _incidentList
+                //     .where((e) => contact!.incidentTypeList!.contains(e.id))
+                //     .toList();
                 _selectedIncidents.clear();
-                _selectedIncidents.addAll(_preSelectedIncidents);
+                _selectedIncidents.addAll(_incidentList
+                    .where((e) => contact!.incidentTypeList!.contains(e.id))
+                    .toList());
               }
             });
           }
@@ -209,7 +211,9 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                   }),
               SpacerSize.at(1.5),
               TextFormField(
-                decoration: TextInputDecoration(labelText: "Job Title", hintText: "Administrator, Employee, etc."),
+                decoration: TextInputDecoration(
+                    labelText: "Job Title",
+                    hintText: "Administrator, Employee, etc."),
                 controller: _designationController,
               ),
               _emailController.text.isNotEmpty
@@ -316,7 +320,7 @@ class AddUpdateGroupContactModelState extends BaseModalRouteState {
                                 SpacerSize.at(1.5),
                                 if (_selectedBranches.contains(e))
                                   IncidentTypeSelection(
-                                    selectedIncidents: _preSelectedIncidents
+                                    selectedIncidents: _selectedIncidents
                                         .where((element) =>
                                             element.branchId == e.id)
                                         .toList(),

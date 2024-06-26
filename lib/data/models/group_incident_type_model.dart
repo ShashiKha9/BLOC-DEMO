@@ -11,6 +11,7 @@ class GroupIncidentTypeModel {
   late String? dispatchCode;
   late List<String>? branches;
   late String color;
+  late bool? addAdmins;
 
   GroupIncidentTypeModel(
       {this.id,
@@ -22,7 +23,8 @@ class GroupIncidentTypeModel {
       this.branchId,
       this.dispatchCode,
       this.branches,
-      required this.color});
+      required this.color,
+      this.addAdmins});
 
   GroupIncidentTypeModel.fromDto(GroupIncidentTypeDto dto) {
     id = dto.id;
@@ -47,6 +49,7 @@ class GroupIncidentTypeModel {
         branches: branches,
         branchId: branchId,
         dispatchCode: dispatchCode,
-        color: color);
+        color: color,
+        addAdmins: addAdmins);
   }
 }
