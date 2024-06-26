@@ -202,7 +202,7 @@ class DependencyConfiguration {
       BlocProvider<GroupAdminBloc>(
           create: (ctx) => GroupAdminBloc(ctx.read(), ctx.read())),
       BlocProvider<AddUpdateGroupAdminBloc>(
-          create: (ctx) => AddUpdateGroupAdminBloc(ctx.read())),
+          create: (ctx) => AddUpdateGroupAdminBloc(ctx.read(), ctx.read(), ctx.read())),
       BlocProvider<ForgotPasswordBloc>(
           create: (ctx) => ForgotPasswordBloc(ctx.read())),
       BlocProvider<VerifyForgotPasswordCodeBloc>(

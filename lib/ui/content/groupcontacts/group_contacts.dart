@@ -246,7 +246,7 @@ class _GroupContactsContentState extends State<GroupContactsContent> {
                       Navigator.of(context).push(MaterialPageRoute(
                           builder: (ctx) => ModalRouteWidget(
                               stateGenerator: () =>
-                                  ManageGroupContactsContent(widget.groupId))));
+                                  ManageGroupContactsContent(widget.groupId, FleetUserRoles.contact))));
                     },
                     buttonText: "Manage Contacts",
                   ),

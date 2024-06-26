@@ -3,13 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rescu_organization_portal/ui/content/groupAdmins/add_group_admin.dart';
 
 import '../../../data/blocs/group_admins_bloc.dart';
+import '../../../data/constants/fleet_user_roles.dart';
 import '../../../data/constants/messages.dart';
 import '../../adaptive_items.dart';
 import '../../adaptive_navigation.dart';
+import '../../widgets/buttons.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/dialogs.dart';
 import '../../widgets/loading_container.dart';
 import '../../widgets/text_input_decoration.dart';
+import '../manageContacts/manage_contacts.dart';
 
 class GroupAdminsContent extends StatefulWidget with FloatingActionMixin {
   final String groupId;
@@ -176,6 +179,16 @@ class _GroupAdminsContentState extends State<GroupAdminsContent> {
                         ),
                       ),
                     ),
+                  ),
+                  AppButtonWithIcon(
+                    icon: const Icon(Icons.contacts_rounded),
+                    onPressed: () async {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (ctx) => ModalRouteWidget(
+                              stateGenerator: () =>
+                                  ManageGroupContactsContent(widget.groupId, FleetUserRoles.admin))));
+                    },
+                    buttonText: "Manage Admins",
                   ),
                 ],
               ),
