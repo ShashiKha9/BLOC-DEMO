@@ -31,7 +31,7 @@ class AddUpdateGroupAdminModelState extends BaseModalRouteState {
   final TextEditingController _emailController = TextEditingController();
   bool _validMobileNumber = false;
   List<GroupIncidentTypeModel> _incidentList = [];
-  List<GroupIncidentTypeModel> _preSelectedIncidents = [];
+  //List<GroupIncidentTypeModel> _preSelectedIncidents = [];
   final List<GroupIncidentTypeModel> _selectedIncidents = [];
   List<GroupBranchDto> _branches = [];
   List<GroupBranchDto> _selectedBranches = [];
@@ -101,15 +101,17 @@ class AddUpdateGroupAdminModelState extends BaseModalRouteState {
               if (contact != null &&
                   contact!.incidentTypeList != null &&
                   contact!.incidentTypeList!.isNotEmpty) {
-                _preSelectedIncidents = _incidentList
+                // _preSelectedIncidents = _incidentList
+                //     .where((e) => contact!.incidentTypeList!.contains(e.id))
+                //     .toList();
+                _selectedIncidents.clear();
+                _selectedIncidents.addAll(_incidentList
                     .where((e) => contact!.incidentTypeList!.contains(e.id))
-                    .toList();
-                _selectedIncidents.clear();
-                _selectedIncidents.addAll(_preSelectedIncidents);
+                    .toList());
               } else {
-                _preSelectedIncidents = _incidentList;
+                //_preSelectedIncidents = _incidentList;
                 _selectedIncidents.clear();
-                _selectedIncidents.addAll(_preSelectedIncidents);
+                _selectedIncidents.addAll(_incidentList.toList());
               }
             });
           }
@@ -123,7 +125,7 @@ class AddUpdateGroupAdminModelState extends BaseModalRouteState {
                     .where((e) => contact!.branchIds!.contains(e.id))
                     .toList();
               } else {
-                _selectedBranches = activeBranches;
+                _selectedBranches = activeBranches.toList();
               }
               activeBranches.addAll(_selectedBranches
                   .where((element) => !element.active)
@@ -261,7 +263,7 @@ class AddUpdateGroupAdminModelState extends BaseModalRouteState {
                               SpacerSize.at(1.5),
                               if (_selectedBranches.contains(e))
                                 IncidentTypeSelection(
-                                  selectedIncidents: _preSelectedIncidents
+                                  selectedIncidents: _selectedIncidents
                                       .where(
                                           (element) => element.branchId == e.id)
                                       .toList(),

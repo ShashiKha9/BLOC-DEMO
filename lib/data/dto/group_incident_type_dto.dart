@@ -9,6 +9,7 @@ class GroupIncidentTypeDto {
   late String? dispatchCode;
   late List<String>? branches;
   late String color;
+  late bool? addAdmins;
 
   GroupIncidentTypeDto(
       {this.id,
@@ -20,7 +21,8 @@ class GroupIncidentTypeDto {
       this.branchId,
       this.dispatchCode,
       this.branches,
-      required this.color});
+      required this.color,
+      this.addAdmins});
 
   GroupIncidentTypeDto.fromJson(Map<String, dynamic> json) {
     id = json["Id"]?.toString();
@@ -46,6 +48,7 @@ class GroupIncidentTypeDto {
     data["BranchId"] = branchId;
     data["DispatchCode"] = dispatchCode;
     data["Color"] = color;
+    data["AddAdmins"] = addAdmins ?? false;
     return data;
   }
 }

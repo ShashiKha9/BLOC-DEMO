@@ -22,7 +22,8 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
   final bool isSpecialDispatch;
   final GroupIncidentTypeModel? incidentType;
 
-  AddUpdateGroupIncidentTypeModelState(this.groupId, this.isSpecialDispatch, {this.incidentType});
+  AddUpdateGroupIncidentTypeModelState(this.groupId, this.isSpecialDispatch,
+      {this.incidentType});
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _nameController = TextEditingController();
@@ -35,6 +36,8 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
   List<GroupBranchDto> _selectedBranches = [];
 
   final multiSelectState = GlobalKey<FormFieldState>();
+
+  bool _notifyAllAdmins = true;
 
   @override
   void initState() {
@@ -258,6 +261,34 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
                   ],
                 ),
               ),
+              incidentType != null && incidentType!.id != null
+                  ? const SizedBox()
+                  : GestureDetector(
+                      onTap: () => setState(() {
+                        _notifyAllAdmins = !_notifyAllAdmins;
+                      }),
+                      child: Column(
+                        children: [
+                          SpacerSize.at(1.5),
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: _notifyAllAdmins,
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    _notifyAllAdmins = value ?? false;
+                                  });
+                                },
+                              ),
+                              const SizedBox(width: 5),
+                              const Text(
+                                'Enable for all admins?',
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
             ],
           ),
         ),
@@ -285,6 +316,7 @@ class AddUpdateGroupIncidentTypeModelState extends BaseModalRouteState {
         } else {
           addIncidentType.branches =
               _selectedBranches.map((e) => e.id!).toList();
+          addIncidentType.addAdmins = _notifyAllAdmins;
           context
               .read<GroupIncidentTypeBloc>()
               .add(AddIncidentType(groupId, addIncidentType));
