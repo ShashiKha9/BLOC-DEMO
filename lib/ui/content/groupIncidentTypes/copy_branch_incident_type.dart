@@ -17,14 +17,14 @@ class CopyBranchIncidentTypeModalState extends BaseModalRouteState {
   final String branchId;
 
   CopyBranchIncidentTypeModalState(
-      {required this.groupId,
-      required this.branchId});
+      {required this.groupId, required this.branchId});
 
   String? _selectedBranchId;
   List<GroupBranchDto> _branches = [];
   final List<GroupIncidentTypeDto> _selectedIncidentTypes = [];
   List<GroupIncidentTypeDto> _incidentTypeList = [];
   final LoadingController _controller = LoadingController();
+  bool _notifyAllAdmins = true;
 
   @override
   void initState() {
@@ -103,6 +103,32 @@ class CopyBranchIncidentTypeModalState extends BaseModalRouteState {
                           GetBranchIncidentTypes(groupId, _selectedBranchId));
                     }),
                 const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: () => setState(() {
+                    _notifyAllAdmins = !_notifyAllAdmins;
+                  }),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: _notifyAllAdmins,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                _notifyAllAdmins = value ?? false;
+                              });
+                            },
+                          ),
+                          const SizedBox(width: 5),
+                          const Text(
+                            'Enable for all admins?',
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
                 Expanded(
                     child: ListView.builder(
                         itemCount: _incidentTypeList.length,
@@ -144,6 +170,9 @@ class CopyBranchIncidentTypeModalState extends BaseModalRouteState {
         //   return;
         // }
         if (_selectedIncidentTypes.isNotEmpty) {
+          for (var e in _selectedIncidentTypes) {
+            e.addAdmins = _notifyAllAdmins;
+          }
           context.read<CopyBranchIncidentTypeBloc>().add(
               SaveIncidentTypes(groupId, branchId, _selectedIncidentTypes));
         }

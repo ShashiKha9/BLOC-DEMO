@@ -9,7 +9,7 @@ class GroupIncidentTypeDto {
   late String? dispatchCode;
   late List<String>? branches;
   late String color;
-  late bool? addAdmins;
+  bool? addAdmins;
 
   GroupIncidentTypeDto(
       {this.id,

@@ -11,7 +11,7 @@ class GroupIncidentTypeModel {
   late String? dispatchCode;
   late List<String>? branches;
   late String color;
-  late bool? addAdmins;
+  bool? addAdmins;
 
   GroupIncidentTypeModel(
       {this.id,
