@@ -1,6 +1,6 @@
+import 'package:TEST/data/api/base_api.dart';
+import 'package:TEST/data/dto/group_info_dto.dart';
 import 'package:dio/dio.dart';
-import 'package:rescu_organization_portal/data/api/base_api.dart';
-import 'package:rescu_organization_portal/data/dto/group_info_dto.dart';
 
 abstract class IGroupInfoApi {
   Future<ApiDataResponse<GroupInfoDto>> getLoggedInUserGroup();

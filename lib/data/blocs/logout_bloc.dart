@@ -1,6 +1,6 @@
+import 'package:TEST/data/persists/data_manager.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rescu_organization_portal/data/persists/data_manager.dart';
 
 // Events
 abstract class LogoutEvent extends Equatable {

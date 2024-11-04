@@ -1,4 +1,5 @@
-import 'package:rescu_organization_portal/data/dto/group_incident_type_dto.dart';
+
+import 'package:TEST/data/dto/group_incident_type_dto.dart';
 
 class GroupIncidentTypeModel {
   late String? id;

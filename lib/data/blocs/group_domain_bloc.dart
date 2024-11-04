@@ -1,9 +1,10 @@
+import 'package:TEST/data/api/base_api.dart';
+import 'package:TEST/data/api/group_domain_api.dart';
+import 'package:TEST/data/dto/group_domain_dto.dart';
+import 'package:TEST/data/models/group_domain_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rescu_organization_portal/data/api/base_api.dart';
-import 'package:rescu_organization_portal/data/api/group_domain_api.dart';
-import 'package:rescu_organization_portal/data/dto/group_domain_dto.dart';
-import 'package:rescu_organization_portal/data/models/group_domain_model.dart';
+
 
 // Events
 abstract class GroupDomainEvent extends Equatable {

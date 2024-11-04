@@ -1,10 +1,6 @@
+import 'package:TEST/data/dto/group_address_dto.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rescu_organization_portal/data/api/base_api.dart';
-import 'package:rescu_organization_portal/data/api/group_address_api.dart';
-import 'package:rescu_organization_portal/data/api/group_branch_api.dart';
-import 'package:rescu_organization_portal/data/dto/group_address_dto.dart';
-import 'package:rescu_organization_portal/data/dto/group_branch_dto.dart';
 
 abstract class CopyBranchAddressEvent extends Equatable {
   @override

@@ -194,7 +194,7 @@ class AddUpdateGroupAdminModelState extends BaseModalRouteState {
                   onTap: () {
                     if (contact != null && contact!.id != null) {
                       ToastDialog.error(
-                          "Email cannot be changed. It is used to log into Group Portal & Rescu Ops.");
+                          "Email cannot be changed. It is used to log into TEST & TEST.");
                     }
                   },
                   validator: (value) {
@@ -217,7 +217,7 @@ class AddUpdateGroupAdminModelState extends BaseModalRouteState {
                       height: 0,
                     )
                   : const Text(
-                      "This Email should be used to log into Group Portal & Rescu Ops. User will receive the credentials on the email.",
+                      "This Email should be used to log into TEST & TEST. User will receive the credentials on the email.",
                       style:
                           TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
                     ),

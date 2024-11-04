@@ -1,4 +1,4 @@
-import 'package:rescu_organization_portal/data/dto/group_user_dto.dart';
+import 'package:TEST/data/dto/group_user_dto.dart';
 
 class GroupUserModel {
   late String id;

@@ -1,8 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rescu_organization_portal/data/api/base_api.dart';
-import 'package:rescu_organization_portal/data/api/group_report_api.dart';
-import 'package:rescu_organization_portal/data/dto/group_incident_history_dto.dart';
+
 
 abstract class GroupIncidentHistoryEvent extends Equatable {
   @override

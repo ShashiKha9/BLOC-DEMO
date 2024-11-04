@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rescu_organization_portal/ui/splash_route.dart';
 import 'package:rescu_organization_portal/ui/widgets/custom_colors.dart';
 
@@ -13,7 +11,7 @@ class App extends StatelessWidget {
     String family = 'Montserrat-Light';
     var dark = ThemeData.dark();
     return MaterialApp(
-      title: 'Rescu Group Portal',
+      title: 'TEST',
       theme: dark.copyWith(
         dialogBackgroundColor: Colors.white,
         dialogTheme: DialogTheme(
@@ -59,7 +57,7 @@ class App extends StatelessWidget {
               uri.pathSegments.first == 'splash') {
             return MaterialPageRoute(builder: (context) => const SplashRoute());
           }
-          //Used when accessed from RESCU OPS WEB by admin
+          //Used when accessed from TEST WEB by admin
           if (uri.pathSegments.length == 1 &&
               uri.pathSegments.first == 'manage') {
             var accessToken = uri.queryParameters["accesstoken"];

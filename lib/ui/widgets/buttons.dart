@@ -15,8 +15,7 @@ Widget roundEdgedButton(
       onPressed();
     },
     style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
-        primary: const Color(0xffEE3133),
+        padding: const EdgeInsets.fromLTRB(0, 15, 0, 15), backgroundColor: const Color(0xffEE3133),
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
   );
@@ -41,7 +40,7 @@ class AppButton extends StatelessWidget {
       ),
       style: ButtonStyle(
           backgroundColor:
-              MaterialStateProperty.all(AppColor.baseBlueBackground)),
+              WidgetStateProperty.all(AppColor.baseBlueBackground)),
     );
   }
 }
@@ -71,8 +70,8 @@ class AppButtonWithIcon extends StatelessWidget {
             data: const IconThemeData(color: Colors.white), child: icon),
         style: ButtonStyle(
           backgroundColor:
-              MaterialStateProperty.all(AppColor.baseBlueBackground),
-          padding: MaterialStateProperty.all(padding ??
+              WidgetStateProperty.all(AppColor.baseBlueBackground),
+          padding: WidgetStateProperty.all(padding ??
               const EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
         ),
         onPressed: () {

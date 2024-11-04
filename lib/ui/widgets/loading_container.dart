@@ -1,7 +1,7 @@
+import 'package:TEST/ui/widgets/size_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:loading_overlay/loading_overlay.dart';
-import 'package:rescu_organization_portal/ui/widgets/size_config.dart';
 
 class LoadingContainer extends StatefulWidget {
   final LoadingController controller;

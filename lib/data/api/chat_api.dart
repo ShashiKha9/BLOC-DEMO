@@ -1,6 +1,6 @@
 import 'dart:convert';
+import 'package:TEST/data/services/service_response.dart';
 import 'package:dio/dio.dart';
-import 'package:rescu_organization_portal/data/services/service_response.dart';
 import '../models/chat_model.dart';
 import 'base_api.dart';
 

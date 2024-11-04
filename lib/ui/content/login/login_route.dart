@@ -1,18 +1,18 @@
+import 'package:TEST/data/blocs/login_bloc.dart';
+import 'package:TEST/data/constants/messages.dart';
+import 'package:TEST/data/constants/validation_messages.dart';
+import 'package:TEST/ui/adaptive_navigation.dart';
+import 'package:TEST/ui/content/account/change_password.dart';
+import 'package:TEST/ui/widgets/buttons.dart';
+import 'package:TEST/ui/widgets/custom_colors.dart';
+import 'package:TEST/ui/widgets/dialogs.dart';
+import 'package:TEST/ui/widgets/loading_container.dart';
+import 'package:TEST/ui/widgets/size_config.dart';
+import 'package:TEST/ui/widgets/spacer_size.dart';
+import 'package:TEST/ui/widgets/text_input_decoration.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rescu_organization_portal/data/blocs/login_bloc.dart';
-import 'package:rescu_organization_portal/data/constants/messages.dart';
-import 'package:rescu_organization_portal/data/constants/validation_messages.dart';
-import 'package:rescu_organization_portal/ui/adaptive_navigation.dart';
-import 'package:rescu_organization_portal/ui/content/account/change_password.dart';
-import 'package:rescu_organization_portal/ui/widgets/buttons.dart';
-import 'package:rescu_organization_portal/ui/widgets/custom_colors.dart';
-import 'package:rescu_organization_portal/ui/widgets/dialogs.dart';
-import 'package:rescu_organization_portal/ui/widgets/loading_container.dart';
-import 'package:rescu_organization_portal/ui/widgets/size_config.dart';
-import 'package:rescu_organization_portal/ui/widgets/spacer_size.dart';
-import 'package:rescu_organization_portal/ui/widgets/text_input_decoration.dart';
 
 import 'forgotPassword/forgot_password_route.dart';
 
@@ -98,7 +98,7 @@ class _LoginRouteState extends State<LoginRoute> {
                                     ),
                                     SpacerSize.at(1.5),
                                     Center(
-                                      child: Text("Rescu Group Portal",
+                                      child: Text("TEST",
                                           style: TextStyle(
                                               fontSize: SizeConfig.size(2),
                                               color: const Color(0xff203542))),

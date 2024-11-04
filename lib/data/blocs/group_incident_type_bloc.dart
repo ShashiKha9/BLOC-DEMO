@@ -1,11 +1,7 @@
+import 'package:TEST/data/models/group_incident_type_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rescu_organization_portal/data/api/base_api.dart';
-import 'package:rescu_organization_portal/data/api/group_branch_api.dart';
-import 'package:rescu_organization_portal/data/api/group_incident_type_api.dart';
-import 'package:rescu_organization_portal/data/dto/group_branch_dto.dart';
-import 'package:rescu_organization_portal/data/dto/group_incident_type_dto.dart';
-import 'package:rescu_organization_portal/data/models/group_incident_type_model.dart';
+
 
 abstract class GroupIncidentTypeEvent extends Equatable {
   @override

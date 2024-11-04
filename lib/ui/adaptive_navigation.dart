@@ -1,24 +1,23 @@
+import 'package:TEST/data/api/group_branch_api.dart';
+import 'package:TEST/data/api/group_info_api.dart';
+import 'package:TEST/data/blocs/logout_bloc.dart';
+import 'package:TEST/data/dto/group_branch_dto.dart';
+import 'package:TEST/ui/content/account/change_password.dart';
+import 'package:TEST/ui/content/domains/domains.dart';
+import 'package:TEST/ui/content/groupBranches/group_branches.dart';
+import 'package:TEST/ui/content/groupIncidentHistory/group_incident_history.dart';
+import 'package:TEST/ui/content/groupIncidentTypeQuestions/group_incident_type_questions.dart';
+import 'package:TEST/ui/content/groupIncidentTypes/group_incident_types.dart';
+import 'package:TEST/ui/content/login/login_route.dart';
+import 'package:TEST/ui/content/users/users.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:rescu_organization_portal/data/api/group_branch_api.dart';
-import 'package:rescu_organization_portal/data/api/group_info_api.dart';
-import 'package:rescu_organization_portal/data/blocs/logout_bloc.dart';
-import 'package:rescu_organization_portal/data/dto/group_branch_dto.dart';
-import 'package:rescu_organization_portal/ui/content/account/change_password.dart';
-import 'package:rescu_organization_portal/ui/content/domains/domains.dart';
-import 'package:rescu_organization_portal/ui/content/groupBranches/group_branches.dart';
-import 'package:rescu_organization_portal/ui/content/groupIncidentHistory/group_incident_history.dart';
-import 'package:rescu_organization_portal/ui/content/groupIncidentTypeQuestions/group_incident_type_questions.dart';
-import 'package:rescu_organization_portal/ui/content/groupIncidentTypes/group_incident_types.dart';
-import 'package:rescu_organization_portal/ui/content/login/login_route.dart';
-import 'package:rescu_organization_portal/ui/content/users/users.dart';
+
 import '../data/api/base_api.dart';
 import '../data/dto/group_info_dto.dart';
 import 'adaptive_utils.dart';
-
-import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'content/groupAdmins/group_admins.dart';
 import 'content/groupaddresses/group_addresses.dart';
 import 'content/groupcontacts/group_contacts.dart';
@@ -297,7 +296,7 @@ class Mobile extends AdaptiveLayoutBase {
             toolbarHeight: content is AppBarBranchSelectionMixin ? 100 : null,
             title:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text("Rescu Group Portal"),
+              const Text("TEST"),
               if (content is AppBarBranchSelectionMixin)
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.8,
@@ -395,7 +394,7 @@ class Compact extends AdaptiveLayoutBase {
       appBar: AppBar(
           centerTitle: true,
           title: Row(children: [
-            const Text("Rescu Group Portal"),
+            const Text("TEST"),
             if (content is AppBarBranchSelectionMixin)
               Expanded(
                 child: Align(
@@ -509,7 +508,7 @@ class Full extends AdaptiveLayoutBase {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    const Text("Rescu Group Portal"),
+                    const Text("TEST"),
                     if (content is AppBarBranchSelectionMixin)
                       Expanded(
                         child: Align(

@@ -1,5 +1,5 @@
+import 'package:TEST/ui/widgets/buttons.dart';
 import 'package:flutter/material.dart';
-import 'package:rescu_organization_portal/ui/widgets/buttons.dart';
 
 import 'adaptive_items.dart';
 
@@ -111,7 +111,7 @@ class MobileListTileState extends State<AdaptiveListTileWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  ButtonBar(
+                  OverflowBar(
                       children: toggles.map((toggle) {
                     return Row(mainAxisSize: MainAxisSize.min, children: [
                       Text(toggle.label),
@@ -124,7 +124,7 @@ class MobileListTileState extends State<AdaptiveListTileWidget> {
                           })
                     ]);
                   }).toList()),
-                  ButtonBar(
+                  OverflowBar(
                       children: buttons.map((button) {
                     return roundEdgedButton(
                         buttonText: button.label, onPressed: button.onPressed);
@@ -167,7 +167,7 @@ class FullListTileState extends State<AdaptiveListTileWidget> {
                 ),
               ],
             ),
-            ButtonBar(
+            OverflowBar(
               children: actionsAndTogglesAndButtons.map((action) {
                 if (action is AdaptiveItemAction) {
                   return AppButtonWithIcon(

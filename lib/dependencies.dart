@@ -1,3 +1,10 @@
+import 'package:TEST/data/api/authentication_api.dart';
+import 'package:TEST/data/api/group_domain_api.dart';
+import 'package:TEST/data/api/group_incident_type_api.dart';
+import 'package:TEST/data/api/group_incident_type_question_api.dart';
+import 'package:TEST/data/api/group_user_api.dart';
+import 'package:TEST/data/persists/data_manager.dart';
+import 'package:TEST/ui/widgets/dialogs.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -95,7 +102,7 @@ class DependencyConfiguration {
           ITokenStore tokenStore = ctx.read();
           if (await tokenStore.isLoggedIn()) {
             String? token = await tokenStore.load();
-            if (token != null && token.isNotEmpty) {
+            if (token.isNotEmpty) {
               options.headers['Authorization'] = 'Bearer $token';
             }
           }

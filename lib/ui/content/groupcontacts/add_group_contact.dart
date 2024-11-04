@@ -439,7 +439,7 @@ class _IncidentTypeSelectionState extends State<IncidentTypeSelection> {
   void initState() {
     super.initState();
     _selectedIncidents = widget.selectedIncidents ?? [];
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         _handleCheckboxSelection();
       });

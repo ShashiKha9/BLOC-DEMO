@@ -68,7 +68,7 @@ class _ChangePasswordContentState extends State<ChangePasswordContent> {
                     padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),
                     child: Column(children: [
                       Expanded(child: getContent(context)),
-                      ButtonBar(
+                      OverflowBar(
                           alignment: MainAxisAlignment.end,
                           children: getActions(context)
                               .map((e) => AppButtonWithIcon(

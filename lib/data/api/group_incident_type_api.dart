@@ -1,6 +1,6 @@
+import 'package:TEST/data/api/base_api.dart';
+import 'package:TEST/data/dto/group_incident_type_dto.dart';
 import 'package:dio/dio.dart';
-import 'package:rescu_organization_portal/data/api/base_api.dart';
-import 'package:rescu_organization_portal/data/dto/group_incident_type_dto.dart';
 
 abstract class IGroupIncidentTypeApi {
   Future<ApiDataResponse<List<GroupIncidentTypeDto>>> get(
